@@ -10,4 +10,6 @@
 *.lai
 *.la
 *.a
+
 build/
+*.sublime-workspace

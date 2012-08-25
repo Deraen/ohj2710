@@ -1,0 +1,19 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	]
+	,"settings":
+	{
+		"trim_trailing_white_space_on_save": true,
+		"sublimeclang_enabled": true,
+		"sublimeclang_options":
+		[
+			"-std=c++11",
+			"-I${folder:${project_path:peli.sublime-project}}/dev/lib",
+			"-ferror-limit=0"
+		]
+	}
+}
