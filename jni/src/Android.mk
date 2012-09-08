@@ -5,8 +5,11 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := main
 
 SDL_PATH := ../SDL
+BOX2D_PATH := ../Box2D
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/$(SDL_PATH)/include
+LOCAL_C_INCLUDES := \
+	$(LOCAL_PATH)/$(SDL_PATH)/include \
+	$(LOCAL_PATH)/$(BOX2D_PATH)
 
 # Add your application source files here...
 LOCAL_SRC_FILES := \
