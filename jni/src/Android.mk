@@ -11,10 +11,12 @@ LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/$(SDL_PATH)/include \
 	$(LOCAL_PATH)/$(BOX2D_PATH)
 
-# Add your application source files here...
 LOCAL_SRC_FILES := \
 	$(SDL_PATH)/src/main/android/SDL_android_main.cpp \
-	main_android.cpp
+	main_android.cpp \
+	Object.cpp \
+	Manager.cpp \
+	objects/Player.cpp \
 
 LOCAL_SHARED_LIBRARIES := SDL2 Box2D
 

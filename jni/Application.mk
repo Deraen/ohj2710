@@ -1,2 +1,2 @@
 # Because Box2D needs eg. <limits>
-APP_STL := stlport_static
+APP_STL := stlport_shared

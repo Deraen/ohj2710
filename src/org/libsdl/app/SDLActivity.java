@@ -52,6 +52,7 @@ public class SDLActivity extends Activity {
 
     // Load the .so
     static {
+        System.loadLibrary("stlport_shared");
         System.loadLibrary("SDL2");
         System.loadLibrary("Box2D");
         //System.loadLibrary("SDL2_mixer");
