@@ -1,14 +1,7 @@
 #include "SDL.h"
 
-#ifdef __ANDROID__
-    #define DIR_CUR "/sdcard/"
-    #define DIR_SEP	"/"
-#else //UNIX
-    #define DIR_CUR ""
-    #define DIR_SEP "/"
-#endif
-
-#define DATAFILE(X) DIR_CUR "data" DIR_SEP X
+#include "managers/PlayerManager.hpp"
+#include "managers/DrawableManager.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -31,17 +24,11 @@ int main(int argc, char* argv[])
 	// Get the first available Hardware-accelerated renderer for this window.
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	// Select the base colour for drawing. It is set to red here.
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	// Black base color.
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-	// Load the image we will draw and convert it to a renderer-specific texture
-	// for greater efficiency.
-	SDL_Texture *texture = NULL;
-	SDL_Surface *surface = NULL;
-	// The App shouldn't crash even if this file is not actually present ;)
-	surface = SDL_LoadBMP(DATAFILE("test.bmp"));
-	texture = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_FreeSurface(surface);
+	// Init objects.
+	unsigned int player1 = PlayerManager::instance().newObject();
 
 	// Execute the main loop.
 	bool running = true;
@@ -50,10 +37,7 @@ int main(int argc, char* argv[])
 		// Clear the entire screen to the Renderer's base colour.
 		SDL_RenderClear(renderer);
 
-		// Render the image on top of this. The two final parameters are the
-		// source and destination sub-rectangle: NULL for both means we use
-		// the whole image and stretch it across the whole screen.s
-		SDL_RenderCopy(renderer, texture, NULL, NULL);
+		DrawableManager::instance().drawAll();
 
 		// Flip the shown and hidden buffers to refresh the screen.
 		SDL_RenderPresent(renderer);
@@ -74,7 +58,6 @@ int main(int argc, char* argv[])
 	}
 
 	// Remember to free up all the memory we've used, this ain't no Java!
-	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

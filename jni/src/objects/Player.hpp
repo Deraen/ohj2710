@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include "Object.hpp"
+#include "../Object.hpp"
 
 class Player: public Object {
 public:
@@ -25,8 +25,6 @@ private:
 	std::string name_;
 
 	/*
-	 * Players planet.
-	 *
 	 * Player owns his planet.
 	 */
 	unsigned int planet_;

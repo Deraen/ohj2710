@@ -1,0 +1,21 @@
+{
+	"folders":
+	[
+		{
+			"path": "/home/juho/Source/ohj2710"
+		}
+	],
+	"settings":
+	{
+		"additional_language_options":
+    	{
+	        "c++" : ["-std=c++11"]
+		},
+		"sublimeclang_options":
+		[
+			"-Wno-c++11-extensions",
+	        "-I${folder:${project_path:AndroidManifest.xml}}/jni/SDL/include",
+            "-I${folder:${project_path:AndroidManifest.xml}}/jni/Box2D"
+		]
+	}
+}

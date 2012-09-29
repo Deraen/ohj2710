@@ -12,6 +12,7 @@
 #include <map>
 
 #include "Object.hpp"
+#include "common.hpp"
 
 template<typename T>
 class Manager {
@@ -24,7 +25,7 @@ public:
 	{
 		for (unsigned int i = 0; i < precreate; ++i)
 		{
-			freeObjects_.push(new T);
+			freeObjects_.push(createObject());
 		}
 	}
 	virtual ~Manager() {};
@@ -34,23 +35,21 @@ public:
 	 *
 	 * Id 0 is not used, first object gets id 1.
 	 */
-	unsigned int newObject() {
+	virtual unsigned int newObject() {
 		id_++;
 
 		if (!freeObjects_.empty())
 		{
-			// Debug
 			if (freeObjects_.front()->getId() != 0) {
-				/*
-				 * Tried to use object which is not reseted properly (or it is used somewhere).
-				 */
+				LOGW("Using object (%i) as a free object but it hasn't been freed.",
+					 freeObjects_.front()->getId());
 			}
 
 			objects_[id_] = freeObjects_.front();
 		}
 		else
 		{
-			objects_[id_] = new T;
+			objects_[id_] = createObject();
 		}
 		objects_[id_]->setId(id_);
 		return id_;
@@ -63,7 +62,7 @@ public:
 	 * that no checks (if object == NULL...) are needed where this is called.
 	 */
 	T* getObject(const unsigned int i) const {
-		typename std::map<unsigned int, T*>::const_iterator find = objects_.find(i);
+		auto find = objects_.find(i);
 
 		if (find != objects_.end())
 		{
@@ -76,16 +75,17 @@ public:
 	 * Releases object by id.
 	 * Released objects are not destroyed but reseted and put back into queue for unused objects.
 	 */
-	bool releaseObject(const unsigned int i) {
-		typename std::map<unsigned int, T*>::const_iterator find = objects_.find(i);
+	virtual bool releaseObject(const unsigned int i) {
+		auto find = objects_.find(i);
 
 		if (find != objects_.end())
 		{
-			Object* obj = find->second;
+			T* obj = find->second;
 			objects_.erase(find);
 
 			obj->reset();
 			freeObjects_.push(obj);
+			return true;
 		}
 		return false;
 	}
@@ -105,6 +105,17 @@ private:
 	 * Used objects.
 	 */
 	std::map<unsigned int, T*> objects_;
+
+	/*
+	 * Shortcut to create new Objects.
+	 * obj->reset has to be called always as constructors do nothing.
+	 */
+	T* createObject()
+	{
+		T* obj = new T;
+		obj->reset();
+		return obj;
+	}
 };
 
 #endif /* MANAGER_H_ */

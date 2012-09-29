@@ -5,7 +5,7 @@
  *      Author: juho
  */
 
-#include "Asteroid.h"
+#include "Asteroid.hpp"
 
 Asteroid::Asteroid() {
 	// TODO Auto-generated constructor stub
@@ -16,3 +16,6 @@ Asteroid::~Asteroid() {
 	// TODO Auto-generated destructor stub
 }
 
+void Asteroid::reset_inner()
+{
+}

@@ -7,6 +7,7 @@
 
 #include "Player.hpp"
 #include "Planet.hpp"
+#include "../managers/PlanetManager.hpp"
 
 Player::Player()
 {

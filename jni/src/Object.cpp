@@ -6,10 +6,10 @@
  */
 
 #include "Object.hpp"
+#include "common.hpp"
 
 Object::Object() {
 	// TODO Auto-generated constructor stub
-	reset();
 }
 
 Object::~Object() {
@@ -28,14 +28,11 @@ unsigned int Object::getId() const
 	return id_;
 }
 
-bool Object::setId(const unsigned int i)
+void Object::setId(const unsigned int i)
 {
-	// Debug
-	if (id_ == 0)
+	if (id_ != 0)
 	{
-		/*
-		 * Tried to set id for used object.
-		 */
+		LOGW("Set id for object (%i) even though this object was in use.", id_);
 	}
 
 	id_ = i;

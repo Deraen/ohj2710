@@ -5,7 +5,7 @@
  *      Author: juho
  */
 
-#include "Bomb.h"
+#include "Bomb.hpp"
 
 Bomb::Bomb() {
 	// TODO Auto-generated constructor stub
@@ -16,3 +16,6 @@ Bomb::~Bomb() {
 	// TODO Auto-generated destructor stub
 }
 
+void Bomb::reset_inner()
+{
+}

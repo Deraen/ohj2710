@@ -15,8 +15,8 @@ LOCAL_SRC_FILES := \
 	$(SDL_PATH)/src/main/android/SDL_android_main.cpp \
 	main_android.cpp \
 	Object.cpp \
-	Manager.cpp \
 	objects/Player.cpp \
+	objects/Planet.cpp \
 
 LOCAL_SHARED_LIBRARIES := SDL2 Box2D
 

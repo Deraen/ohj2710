@@ -10,6 +10,10 @@
 
 class Object {
 public:
+	/*
+	 * Object constructors DO NOTHING.
+	 * Reset should always be called after creating new Object.
+	 */
 	Object();
 	virtual ~Object();
 
@@ -34,7 +38,7 @@ public:
 	/*
 	 * Manager can se objects id.
 	 */
-	bool setId(const unsigned int i);
+	void setId(const unsigned int i);
 
 private:
 	unsigned int id_;
