@@ -5,6 +5,8 @@
  *      Author: juho
  */
 
+#include "SDL_log.h"
+
 #include "Planet.hpp"
 #include "../managers/DrawableManager.hpp"
 
@@ -23,7 +25,7 @@ void Planet::initialize(const unsigned int player) {
 
 	drawable_ = DrawableManager::instance().newObject();
 	Drawable* obj = DrawableManager::instance().getObject(drawable_);
-	obj->initialize(Drawable::CIRCLE);
+	obj->initialize(Drawable::CIRCLE, 0, 0, 210, 210);
 	obj->circle(100.0);
 }
 

@@ -11,8 +11,9 @@
 #include <queue>
 #include <map>
 
+#include "SDL_log.h"
+
 #include "Object.hpp"
-#include "common.hpp"
 
 template<typename T>
 class Manager {
@@ -41,8 +42,8 @@ public:
 		if (!freeObjects_.empty())
 		{
 			if (freeObjects_.front()->getId() != 0) {
-				LOGW("Using object (%i) as a free object but it hasn't been freed.",
-					 freeObjects_.front()->getId());
+				SDL_Log("Using object (%i) as a free object but it hasn't been freed.",
+				        freeObjects_.front()->getId());
 			}
 
 			objects_[id_] = freeObjects_.front();
@@ -90,6 +91,12 @@ public:
 		return false;
 	}
 
+protected:
+	/*
+	 * Used objects.
+	 */
+	std::map<unsigned int, T*> objects_;
+
 private:
 	/*
 	 * Which id will be given to next object.
@@ -101,10 +108,6 @@ private:
 	 */
 	std::queue<T*> freeObjects_;
 
-	/*
-	 * Used objects.
-	 */
-	std::map<unsigned int, T*> objects_;
 
 	/*
 	 * Shortcut to create new Objects.

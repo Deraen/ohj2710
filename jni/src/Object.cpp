@@ -5,6 +5,8 @@
  *      Author: juho
  */
 
+#include "SDL_log.h"
+
 #include "Object.hpp"
 #include "common.hpp"
 
@@ -32,7 +34,7 @@ void Object::setId(const unsigned int i)
 {
 	if (id_ != 0)
 	{
-		LOGW("Set id for object (%i) even though this object was in use.", id_);
+		SDL_Log("Set id for object (%i) even though this object was in use.", id_);
 	}
 
 	id_ = i;

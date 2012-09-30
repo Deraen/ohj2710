@@ -8,6 +8,8 @@
 #ifndef DRAWABLEMANAGER_HPP_
 #define DRAWABLEMANAGER_HPP_
 
+#include "SDL.h"
+
 #include "../Manager.hpp"
 #include "../objects/Drawable.hpp"
 
@@ -28,14 +30,24 @@ public:
 		return instance_;
 	}
 
+	void init();
+
+	void destroy();
+
 	void drawAll();
 
-	unsigned int newObject();
-
-	bool releaseObject(const unsigned int i);
+	SDL_Renderer* renderer() const;
 
 private:
+	/*
+	 * Linked list?
+	 */
 	std::vector<Drawable*> drawables_;
+
+	// Window and Renderer.
+	SDL_Window* window_;
+	SDL_Renderer* renderer_;
+	SDL_Surface* surface_;
 };
 
 #endif /* DRAWABLEMANAGER_HPP_ */
