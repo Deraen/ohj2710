@@ -8,9 +8,10 @@
 #ifndef BOMB_H_
 #define BOMB_H_
 
-#include "../Object.hpp"
+#include "Object.hpp"
 
-class Bomb: public Object {
+class Bomb: public Object
+{
 public:
 	enum BombType {
 		NORMAL,

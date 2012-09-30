@@ -10,13 +10,15 @@
 
 #include <queue>
 #include <map>
+#include <functional>
 
 #include "SDL_log.h"
 
 #include "Object.hpp"
 
 template<typename T>
-class Manager {
+class Manager
+{
 public:
 	/*
 	 * precreate: Define how many objects will be created when manager is initialized.
@@ -36,7 +38,8 @@ public:
 	 *
 	 * Id 0 is not used, first object gets id 1.
 	 */
-	virtual unsigned int newObject() {
+	virtual unsigned int newObject()
+	{
 		id_++;
 
 		if (!freeObjects_.empty())
@@ -57,26 +60,45 @@ public:
 	}
 
 	/*
-	 * Returns object by id.
+	 * Do something with object.
+	 * If object is not found do nothing.
 	 *
-	 * XXX: What to do when object with given id is not found? Preferably so
-	 * that no checks (if object == NULL...) are needed where this is called.
+	 * Examples:
+	 * withObject(1, [](Object* obj) {obj->hello();})
+	 *
+	 * [this] Capture the this pointer of the enclosing class
+	 * withObject(2, [this](Object* obj) {obj->hello(this->value)})
+	 *
+	 * [&] Capture any referenced variable by reference
+	 * withObject(3, [&](Object* obj) {obj->hello(local);})
 	 */
-	T* getObject(const unsigned int i) const {
+	void withObject(const unsigned int i, std::function<void(T*)> f) const
+	{
 		auto find = objects_.find(i);
 
 		if (find != objects_.end())
 		{
-			return find->second;
+			f(find->second);
 		}
-		return NULL;
+	}
+
+	/*
+	 * Do something with all of objects.
+	 */
+	void withObjects(std::function<void(T*)> f) const
+	{
+		for (auto i = objects_.begin(); i != objects_.end(); ++i)
+		{
+			f(i->second);
+		}
 	}
 
 	/*
 	 * Releases object by id.
 	 * Released objects are not destroyed but reseted and put back into queue for unused objects.
 	 */
-	virtual bool releaseObject(const unsigned int i) {
+	virtual bool releaseObject(const unsigned int i)
+	{
 		auto find = objects_.find(i);
 
 		if (find != objects_.end())
@@ -91,13 +113,12 @@ public:
 		return false;
 	}
 
-protected:
+private:
 	/*
 	 * Used objects.
 	 */
 	std::map<unsigned int, T*> objects_;
 
-private:
 	/*
 	 * Which id will be given to next object.
 	 */

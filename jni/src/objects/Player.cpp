@@ -7,7 +7,7 @@
 
 #include "Player.hpp"
 #include "Planet.hpp"
-#include "../managers/PlanetManager.hpp"
+#include "managers/PlanetManager.hpp"
 
 Player::Player()
 {
@@ -33,7 +33,9 @@ void Player::initialize(const std::string& name)
 	name_ = name;
 
 	planet_ = PlanetManager::instance().newObject();
-	Planet* planet = PlanetManager::instance().getObject(planet_);
-	// Tell planet which player resides in it.
-	planet->initialize(getId());
+	PlanetManager::instance().withObject(planet_, [this](Planet* obj)
+	{
+		// Tell planet which player resides in it.
+		obj->initialize(getId());
+	});
 }

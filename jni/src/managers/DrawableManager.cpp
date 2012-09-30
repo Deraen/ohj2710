@@ -10,10 +10,10 @@ void DrawableManager::drawAll()
 	// Clear the entire screen to the Renderer's base colour.
 	SDL_RenderClear(renderer_);
 
-	for (auto i = objects_.begin(); i != objects_.end(); ++i)
+	withObjects([](Drawable* obj)
 	{
-		i->second->draw();
-	}
+		obj->draw();
+	});
 
 	// Flip the shown and hidden buffers to refresh the screen.
 	SDL_RenderPresent(renderer_);

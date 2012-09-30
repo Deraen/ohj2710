@@ -10,9 +10,10 @@
 
 #include <string>
 
-#include "../Object.hpp"
+#include "Object.hpp"
 
-class Player: public Object {
+class Player: public Object
+{
 public:
 	Player();
 	virtual ~Player();

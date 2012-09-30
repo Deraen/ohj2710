@@ -13,6 +13,7 @@
 		},
 		"sublimeclang_options":
 		[
+			"-I${folder:${project_path:AndroidManifest.xml}}/jni/src/",
 	        "-I${folder:${project_path:AndroidManifest.xml}}/jni/SDL/include/",
             "-I${folder:${project_path:AndroidManifest.xml}}/jni/Box2D/"
 		],

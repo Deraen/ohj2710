@@ -8,10 +8,11 @@
 #ifndef BOMBMANAGER_HPP_
 #define BOMBMANAGER_HPP_
 
-#include "../Manager.hpp"
-#include "../objects/Bomb.hpp"
+#include "Manager.hpp"
+#include "objects/Bomb.hpp"
 
-class BombManager: public Manager<Bomb> {
+class BombManager: public Manager<Bomb>
+{
 public:
 	BombManager():
 		Manager(100)

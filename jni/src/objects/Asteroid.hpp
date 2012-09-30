@@ -8,9 +8,10 @@
 #ifndef ASTEROID_H_
 #define ASTEROID_H_
 
-#include "../Object.hpp"
+#include "Object.hpp"
 
-class Asteroid: public Object {
+class Asteroid: public Object
+{
 public:
 	Asteroid();
 	virtual ~Asteroid();

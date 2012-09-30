@@ -8,10 +8,11 @@
 #ifndef ASTEROIDMANAGER_HPP_
 #define ASTEROIDMANAGER_HPP_
 
-#include "../Manager.hpp"
-#include "../objects/Asteroid.hpp"
+#include "Manager.hpp"
+#include "objects/Asteroid.hpp"
 
-class AsteroidManager: public Manager<Asteroid> {
+class AsteroidManager: public Manager<Asteroid>
+{
 public:
 	AsteroidManager():
 		Manager(100)

@@ -8,25 +8,30 @@
 #include "SDL_log.h"
 
 #include "Planet.hpp"
-#include "../managers/DrawableManager.hpp"
+#include "managers/DrawableManager.hpp"
 
-Planet::Planet() {
+Planet::Planet()
+{
 	// TODO Auto-generated constructor stub
 
 }
 
-Planet::~Planet() {
+Planet::~Planet()
+{
 	// TODO Auto-generated destructor stub
 }
 
 
-void Planet::initialize(const unsigned int player) {
+void Planet::initialize(const unsigned int player)
+{
 	player_ = player;
 
 	drawable_ = DrawableManager::instance().newObject();
-	Drawable* obj = DrawableManager::instance().getObject(drawable_);
-	obj->initialize(Drawable::CIRCLE, 0, 0, 210, 210);
-	obj->circle(100.0);
+	DrawableManager::instance().withObject(drawable_, [](Drawable* obj)
+	{
+		obj->initialize(Drawable::CIRCLE, 0, 0, 210, 210);
+		obj->circle(100.0);
+	});
 }
 
 void Planet::reset_inner() {

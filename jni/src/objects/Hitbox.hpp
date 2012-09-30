@@ -8,9 +8,10 @@
 #ifndef HITBOX_HPP_
 #define HITBOX_HPP_
 
-#include "../Object.hpp"
+#include "Object.hpp"
 
-class Hitbox: public Object {
+class Hitbox: public Object
+{
 public:
 	Hitbox();
 	virtual ~Hitbox();

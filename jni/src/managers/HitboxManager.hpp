@@ -8,10 +8,11 @@
 #ifndef HITBOXMANAGER_HPP_
 #define HITBOXMANAGER_HPP_
 
-#include "../Manager.hpp"
-#include "../objects/Hitbox.hpp"
+#include "Manager.hpp"
+#include "objects/Hitbox.hpp"
 
-class HitboxManager: public Manager<Hitbox> {
+class HitboxManager: public Manager<Hitbox>
+{
 public:
 	HitboxManager():
 		Manager(200)

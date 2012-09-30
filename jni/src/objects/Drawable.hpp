@@ -10,9 +10,10 @@
 
 #include "SDL.h"
 
-#include "../Object.hpp"
+#include "Object.hpp"
 
-class Drawable: public Object {
+class Drawable: public Object
+{
 public:
 	enum DrawableType {
 		CIRCLE,

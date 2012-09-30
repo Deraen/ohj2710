@@ -8,10 +8,11 @@
 #ifndef PLAYERMANAGER_HPP_
 #define PLAYERMANAGER_HPP_
 
-#include "../Manager.hpp"
-#include "../objects/Player.hpp"
+#include "Manager.hpp"
+#include "objects/Player.hpp"
 
-class PlayerManager: public Manager<Player> {
+class PlayerManager: public Manager<Player>
+{
 public:
 	PlayerManager():
 		Manager(5)

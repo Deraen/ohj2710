@@ -8,10 +8,11 @@
 #ifndef PLANETMANAGER_H_
 #define PLANETMANAGER_H_
 
-#include "../Manager.hpp"
-#include "../objects/Planet.hpp"
+#include "Manager.hpp"
+#include "objects/Planet.hpp"
 
-class PlanetManager: public Manager<Planet> {
+class PlanetManager: public Manager<Planet>
+{
 public:
 	PlanetManager():
 		Manager(5)

@@ -9,8 +9,10 @@ int main(int argc, char* argv[])
 
 	// Init objects.
 	unsigned int player1 = PlayerManager::instance().newObject();
-	Player* obj = PlayerManager::instance().getObject(player1);
-	obj->initialize("Pelaaja 1");
+	PlayerManager::instance().withObject(player1, [](Player* obj)
+	{
+		obj->initialize("Pelaaja 1");
+	});
 
 	// Execute the main loop.
 	bool running = true;

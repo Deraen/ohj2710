@@ -7,12 +7,14 @@
 
 #include "Hitbox.hpp"
 
-Hitbox::Hitbox() {
+Hitbox::Hitbox()
+{
 	// TODO Auto-generated constructor stub
 
 }
 
-Hitbox::~Hitbox() {
+Hitbox::~Hitbox()
+{
 	// TODO Auto-generated destructor stub
 }
 

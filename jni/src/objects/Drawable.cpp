@@ -6,9 +6,10 @@
  */
 
 #include "Drawable.hpp"
-#include "../managers/DrawableManager.hpp"
+#include "managers/DrawableManager.hpp"
 
-namespace {
+namespace
+{
 	void plot(SDL_Surface* surface, unsigned int x, unsigned int y, Uint32 color)
 	{
 		Uint8* buf = (Uint8*)surface->pixels + y * surface->pitch + x * surface->format->BytesPerPixel;
@@ -24,7 +25,8 @@ Drawable::Drawable():
 
 }
 
-Drawable::~Drawable() {
+Drawable::~Drawable()
+{
 	// TODO Auto-generated destructor stub
 }
 
@@ -80,7 +82,8 @@ void Drawable::circle(float r)
 	SDL_LockSurface(surface_);
 
 	int u, v; bool diagonal = false;
-	for (u = static_cast<int>(r), v = 0; u > v;) { // start from a know pixel (u,v)=(r,0) on the x axis, compute only the first octant (u > v)
+	for (u = static_cast<int>(r), v = 0; u > v;)
+	{ // start from a know pixel (u,v)=(r,0) on the x axis, compute only the first octant (u > v)
 		plot(surface_, cx + u, cy + v, color); plot(surface_, cx + v, cy + u, color);
 		plot(surface_, cx - u, cy + v, color); plot(surface_, cx - v, cy + u, color);
 		plot(surface_, cx + u, cy - v, color); plot(surface_, cx + v, cy - u, color);
@@ -89,10 +92,13 @@ void Drawable::circle(float r)
 		// if the pixel above is at distance greater than 1/2+r from the origin
 		// we could test if (v^2 + u^2 >= (1/2+r)^2), but the following is equivalent with integers: 
 		if ((diagonal = v*v + u*u - (1 + r)*r > 0))
+		{
 			u--; // choose the diagonal pixel instead (to the right in the first octant)
+		}
 	}
 
-	if (u == v && diagonal) { // last pixel if it's on the 45° diagonal
+	if (u == v && diagonal)
+	{ // last pixel if it's on the 45° diagonal
 		plot(surface_, cx + u, cy + u, color);
 		plot(surface_, cx - u, cy + u, color);
 		plot(surface_, cx + u, cy - u, color);

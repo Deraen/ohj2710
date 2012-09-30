@@ -10,10 +10,11 @@
 
 #include "SDL.h"
 
-#include "../Manager.hpp"
-#include "../objects/Drawable.hpp"
+#include "Manager.hpp"
+#include "objects/Drawable.hpp"
 
-class DrawableManager: public Manager<Drawable> {
+class DrawableManager: public Manager<Drawable>
+{
 public:
 	DrawableManager():
 		Manager(100)
@@ -39,11 +40,6 @@ public:
 	SDL_Renderer* renderer() const;
 
 private:
-	/*
-	 * Linked list?
-	 */
-	std::vector<Drawable*> drawables_;
-
 	// Window and Renderer.
 	SDL_Window* window_;
 	SDL_Renderer* renderer_;

@@ -1,5 +1,6 @@
 include_directories(${SDL2_INCLUDE_DIR})
 include_directories(${BOX2D_INCLUDE})
+include_directories(.)
 
 SET(CMAKE_CXX_FLAGS "-std=c++0x")
 
@@ -25,6 +26,5 @@ add_executable(
 target_link_libraries (
 	peli
 	${SDL2_LIBRARY}
-	${OpenGLES_LIBRARIES}
 	Box2D
 )
