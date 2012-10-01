@@ -9,6 +9,7 @@
 #define DRAWABLE_HPP_
 
 #include "SDL.h"
+#include "Box2D.h"
 
 #include "Object.hpp"
 
@@ -20,9 +21,12 @@ public:
 
 	void reset_inner();
 
-	void initialize(int x, int y, unsigned int w, unsigned int h);
+	void initialize(const b2Vec2& pos, const b2Vec2& dim);
 
 	void draw() const;
+
+	// fuu
+	void updatePos(const b2Vec2& pos);
 private:
 	SDL_Surface* surface_;
 	SDL_Texture* texture_;

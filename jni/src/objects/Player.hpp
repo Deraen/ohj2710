@@ -22,6 +22,12 @@ public:
 
 	void initialize(const std::string& name);
 
+	// Own functions
+	unsigned int getPlanet() const
+	{
+		return planet_;
+	}
+
 private:
 	std::string name_;
 

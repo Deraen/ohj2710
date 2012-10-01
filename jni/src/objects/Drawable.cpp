@@ -38,7 +38,7 @@ void Drawable::reset_inner()
 	texture_ = NULL;
 }
 
-void Drawable::initialize(int x, int y, unsigned int w, unsigned int h)
+void Drawable::initialize(const b2Vec2 &pos, const b2Vec2 &dim)
 {
 	Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -55,17 +55,17 @@ void Drawable::initialize(int x, int y, unsigned int w, unsigned int h)
 
 	// Surface
 	SDL_FreeSurface(surface_);
-	surface_ = SDL_CreateRGBSurface(0, w, h, 32, rmask, gmask, bmask, amask);
+	surface_ = SDL_CreateRGBSurface(0, dim.x, dim.y, 32, rmask, gmask, bmask, amask);
 
 	src_.x = 0;
 	src_.y = 0;
-	src_.w = w;
-	src_.h = h;
+	src_.w = dim.x;
+	src_.h = dim.y;
 
-	dst_.x = 800 / 2 - w / 2 + x;
-	dst_.y = 480 / 2 - h / 2 + y;
-	dst_.w = w;
-	dst_.h = h;
+	dst_.x = 800 / 2 - dim.x / 2 + pos.x;
+	dst_.y = 480 / 2 - dim.y / 2 + pos.y;
+	dst_.w = dim.x;
+	dst_.h = dim.y;
 
 	// #FF00EA
 	Uint32 notfound_color = SDL_MapRGB(surface_->format, 255, 0, 240);
@@ -74,6 +74,8 @@ void Drawable::initialize(int x, int y, unsigned int w, unsigned int h)
 
 	if (texture_ != NULL) SDL_DestroyTexture(texture_);
 	texture_ = SDL_CreateTextureFromSurface(DrawableManager::instance().renderer(), surface_);
+
+	SDL_Log("Drawable %i: %ix%i @ %ix%i", getId(), dst_.x, dst_.y, dst_.w, dst_.h);
 }
 
 void Drawable::draw() const
@@ -81,4 +83,10 @@ void Drawable::draw() const
 	SDL_Renderer* renderer = DrawableManager::instance().renderer();
 
 	SDL_RenderCopy(renderer, texture_, &src_, &dst_);
+}
+
+void Drawable::updatePos(const b2Vec2 &pos)
+{
+	dst_.x = 800 / 2 - src_.w / 2 + pos.x;
+	dst_.y = 480 / 2 - src_.h / 2 + pos.y;
 }

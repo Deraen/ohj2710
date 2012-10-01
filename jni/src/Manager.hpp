@@ -50,6 +50,7 @@ public:
 			}
 
 			objects_[id_] = freeObjects_.front();
+			freeObjects_.pop();
 		}
 		else
 		{

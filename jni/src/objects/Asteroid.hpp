@@ -8,6 +8,8 @@
 #ifndef ASTEROID_H_
 #define ASTEROID_H_
 
+#include "Box2D/Box2D.h"
+
 #include "Object.hpp"
 
 class Asteroid: public Object
@@ -19,6 +21,12 @@ public:
 	void initialize(const unsigned int planet);
 
 	void reset_inner();
+
+	// Own functions
+	/*
+	 * Fuu.
+	 */
+	void move();
 
 private:
 	/*
@@ -32,10 +40,16 @@ private:
 	unsigned int hitbox_;
 
 	/*
+	 * Asteroid has drawable.
+	 */
+	unsigned int drawable_;
+
+	/*
 	 * Velocity.
 	 */
-	float dx_;
-	float dy_;
+	b2Vec2 vel_;
+
+	b2Vec2 pos_;
 };
 
 #endif /* ASTEROID_H_ */
