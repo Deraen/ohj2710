@@ -1,0 +1,24 @@
+{
+	"folders":
+	[
+		{
+			"path": "/home/juho/Source/ohj2710"
+		}
+	],
+	"settings":
+	{
+		"sublimeclang_additional_language_options":
+    	{
+	        "c++" : ["-std=c++11"]
+		},
+		"sublimeclang_options":
+		[
+			"-I${folder:${project_path:AndroidManifest.xml}}/jni/src/",
+	        "-I${folder:${project_path:AndroidManifest.xml}}/jni/SDL/include/",
+            "-I${folder:${project_path:AndroidManifest.xml}}/jni/"
+		],
+		"sublimeclang_enable_fast_completions": false,
+		"sublimeclang_dont_prepend_clang_includes": true,
+		"sublimeclang_debug_options": true
+	}
+}
