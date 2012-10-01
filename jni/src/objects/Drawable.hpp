@@ -15,27 +15,15 @@
 class Drawable: public Object
 {
 public:
-	enum DrawableType {
-		CIRCLE,
-		TRIANGLE,
-		SPRITE,
-	};
-
 	Drawable();
 	virtual ~Drawable();
 
 	void reset_inner();
 
-	void initialize(DrawableType type, int x, int y, unsigned int w, unsigned int h);
-
-	void circle(float r);
+	void initialize(int x, int y, unsigned int w, unsigned int h);
 
 	void draw() const;
 private:
-	DrawableType type_;
-
-	float r_;
-
 	SDL_Surface* surface_;
 	SDL_Texture* texture_;
 

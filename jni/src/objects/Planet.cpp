@@ -29,8 +29,7 @@ void Planet::initialize(const unsigned int player)
 	drawable_ = DrawableManager::instance().newObject();
 	DrawableManager::instance().withObject(drawable_, [](Drawable* obj)
 	{
-		obj->initialize(Drawable::CIRCLE, 0, 0, 210, 210);
-		obj->circle(100.0);
+		obj->initialize(0, 0, 120, 120);
 	});
 }
 

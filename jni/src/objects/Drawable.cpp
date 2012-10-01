@@ -38,10 +38,8 @@ void Drawable::reset_inner()
 	texture_ = NULL;
 }
 
-void Drawable::initialize(DrawableType type, int x, int y, unsigned int w, unsigned int h)
+void Drawable::initialize(int x, int y, unsigned int w, unsigned int h)
 {
-	type_ = type;
-
 	Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	rmask = 0xff000000;
@@ -68,46 +66,12 @@ void Drawable::initialize(DrawableType type, int x, int y, unsigned int w, unsig
 	dst_.y = 480 / 2 - h / 2 + y;
 	dst_.w = w;
 	dst_.h = h;
-}
 
-void Drawable::circle(float r)
-{
-	r_ = r;
-	Uint32 color = SDL_MapRGB(surface_->format, 230, 230, 230);
+	// #FF00EA
+	Uint32 notfound_color = SDL_MapRGB(surface_->format, 255, 0, 240);
 
-	// Lets draw circle to surface.
-	int cx = src_.w / 2;
-	int cy = src_.h / 2;
+	SDL_FillRect(surface_, &src_, notfound_color);
 
-	SDL_LockSurface(surface_);
-
-	int u, v; bool diagonal = false;
-	for (u = static_cast<int>(r), v = 0; u > v;)
-	{ // start from a know pixel (u,v)=(r,0) on the x axis, compute only the first octant (u > v)
-		plot(surface_, cx + u, cy + v, color); plot(surface_, cx + v, cy + u, color);
-		plot(surface_, cx - u, cy + v, color); plot(surface_, cx - v, cy + u, color);
-		plot(surface_, cx + u, cy - v, color); plot(surface_, cx + v, cy - u, color);
-		plot(surface_, cx - u, cy - v, color); plot(surface_, cx - v, cy - u, color);
-		v++; // next pixel is above (in the first octant)
-		// if the pixel above is at distance greater than 1/2+r from the origin
-		// we could test if (v^2 + u^2 >= (1/2+r)^2), but the following is equivalent with integers: 
-		if ((diagonal = v*v + u*u - (1 + r)*r > 0))
-		{
-			u--; // choose the diagonal pixel instead (to the right in the first octant)
-		}
-	}
-
-	if (u == v && diagonal)
-	{ // last pixel if it's on the 45° diagonal
-		plot(surface_, cx + u, cy + u, color);
-		plot(surface_, cx - u, cy + u, color);
-		plot(surface_, cx + u, cy - u, color);
-		plot(surface_, cx - u, cy - u, color);
-	}
-
-	SDL_UnlockSurface(surface_);
-
-	// Create texture from surface for easy drawing later.
 	if (texture_ != NULL) SDL_DestroyTexture(texture_);
 	texture_ = SDL_CreateTextureFromSurface(DrawableManager::instance().renderer(), surface_);
 }
@@ -116,8 +80,5 @@ void Drawable::draw() const
 {
 	SDL_Renderer* renderer = DrawableManager::instance().renderer();
 
-	if (type_ == CIRCLE)
-	{
-		SDL_RenderCopy(renderer, texture_, &src_, &dst_);
-	}
+	SDL_RenderCopy(renderer, texture_, &src_, &dst_);
 }
