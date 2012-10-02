@@ -80,6 +80,8 @@ void Drawable::initialize(const b2Vec2 &pos, const b2Vec2 &dim)
 
 void Drawable::draw() const
 {
+	SDL_Log("Drawing object %i", getId());
+
 	SDL_Renderer* renderer = DrawableManager::instance().renderer();
 
 	SDL_RenderCopy(renderer, texture_, &src_, &dst_);

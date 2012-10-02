@@ -41,9 +41,6 @@ int main(int argc, char* argv[])
 			obj->move();
 		});
 
-		// Give other applications some time to execute.
-		SDL_Delay(50);
-
 		// Check for input events and exit if the window is closed (ex: pressing
 		// the cross, closed by the OS)
 		static SDL_Event event;
@@ -54,6 +51,9 @@ int main(int argc, char* argv[])
 				running = false;
 			}
 		}
+
+		// Give other applications some time to execute.
+		SDL_Delay(50);
 	}
 
 	DrawableManager::instance().destroy();

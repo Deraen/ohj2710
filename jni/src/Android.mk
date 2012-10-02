@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := main
 
 SDL_PATH := ../SDL
-BOX2D_PATH := ../Box2D
+BOX2D_PATH := ../
 
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/$(SDL_PATH)/include \
@@ -19,9 +19,11 @@ LOCAL_SRC_FILES := \
 	objects/Player.cpp \
 	objects/Planet.cpp \
 	objects/Drawable.cpp \
+	objects/Asteroid.cpp \
 
 LOCAL_SHARED_LIBRARIES := SDL2 Box2D
 
 LOCAL_LDLIBS := -lGLESv1_CM -llog
+LOCAL_CPPFLAGS = -std=gnu++0x
 
 include $(BUILD_SHARED_LIBRARY)

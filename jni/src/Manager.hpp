@@ -57,6 +57,9 @@ public:
 			objects_[id_] = createObject();
 		}
 		objects_[id_]->setId(id_);
+
+		SDL_Log("New object %i", id_);
+
 		return id_;
 	}
 
@@ -109,6 +112,9 @@ public:
 
 			obj->reset();
 			freeObjects_.push(obj);
+
+			SDL_Log("Released object %i", i);
+
 			return true;
 		}
 		return false;
