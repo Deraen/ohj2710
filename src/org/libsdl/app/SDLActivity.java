@@ -10,6 +10,7 @@ import javax.microedition.khronos.egl.*;
 
 import android.app.*;
 import android.content.*;
+import android.content.pm.*;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.os.*;
@@ -71,6 +72,13 @@ public class SDLActivity extends Activity {
 
         // Keep track of the paused state
         mIsPaused = false;
+
+        // fullscreen
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        // landscape
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         // Set up the surface
         mSurface = new SDLSurface(getApplication());
