@@ -9,7 +9,7 @@
 #define DRAWABLE_HPP_
 
 #include "SDL.h"
-#include "Box2D.h"
+#include "Box2D/Box2D.h"
 
 #include "Object.hpp"
 
