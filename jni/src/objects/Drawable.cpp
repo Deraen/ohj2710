@@ -62,8 +62,8 @@ void Drawable::initialize(const b2Vec2 &pos, const b2Vec2 &dim)
 	src_.w = dim.x;
 	src_.h = dim.y;
 
-	dst_.x = 800 / 2 - dim.x / 2 + pos.x;
-	dst_.y = 480 / 2 - dim.y / 2 + pos.y;
+	dst_.x = pos.x;
+	dst_.y = pos.y;
 	dst_.w = dim.x;
 	dst_.h = dim.y;
 
@@ -75,20 +75,20 @@ void Drawable::initialize(const b2Vec2 &pos, const b2Vec2 &dim)
 	if (texture_ != NULL) SDL_DestroyTexture(texture_);
 	texture_ = SDL_CreateTextureFromSurface(DrawableManager::instance().renderer(), surface_);
 
-	SDL_Log("Drawable %i: %ix%i @ %ix%i", getId(), dst_.x, dst_.y, dst_.w, dst_.h);
+	SDL_Log("Drawable %i: %ix%i @ %i,%i", getId(), dst_.w, dst_.h, dst_.x, dst_.y);
 }
 
 void Drawable::draw() const
 {
-	SDL_Log("Drawing object %i", getId());
-
 	SDL_Renderer* renderer = DrawableManager::instance().renderer();
+	SDL_Rect dst_screen = DrawableManager::instance().toScreenCoordinates(dst_);
 
-	SDL_RenderCopy(renderer, texture_, &src_, &dst_);
+	// NULL = Entire texture
+	SDL_RenderCopy(renderer, texture_, NULL, &dst_screen);
 }
 
 void Drawable::updatePos(const b2Vec2 &pos)
 {
-	dst_.x = 800 / 2 - src_.w / 2 + pos.x;
-	dst_.y = 480 / 2 - src_.h / 2 + pos.y;
+	dst_.x = pos.x;
+	dst_.y = pos.y;
 }

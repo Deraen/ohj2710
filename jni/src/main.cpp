@@ -46,9 +46,16 @@ int main(int argc, char* argv[])
 		static SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			if(event.type == SDL_QUIT)
+			if (event.type == SDL_QUIT)
 			{
 				running = false;
+			}
+			else if (event.type == SDL_WINDOWEVENT)
+			{
+				if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+				{
+					DrawableManager::instance().resized();
+				}
 			}
 		}
 

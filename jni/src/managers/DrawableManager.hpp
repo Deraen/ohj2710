@@ -39,9 +39,28 @@ public:
 
 	SDL_Renderer* renderer() const;
 
+	void resized();
+
+	template<typename E>
+	void toScreenCoordinates(E& x, E& y) const
+	{
+		// XXX: Round?
+		x = x * scale_;
+		y = y * scale_;
+	}
+	// b2Vec2 toScreenCoordinates(const b2Vec2& coord) const;
+	SDL_Rect toScreenCoordinates(const SDL_Rect& rect) const;
+
+	static const int DEF_SCREEN_WIDTH = 800;
+	static const int DEF_SCREEN_HEIGHT = 480;
+
 private:
 	// Window and Renderer.
 	SDL_Window* window_;
+	int w_;
+	int h_;
+	float scale_;
+
 	SDL_Renderer* renderer_;
 	SDL_Surface* surface_;
 };

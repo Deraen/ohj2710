@@ -31,11 +31,16 @@ void DrawableManager::init()
 	// Debug SDL, on Android messages go to log, on Linux to stderr.
 	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_INFO);
 
-	// Create the application window. The size chosen is logical, not the exact
-	// number of pixels of the window (mobiles will override it).
+	/*
+	 * On android, this resolution is ignored and devices screen resolution
+	 * is used instead.
+	 * Windows are never resizable on Android.
+	 */
 	window_ = SDL_CreateWindow("My SDL 1.3 Test",
 	                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-	                           800, 480, SDL_WINDOW_SHOWN);
+	                           1280, 900, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+
+	resized();
 
 	// Get the first available Hardware-accelerated renderer for this window.
 	renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
@@ -56,4 +61,42 @@ void DrawableManager::destroy()
 SDL_Renderer* DrawableManager::renderer() const
 {
 	return renderer_;
+}
+
+void DrawableManager::resized()
+{
+	SDL_GetWindowSize(window_, &w_, &h_);
+	scale_ = static_cast<float>(w_) / DEF_SCREEN_WIDTH;
+
+	SDL_Log("Screen resolution %ix%i, scale %f", w_, h_, scale_);
+
+	SDL_Rect rect;
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = w_;
+	rect.h = h_;
+
+	// Render viewport needs to be fixed after resize or it will be
+	// messed up after window shrinking.
+	SDL_RenderSetViewport(renderer_, &rect);
+}
+
+// b2Vec2 DrawableManager::toScreenCoordinates(const b2Vec2 &coord) const
+// {
+// 	b2Vec2 copy(coord);
+// 	toScreenCoordinates(copy.x, copy.y);
+// 	return copy;
+// }
+
+SDL_Rect DrawableManager::toScreenCoordinates(const SDL_Rect &rect) const
+{
+	SDL_Rect copy(rect);
+	toScreenCoordinates(copy.x, copy.y);
+	toScreenCoordinates(copy.w, copy.h);
+
+	// Move to window coordinate system. = 0,0 window topleft.
+	// For drawing we need topleft coordinate instead of obj center coordinates.
+	copy.x += w_ / 2 - copy.w / 2;
+	copy.y += h_ / 2 - copy.h / 2;
+	return copy;
 }
