@@ -2,7 +2,9 @@
 	"folders":
 	[
 		{
-			"path": "/home/juho/Source/ohj2710"
+			"path": "/home/juho/Source/ohj2710",
+			"file_exclude_patterns": [".*project", ".classpath", "*.sublime-workspace"],
+			"folder_exclude_patterns": [".cache", ".settings", "libs", "gen", "bin", "obj"]
 		}
 	],
 	"settings":
