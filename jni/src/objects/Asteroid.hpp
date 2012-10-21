@@ -28,6 +28,9 @@ public:
 	 */
 	void move();
 
+	inline b2Vec2 Position() const { return pos_; }
+	inline void SetPosition(b2Vec2 p) { pos_ = p; }
+	inline void SetBody(b2Body* b) { body_ = b; }
 private:
 	/*
 	 * Asteroid doesn't own planet.
@@ -47,9 +50,12 @@ private:
 	/*
 	 * Velocity.
 	 */
-	b2Vec2 vel_;
+	b2Vec2 debris_;
+	b2Vec2 velocity_;
 
 	b2Vec2 pos_;
+
+	b2Body* body_;
 };
 
 #endif /* ASTEROID_H_ */

@@ -20,6 +20,7 @@ LOCAL_SRC_FILES := \
 	objects/Planet.cpp \
 	objects/Drawable.cpp \
 	objects/Asteroid.cpp \
+	World.cpp \
 
 LOCAL_SHARED_LIBRARIES := SDL2 Box2D
 
