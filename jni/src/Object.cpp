@@ -10,19 +10,14 @@
 #include "Object.hpp"
 #include "common.hpp"
 
-Object::Object() {
+Object::Object():
+	id_(0)
+{
 	// TODO Auto-generated constructor stub
 }
 
 Object::~Object() {
 	// TODO Auto-generated destructor stub
-}
-
-void Object::reset()
-{
-	reset_inner();
-
-	id_ = 0;
 }
 
 unsigned int Object::getId() const

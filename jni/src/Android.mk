@@ -15,16 +15,16 @@ LOCAL_SRC_FILES := \
 	$(SDL_PATH)/src/main/android/SDL_android_main.cpp \
 	main.cpp \
 	Object.cpp \
-	managers/DrawableManager.cpp \
-	objects/Player.cpp \
 	objects/Planet.cpp \
-	objects/Drawable.cpp \
+	objects/Sprite.cpp \
 	objects/Asteroid.cpp \
 	World.cpp \
+	Screen.cpp \
+	Manager.cpp
 
 LOCAL_SHARED_LIBRARIES := SDL2 Box2D
 
 LOCAL_LDLIBS := -lGLESv1_CM -llog
-LOCAL_CPPFLAGS = -std=gnu++0x
+LOCAL_CPPFLAGS = -std=gnu++0x -frtti
 
 include $(BUILD_SHARED_LIBRARY)

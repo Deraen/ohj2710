@@ -12,13 +12,12 @@
 #include "objects/Planet.hpp"
 #include "Manager.hpp"
 
-Asteroid::Asteroid() {
-	// TODO Auto-generated constructor stub
-
+Asteroid::Asteroid()
+{
 }
 
-Asteroid::~Asteroid() {
-	// TODO Auto-generated destructor stub
+Asteroid::~Asteroid()
+{
 }
 
 void Asteroid::initialize(const unsigned int planet)

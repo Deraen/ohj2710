@@ -24,7 +24,3 @@ void Planet::initialize()
 	pos_.x = 0.0;
 	pos_.y = 0.0;
 }
-
-void Planet::reset_inner()
-{
-}

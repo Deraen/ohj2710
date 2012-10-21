@@ -38,7 +38,6 @@ public:
 		id_++;
 
 		objects_[id_] = new T;
-		objects_[id_]->reset();
 		objects_[id_]->setId(id_);
 
 		SDL_Log("New object %i", id_);

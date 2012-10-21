@@ -17,8 +17,6 @@ public:
 	Sprite();
 	virtual ~Sprite();
 
-	void reset_inner();
-
 	void initialize();
 
 	void draw(Drawable* drawable) const;

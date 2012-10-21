@@ -14,7 +14,3 @@ Bomb::Bomb()
 Bomb::~Bomb()
 {
 }
-
-void Bomb::reset_inner()
-{
-}

@@ -24,8 +24,6 @@ public:
 
 	void initialize();
 
-	void reset_inner();
-
 	// --- Drawable ---
 	inline unsigned int sprite() const { return 10; }
 	inline float angle() const { return 0.0; }

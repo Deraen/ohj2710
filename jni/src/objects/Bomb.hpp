@@ -24,8 +24,6 @@ public:
 
 	void initialize(const unsigned int planet, BombType type);
 
-	void reset_inner();
-
 private:
 	/*
 	 * Bomb doesn't own planet.

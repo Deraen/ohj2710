@@ -21,8 +21,6 @@ public:
 
 	void initialize(const unsigned int planet);
 
-	void reset_inner();
-
 	// Own functions
 	/*
 	 * XXX: Fuu.
