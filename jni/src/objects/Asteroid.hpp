@@ -11,8 +11,9 @@
 #include "Box2D/Box2D.h"
 
 #include "Object.hpp"
+#include "interfaces/Drawable.hpp"
 
-class Asteroid: public Object
+class Asteroid: public Object, public Drawable
 {
 public:
 	Asteroid();
@@ -24,28 +25,26 @@ public:
 
 	// Own functions
 	/*
-	 * Fuu.
+	 * XXX: Fuu.
 	 */
 	void move();
 
+	// --- Box2D things ---
 	inline b2Vec2 Position() const { return pos_; }
 	inline void SetPosition(b2Vec2 p) { pos_ = p; }
 	inline void SetBody(b2Body* b) { body_ = b; }
+
+	// --- Drawable ---
+	inline unsigned int sprite() const { return 11; }
+	inline float angle() const { return 0.0; }
+	inline b2Vec2 pos() const { return pos_; }
+	inline b2Vec2 dimensions() const { return b2Vec2(10, 10); }
+
 private:
 	/*
 	 * Asteroid doesn't own planet.
 	 */
 	unsigned int planet_;
-
-	/*
-	 * Asteroid owns hitbox.
-	 */
-	unsigned int hitbox_;
-
-	/*
-	 * Asteroid has drawable.
-	 */
-	unsigned int drawable_;
 
 	/*
 	 * Velocity.

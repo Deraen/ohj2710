@@ -8,9 +8,9 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "Asteroid.hpp"
-#include "managers/DrawableManager.hpp"
-#include "managers/PlanetManager.hpp"
+#include "objects/Asteroid.hpp"
+#include "objects/Planet.hpp"
+#include "Manager.hpp"
 
 Asteroid::Asteroid() {
 	// TODO Auto-generated constructor stub
@@ -19,11 +19,6 @@ Asteroid::Asteroid() {
 
 Asteroid::~Asteroid() {
 	// TODO Auto-generated destructor stub
-}
-
-void Asteroid::reset_inner()
-{
-
 }
 
 void Asteroid::initialize(const unsigned int planet)
@@ -36,13 +31,6 @@ void Asteroid::initialize(const unsigned int planet)
 	// Init pos
 	pos_.x = 200.0f * std::cos(pos);
 	pos_.y = 200.0f * std::sin(pos);
-
-	drawable_ = DrawableManager::instance().newObject();
-	DrawableManager::instance().withObject(drawable_, [this](Drawable* obj)
-	{
-		obj->initialize(pos_, b2Vec2(10, 10));
-	});
-
 }
 
 #define SCALE(OldValue, OldMin, OldMax, NewMin, NewMax) ((((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin);
@@ -118,8 +106,4 @@ void Asteroid::move()
 	//body_->SetLinearDamping(10.0f);
 	//pos_= body_->GetPosition();
 	//SDL_Log("(%f, %f)", pos_.x, pos_.y);
-	DrawableManager::instance().withObject(drawable_, [this](Drawable* obj)
-	{
-		obj->updatePos(pos_);
-	});
 }

@@ -3,16 +3,21 @@
 #include "SDL.h"
 #include "SDL_log.h"
 
-#include "DrawableManager.hpp"
+#include "Screen.hpp"
+#include "Manager.hpp"
+#include "interfaces/Drawable.hpp"
+#include "objects/Sprite.hpp"
 
-void DrawableManager::drawAll()
+void Screen::drawAll()
 {
 	// Clear the entire screen to the Renderer's base colour.
 	SDL_RenderClear(renderer_);
 
-	withObjects([](Drawable* obj)
+	Manager::instance().withObjects<Drawable>([](Drawable* obj)
 	{
-		obj->draw();
+		Manager::instance().withObject<Sprite>(obj->sprite(), [&](Sprite* sprite) {
+			sprite->draw(obj);
+		});
 	});
 
 	// Flip the shown and hidden buffers to refresh the screen.
@@ -20,7 +25,7 @@ void DrawableManager::drawAll()
 }
 
 
-void DrawableManager::init()
+void Screen::init()
 {
 	// Initialize SDL.
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) // | SDL_INIT_AUDIO
@@ -40,30 +45,33 @@ void DrawableManager::init()
 	                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 	                           1280, 900, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
-	resized();
-
 	// Get the first available Hardware-accelerated renderer for this window.
 	renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
 
+	resized();
+
 	// Black base color.
 	SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+
+	// XXX:
+	unsigned int earth = Manager::instance().newObject<Sprite>();
+	Manager::instance().withObject<Sprite>(earth, [](Sprite* obj) {
+		obj->initialize();
+	});
+	unsigned int asteroid = Manager::instance().newObject<Sprite>();
+	Manager::instance().withObject<Sprite>(asteroid, [](Sprite* obj) {
+		obj->initialize();
+	});
 }
 
-void DrawableManager::destroy()
+void Screen::destroy()
 {
-	// Remember to free up all the memory we've used, this ain't no Java!
 	SDL_DestroyRenderer(renderer_);
 	SDL_DestroyWindow(window_);
 	SDL_Quit();
-
 }
 
-SDL_Renderer* DrawableManager::renderer() const
-{
-	return renderer_;
-}
-
-void DrawableManager::resized()
+void Screen::resized()
 {
 	SDL_GetWindowSize(window_, &w_, &h_);
 	scale_ = static_cast<float>(w_) / DEF_SCREEN_WIDTH;
@@ -81,14 +89,14 @@ void DrawableManager::resized()
 	SDL_RenderSetViewport(renderer_, &rect);
 }
 
-// b2Vec2 DrawableManager::toScreenCoordinates(const b2Vec2 &coord) const
+// b2Vec2 Screen::toScreenCoordinates(const b2Vec2 &coord) const
 // {
 // 	b2Vec2 copy(coord);
 // 	toScreenCoordinates(copy.x, copy.y);
 // 	return copy;
 // }
 
-SDL_Rect DrawableManager::toScreenCoordinates(const SDL_Rect &rect) const
+SDL_Rect Screen::toScreenCoordinates(const SDL_Rect &rect) const
 {
 	SDL_Rect copy(rect);
 	toScreenCoordinates(copy.x, copy.y);

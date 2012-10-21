@@ -7,13 +7,13 @@ SET(CMAKE_CXX_FLAGS "-std=c++0x")
 set(SOURCES
 	main.cpp
 	Object.cpp
-	managers/DrawableManager.cpp
+	World.cpp
+	Manager.cpp
+	Screen.cpp
 	objects/Asteroid.cpp
 	objects/Bomb.cpp
-	objects/Hitbox.cpp
 	objects/Planet.cpp
-	objects/Player.cpp
-	objects/Drawable.cpp
+	objects/Sprite.cpp
 	)
 
 add_executable(

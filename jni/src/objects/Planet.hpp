@@ -11,38 +11,29 @@
 #include "Box2D/Box2D.h"
 
 #include "Object.hpp"
+#include "interfaces/Drawable.hpp"
 
-class Planet: public Object
+/*
+ * A planet is a player.
+ */
+class Planet: public Object, public Drawable
 {
 public:
 	Planet();
 	virtual ~Planet();
 
-	void initialize(const unsigned int player);
+	void initialize();
 
 	void reset_inner();
 
-	// Own functions
-	b2Vec2 getPos() const
-	{
-		return pos_;
-	}
+	// --- Drawable ---
+	inline unsigned int sprite() const { return 10; }
+	inline float angle() const { return 0.0; }
+	inline b2Vec2 pos() const { return pos_; }
+	inline b2Vec2 dimensions() const { return b2Vec2(128, 128); }
 
 private:
-	/*
-	 * Planet doesn't own player.
-	 */
-	unsigned int player_;
-
-	/*
-	 * Planet owns hitbox.
-	 */
-	unsigned int hitbox_;
-
-	/*
-	 * Planet owns drawable.
-	 */
-	unsigned int drawable_;
+	std::string name;
 
 	b2Vec2 pos_;
 };

@@ -7,13 +7,12 @@
 
 #include "Bomb.hpp"
 
-Bomb::Bomb() {
-	// TODO Auto-generated constructor stub
-
+Bomb::Bomb()
+{
 }
 
-Bomb::~Bomb() {
-	// TODO Auto-generated destructor stub
+Bomb::~Bomb()
+{
 }
 
 void Bomb::reset_inner()

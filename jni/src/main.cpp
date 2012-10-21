@@ -1,11 +1,10 @@
 #include <cstdlib>
 
 #include "SDL.h"
+#include "Manager.hpp"
 
-#include "managers/PlayerManager.hpp"
-#include "managers/DrawableManager.hpp"
-#include "managers/AsteroidManager.hpp"
 #include "World.hpp"
+#include "Screen.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -13,11 +12,13 @@ int main(int argc, char* argv[])
 
 	World world;
 
+	Screen::instance().init();
+
 	// Execute the main loop.
 	bool running = true;
 	while(running)
 	{
-		DrawableManager::instance().drawAll();
+		Screen::instance().drawAll();
 
 		world.Step();
 
@@ -34,7 +35,7 @@ int main(int argc, char* argv[])
 			{
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED)
 				{
-					DrawableManager::instance().resized();
+					Screen::instance().resized();
 				}
 			}
 			else if (event.type == SDL_KEYUP)
@@ -50,8 +51,8 @@ int main(int argc, char* argv[])
 		SDL_Delay(20);
 	}
 
-	DrawableManager::instance().destroy();
-	SDL_Quit();
+	Screen::instance().destroy();
+
 	// all clear, return EXIT_SUCCESS
 	return 0;
 }
