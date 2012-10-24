@@ -52,16 +52,6 @@ void Screen::init()
 
 	// Black base color.
 	SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
-
-	// XXX:
-	unsigned int earth = Manager::instance().newObject<Sprite>();
-	Manager::instance().withObject<Sprite>(earth, [](Sprite* obj) {
-		obj->initialize();
-	});
-	unsigned int asteroid = Manager::instance().newObject<Sprite>();
-	Manager::instance().withObject<Sprite>(asteroid, [](Sprite* obj) {
-		obj->initialize();
-	});
 }
 
 void Screen::destroy()

@@ -33,7 +33,7 @@ public:
 	inline void SetBody(b2Body* b) { body_ = b; }
 
 	// --- Drawable ---
-	inline unsigned int sprite() const { return 11; }
+	unsigned int sprite() const;
 	inline float angle() const { return 0.0; }
 	inline b2Vec2 pos() const { return pos_; }
 	inline b2Vec2 dimensions() const { return b2Vec2(10, 10); }

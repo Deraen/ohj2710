@@ -9,6 +9,7 @@
 
 #include "Planet.hpp"
 #include "Manager.hpp"
+#include "Assets.hpp"
 
 Planet::Planet()
 {
@@ -23,4 +24,9 @@ void Planet::initialize()
 {
 	pos_.x = 0.0;
 	pos_.y = 0.0;
+}
+
+unsigned int Planet::sprite() const
+{
+	return Assets::instance().getSprite("earth");
 }

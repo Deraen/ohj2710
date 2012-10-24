@@ -27,7 +27,7 @@ Sprite::~Sprite()
 {
 }
 
-void Sprite::initialize()
+void Sprite::initialize(int x, int y, unsigned char* data)
 {
 	Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -45,16 +45,11 @@ void Sprite::initialize()
 	src_.x = 0;
 	src_.y = 0;
 	// XXX: Dimensions of source image
-	src_.w = 10;
-	src_.h = 10;
+	src_.w = x;
+	src_.h = y;
 
 	// Surface
-	surface_ = SDL_CreateRGBSurface(0, src_.w, src_.h, 32, rmask, gmask, bmask, amask);
-
-	// #FF00EA
-	Uint32 notfound_color = SDL_MapRGB(surface_->format, 255, 0, 240);
-
-	SDL_FillRect(surface_, &src_, notfound_color);
+	surface_ = SDL_CreateRGBSurfaceFrom(data, src_.w, src_.h, 32, src_.w * 4, rmask, gmask, bmask, amask);
 
 	texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface_);
 }

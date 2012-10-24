@@ -11,6 +11,7 @@
 #include "objects/Asteroid.hpp"
 #include "objects/Planet.hpp"
 #include "Manager.hpp"
+#include "Assets.hpp"
 
 Asteroid::Asteroid()
 {
@@ -105,4 +106,9 @@ void Asteroid::move()
 	//body_->SetLinearDamping(10.0f);
 	//pos_= body_->GetPosition();
 	//SDL_Log("(%f, %f)", pos_.x, pos_.y);
+}
+
+unsigned int Asteroid::sprite() const
+{
+	return Assets::instance().getSprite("asteroid");
 }

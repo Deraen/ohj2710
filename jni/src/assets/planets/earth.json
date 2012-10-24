@@ -1,0 +1,9 @@
+{
+	"name": "Earth",
+	"id": "earth",
+	"sprite": "earth.png",
+	"boundingbox": {
+		"type": "circle",
+		"r": 32
+	}
+}

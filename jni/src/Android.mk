@@ -20,7 +20,8 @@ LOCAL_SRC_FILES := \
 	objects/Asteroid.cpp \
 	World.cpp \
 	Screen.cpp \
-	Manager.cpp
+	Manager.cpp \
+	Assets.cpp
 
 LOCAL_SHARED_LIBRARIES := SDL2 Box2D
 

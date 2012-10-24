@@ -5,14 +5,15 @@
 
 #include "World.hpp"
 #include "Screen.hpp"
+#include "Assets.hpp"
 
 int main(int argc, char* argv[])
 {
 	srand(time(NULL));
 
 	World world;
-
 	Screen::instance().init();
+	Assets::instance().init();
 
 	// Execute the main loop.
 	bool running = true;

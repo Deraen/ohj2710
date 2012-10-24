@@ -17,7 +17,7 @@ public:
 	Sprite();
 	virtual ~Sprite();
 
-	void initialize();
+	void initialize(int x, int y, unsigned char* data);
 
 	void draw(Drawable* drawable) const;
 

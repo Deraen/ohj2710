@@ -25,7 +25,7 @@ public:
 	void initialize();
 
 	// --- Drawable ---
-	inline unsigned int sprite() const { return 10; }
+	unsigned int sprite() const;
 	inline float angle() const { return 0.0; }
 	inline b2Vec2 pos() const { return pos_; }
 	inline b2Vec2 dimensions() const { return b2Vec2(128, 128); }
