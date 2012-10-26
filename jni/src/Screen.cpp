@@ -6,24 +6,8 @@
 #include "Screen.hpp"
 #include "Manager.hpp"
 #include "interfaces/Drawable.hpp"
+#include "interfaces/Touchable.hpp"
 #include "objects/Sprite.hpp"
-
-void Screen::drawAll()
-{
-	// Clear the entire screen to the Renderer's base colour.
-	SDL_RenderClear(renderer_);
-
-	Manager::instance().withObjects<Drawable>([](Drawable* obj)
-	{
-		Manager::instance().withObject<Sprite>(obj->sprite(), [&](Sprite* sprite) {
-			sprite->draw(obj);
-		});
-	});
-
-	// Flip the shown and hidden buffers to refresh the screen.
-	SDL_RenderPresent(renderer_);
-}
-
 
 void Screen::init()
 {
@@ -59,6 +43,77 @@ void Screen::destroy()
 	SDL_DestroyRenderer(renderer_);
 	SDL_DestroyWindow(window_);
 	SDL_Quit();
+}
+
+void Screen::drawAll()
+{
+	// Clear the entire screen to the Renderer's base colour.
+	SDL_RenderClear(renderer_);
+
+	Manager::instance().withObjects<Drawable>([](Drawable* obj)
+	{
+		Manager::instance().withObject<Sprite>(obj->sprite(), [&](Sprite* sprite) {
+			sprite->draw(obj);
+		});
+	});
+
+	// Flip the shown and hidden buffers to refresh the screen.
+	SDL_RenderPresent(renderer_);
+}
+
+bool Screen::processInput()
+{
+	static SDL_Event event;
+	while (SDL_PollEvent(&event))
+	{
+		if (event.type == SDL_QUIT)
+		{
+			return false;
+		}
+		else if (event.type == SDL_WINDOWEVENT)
+		{
+			if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+			{
+				Screen::instance().resized();
+			}
+		}
+		else if (
+				(event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+			 || (event.type == SDL_FINGERDOWN)
+				)
+		{
+			b2Vec2 p;
+
+			if (event.type == SDL_MOUSEBUTTONDOWN)
+			{
+				p.Set(event.button.x, event.button.y);
+			}
+			else if (event.type == SDL_FINGERDOWN)
+			{
+				p.Set(event.tfinger.x, event.tfinger.y);
+			}
+
+			SDL_Log("Mouse/Touch down, (%f, %f)", p.x, p.y);
+
+			Manager::instance().withObjects<Touchable>([&](Touchable* obj) {
+				b2Body* body = obj->getBody();
+				b2Fixture* fixture = body->GetFixtureList();
+				while (fixture) {
+					b2Shape* shape = fixture->GetShape();
+					b2Transform fuu(b2Vec2(0, 0), b2Rot(0)); // XXX: FUU
+					if (shape->TestPoint(fuu, p)) {
+						obj->touched(p);
+					}
+					fixture = fixture->GetNext();
+				}
+			});
+		}
+		else
+		{
+			// SDL_Log("%i", event.type);
+		}
+	}
+	return true;
 }
 
 void Screen::resized()

@@ -12,11 +12,12 @@
 
 #include "Object.hpp"
 #include "interfaces/Drawable.hpp"
+#include "interfaces/Touchable.hpp"
 
 /*
  * A planet is a player.
  */
-class Planet: public Object, public Drawable
+class Planet: public Object, public Drawable, public Touchable
 {
 public:
 	Planet();
@@ -27,11 +28,18 @@ public:
 	// --- Drawable ---
 	unsigned int sprite() const;
 	inline float angle() const { return 0.0; }
+
+	// --- Drawable/Toucable ---
 	inline b2Vec2 pos() const { return pos_; }
 	inline b2Vec2 dimensions() const { return b2Vec2(128, 128); }
 
+	// --- Touchable ---
+	inline void SetBody(b2Body* body) { body_ = body; } // XXX: remove this...
+	inline b2Body* getBody() const { return body_; }
+	void touched(const b2Vec2& touchPosition);
+
 private:
-	std::string name;
+	b2Body* body_;
 
 	b2Vec2 pos_;
 };

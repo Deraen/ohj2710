@@ -30,3 +30,8 @@ unsigned int Planet::sprite() const
 {
 	return Assets::instance().getSprite("earth");
 }
+
+void Planet::touched(const b2Vec2 &touchPosition)
+{
+	SDL_Log("Planet has been touched!");
+}

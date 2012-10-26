@@ -26,6 +26,8 @@ public:
 
 	void drawAll();
 
+	bool processInput();
+
 	inline SDL_Renderer* renderer() const { return renderer_; }
 
 	void resized();

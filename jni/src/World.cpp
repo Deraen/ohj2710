@@ -14,25 +14,27 @@
 World::World() : world_(b2Vec2(0.0f,0.0f)){
 	unsigned int planet1 = Manager::instance().newObject<Planet>();
 
-	b2BodyDef temp;
-	// temp.userData = obj;
-	temp.position = b2Vec2(0.0f, 0.0f);
-	temp.type = b2_staticBody;
-	b2Body* body = world_.CreateBody(&temp);
+	Manager::instance().withObject<Planet>(planet1, [&](Planet* obj) {
+		b2BodyDef temp;
+		// temp.userData = obj;
+		temp.position = b2Vec2(0.0f, 0.0f);
+		temp.type = b2_staticBody;
+		b2Body* body = world_.CreateBody(&temp);
 
-	b2CircleShape circle;
+		b2CircleShape circle;
 
-	circle.m_radius = 40.0f;
+		circle.m_radius = 40.0f;
 
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &circle;
-	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 1.0f;
-	fixtureDef.restitution = 0.1f;
+		b2FixtureDef fixtureDef;
+		fixtureDef.shape = &circle;
+		fixtureDef.density = 1.0f;
+		fixtureDef.friction = 1.0f;
+		fixtureDef.restitution = 0.1f;
 
-	body->CreateFixture(&fixtureDef);
-	body->ApplyForce(b2Vec2(400.0f,0.0f), body->GetWorldCenter());
-	//obj->SetBody(body);
+		body->CreateFixture(&fixtureDef);
+		body->ApplyForce(b2Vec2(400.0f,0.0f), body->GetWorldCenter());
+		obj->SetBody(body);
+	});
 
 	for (unsigned int i = 0; i < 8; ++i)
 	{
