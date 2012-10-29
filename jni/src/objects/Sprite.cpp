@@ -54,17 +54,21 @@ void Sprite::initialize(int x, int y, unsigned char* data)
 	texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface_);
 }
 
-void Sprite::draw(Drawable* drawable) const
+void Sprite::draw(b2Body* body) const
 {
+	Drawable* drawable = (Drawable*)body->GetUserData();
+	b2Vec2 dim = Screen::instance().toPixels(drawable->dimensions());
+	b2Vec2 pos = Screen::instance().toPixels(body->GetPosition(), true);
+	// body->GetAngle()
+
 	SDL_Rect dst;
-	dst.w = drawable->dimensions().x;
-	dst.h = drawable->dimensions().y;
-	dst.x = drawable->pos().x;
-	dst.y = drawable->pos().y;
+	dst.w = dim.x;
+	dst.h = dim.y;
+	dst.x = pos.x - dim.x / 2;
+	dst.y = pos.y - dim.x / 2;
 
 	SDL_Renderer* renderer = Screen::instance().renderer();
-	SDL_Rect dst_screen = Screen::instance().toScreenCoordinates(dst);
 
 	// NULL = Entire texture
-	SDL_RenderCopy(renderer, texture_, NULL, &dst_screen);
+	SDL_RenderCopy(renderer, texture_, NULL, &dst);
 }

@@ -1,3 +1,4 @@
+
 #ifndef TOUCHABLE_HPP_
 #define TOUCHABLE_HPP_
 
@@ -11,8 +12,6 @@ class Touchable
 public:
 	Touchable() {};
 	virtual ~Touchable() {};
-
-	virtual b2Body* getBody() const = 0;
 
 	/*
 	 * Callback.

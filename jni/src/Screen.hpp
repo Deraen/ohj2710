@@ -1,7 +1,12 @@
+
+
 #ifndef SCREEN_HPP_
 #define SCREEN_HPP_
 
 #include "SDL.h"
+#include "Box2D/Box2D.h"
+
+#include "Object.hpp"
 
 class Screen
 {
@@ -24,32 +29,41 @@ public:
 
 	void destroy();
 
-	void drawAll();
+	void draw();
 
-	bool processInput();
+	void processInput();
 
+	// For sprites
 	inline SDL_Renderer* renderer() const { return renderer_; }
 
 	void resized();
 
-	template<typename E>
-	void toScreenCoordinates(E& x, E& y) const
-	{
-		// XXX: Round?
-		x = x * scale_;
-		y = y * scale_;
-	}
+	// Meters -> Pixels
+	b2Vec2 toPixels(const b2Vec2& coord, bool center = false) const;
 
-	// b2Vec2 toScreenCoordinates(const b2Vec2& coord) const;
-	SDL_Rect toScreenCoordinates(const SDL_Rect& rect) const;
+	// Pixels -> Meters
+	b2Vec2 toMeters(const b2Vec2& coord) const;
 
 	static const int DEF_SCREEN_WIDTH = 800;
 	static const int DEF_SCREEN_HEIGHT = 480;
 
+	class Hit: public b2QueryCallback {
+	public:
+		Hit() {};
+		virtual ~Hit() {};
+
+		inline void setPoint(const b2Vec2 p) { p_ = p; }
+		bool ReportFixture(b2Fixture* fixture);
+	private:
+		b2Vec2 p_;
+	};
+
 private:
 	// Window and Renderer.
 	SDL_Window* window_;
-	float scale_;
+
+	// From box2d coordinates to screen coordinates
+	unsigned int pixelsPerMeter_;
 
 	SDL_Renderer* renderer_;
 	SDL_Surface* surface_;

@@ -9,50 +9,59 @@
 #include <cmath>
 
 #include "objects/Asteroid.hpp"
+#include "Game.hpp"
 #include "objects/Planet.hpp"
-#include "Manager.hpp"
 #include "Assets.hpp"
 
-Asteroid::Asteroid()
+Asteroid::Asteroid(b2Body* planet):
+	Object(),
+	Drawable()
 {
+	sprite_ = Assets::instance().getSprite("asteroid");
+
+	// Random number between 0 and 2*PI
+	float pos = (rand() % 2000) * M_PI / 1000.0;
+
+	// Init Box2D
+	b2BodyDef temp;
+	temp.userData = this;
+	temp.position = planet->GetPosition() + b2Vec2(5.0f * std::cos(pos), 5.0f * std::sin(pos));
+	temp.type = b2_dynamicBody;
+	body_ = Game::instance().world()->CreateBody(&temp);
+
+	b2PolygonShape dynamicBox;
+	dynamicBox.SetAsBox(0.2, 0.2);
+
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &dynamicBox;
+	fixtureDef.density = 1.0f;
+	fixtureDef.friction = 1.0f;
+	fixtureDef.restitution = 0.1f;
+
+	body_->CreateFixture(&fixtureDef);
+	body_->ApplyForce(b2Vec2(4.0f, 0.0f), body_->GetWorldCenter());
+	SDL_Log("Asteroid created (%f, %f)", body_->GetPosition().x, body_->GetPosition().y);
 }
 
 Asteroid::~Asteroid()
 {
 }
 
-void Asteroid::initialize(const unsigned int planet)
-{
-	planet_ = planet;
-
-	// Random number between 0 and 2*PI
-	float pos = (rand() % 2000) * M_PI / 1000.0;
-
-	// Init pos
-	pos_.x = 200.0f * std::cos(pos);
-	pos_.y = 200.0f * std::sin(pos);
-}
-
-#define SCALE(OldValue, OldMin, OldMax, NewMin, NewMax) ((((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin);
-
 void Asteroid::move()
 {
-	float planetRadius = 40.0f;
-	b2Vec2 planetPos(0.0f, 0.0f);
 	b2Vec2 asteroidPos = body_->GetPosition();
-	float asteroidDistance = asteroidPos.Length();
-	//SDL_Log("(%f)", asteroidDistance);
+	float asteroidDistance = asteroidPos.LengthSquared();
 
-	if (asteroidDistance < 6.0f * planetRadius)
+	if (asteroidDistance < 10 * Planet::RADIUS * Planet::RADIUS)
 	{
 		b2Vec2 superForce(0.0f, 0.0f);
 		asteroidPos *= -1.0f;
 		float vecSum = abs(asteroidPos.x) + abs(asteroidPos.y);
-		asteroidPos *= (1.0/vecSum) * (40.0f / asteroidDistance);
+		asteroidPos *= (1.0 / vecSum) * (4.0f / asteroidDistance);
 
-		b2Vec2 F(asteroidPos.x * 10.0f, asteroidPos.y * 10.0f);
+		b2Vec2 F(asteroidPos);
+		F *= 0.5;
 		superForce += F;
-
 
 		/*for(int i = 1; i <= asteroidDistance; ++i)
 		{
@@ -90,10 +99,7 @@ void Asteroid::move()
 		//SDL_Log("(%f, %f)", superForce.x, superForce.y);
 
 		//superForce *= 1000.0f;
-		body_->ApplyForce(4000.0f * superForce, body_->GetWorldCenter());
-
-		velocity_ = body_->GetLinearVelocity();
-		pos_ = body_->GetPosition();
+		body_->ApplyForce(superForce, body_->GetWorldCenter());
 	}
 
 	/*b2Vec2 verschil = velocity_ - body_->GetLinearVelocity();
@@ -105,10 +111,5 @@ void Asteroid::move()
 	//body_->ApplyForce(b2Vec2(4,2), body_->GetWorldCenter());
 	//body_->SetLinearDamping(10.0f);
 	//pos_= body_->GetPosition();
-	//SDL_Log("(%f, %f)", pos_.x, pos_.y);
-}
-
-unsigned int Asteroid::sprite() const
-{
-	return Assets::instance().getSprite("asteroid");
+	// SDL_Log("Asteroid moved (%f, %f)", body_->GetPosition().x, body_->GetPosition().y);
 }

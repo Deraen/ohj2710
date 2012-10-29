@@ -9,17 +9,14 @@
 #define ASTEROID_H_
 
 #include "Box2D/Box2D.h"
-
 #include "Object.hpp"
 #include "interfaces/Drawable.hpp"
 
 class Asteroid: public Object, public Drawable
 {
 public:
-	Asteroid();
+	Asteroid(b2Body* planet);
 	virtual ~Asteroid();
-
-	void initialize(const unsigned int planet);
 
 	// Own functions
 	/*
@@ -27,31 +24,14 @@ public:
 	 */
 	void move();
 
-	// --- Box2D things ---
-	inline b2Vec2 Position() const { return pos_; }
-	inline void SetPosition(b2Vec2 p) { pos_ = p; }
-	inline void SetBody(b2Body* b) { body_ = b; }
+	inline b2Body* getBody() const { return body_; }
 
 	// --- Drawable ---
-	unsigned int sprite() const;
-	inline float angle() const { return 0.0; }
-	inline b2Vec2 pos() const { return pos_; }
-	inline b2Vec2 dimensions() const { return b2Vec2(10, 10); }
+	inline Sprite* sprite() const { return sprite_; }
+	inline b2Vec2 dimensions() const { return b2Vec2(0.2, 0.2); }
 
 private:
-	/*
-	 * Asteroid doesn't own planet.
-	 */
-	unsigned int planet_;
-
-	/*
-	 * Velocity.
-	 */
-	b2Vec2 debris_;
-	b2Vec2 velocity_;
-
-	b2Vec2 pos_;
-
+	Sprite* sprite_;
 	b2Body* body_;
 };
 

@@ -10,6 +10,8 @@
 #include "SDL.h"
 #include "Box2D/Box2D.h"
 
+class Sprite;
+
 class Drawable
 {
 public:
@@ -19,18 +21,18 @@ public:
 	/*
 	 * Returns name of the texture that shold represent this object.
 	 */
-	virtual unsigned int sprite() const = 0;
+	virtual Sprite* sprite() const = 0;
 
 	/*
 	 * In what angle should the texture be drawn.
 	 */
-	virtual float angle() const = 0;
+	// virtual float angle() const = 0;
 
 	/*
 	 * Position of object.
 	 * XXX: On what coordinate system?
 	 */
-	virtual b2Vec2 pos() const = 0;
+	// virtual b2Vec2 pos() const = 0;
 
 	/*
 	 * Dimension of sprite on screen.

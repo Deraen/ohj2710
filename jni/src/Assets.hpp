@@ -2,6 +2,9 @@
 #define ASSETS_HPP_
 #include <string>
 #include <map>
+
+class Sprite;
+
 class Assets {
 public:
     Assets() {};
@@ -11,8 +14,8 @@ public:
 
     void init();
 
-    unsigned int getSprite(const std::string& identifier);
+    Sprite* getSprite(const std::string& identifier);
 private:
-    std::map<std::string, unsigned int> sprites_;
+    std::map<std::string, Sprite* > sprites_;
 };
 #endif /* ASSETS_HPP_ */

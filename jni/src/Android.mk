@@ -14,13 +14,12 @@ LOCAL_C_INCLUDES := \
 LOCAL_SRC_FILES := \
 	$(SDL_PATH)/src/main/android/SDL_android_main.cpp \
 	main.cpp \
-	Object.cpp \
 	objects/Planet.cpp \
 	objects/Sprite.cpp \
 	objects/Asteroid.cpp \
-	World.cpp \
+	objects/Bomb.cpp \
+	Game.cpp \
 	Screen.cpp \
-	Manager.cpp \
 	Assets.cpp
 
 LOCAL_SHARED_LIBRARIES := SDL2 Box2D

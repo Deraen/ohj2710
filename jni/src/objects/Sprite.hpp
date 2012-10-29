@@ -8,10 +8,7 @@
 #include "SDL.h"
 #include "Box2D/Box2D.h"
 
-#include "Object.hpp"
-#include "interfaces/Drawable.hpp"
-
-class Sprite: public Object
+class Sprite
 {
 public:
 	Sprite();
@@ -19,7 +16,7 @@ public:
 
 	void initialize(int x, int y, unsigned char* data);
 
-	void draw(Drawable* drawable) const;
+	void draw(b2Body* body) const;
 
 private:
 	SDL_Surface* surface_;

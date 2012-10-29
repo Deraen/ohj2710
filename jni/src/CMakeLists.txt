@@ -12,9 +12,7 @@ SET(CMAKE_CXX_FLAGS "-std=c++0x")
 
 set(SOURCES
 	main.cpp
-	Object.cpp
-	World.cpp
-	Manager.cpp
+	Game.cpp
 	Screen.cpp
 	Assets.cpp
 	objects/Asteroid.cpp

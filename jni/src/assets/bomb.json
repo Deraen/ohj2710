@@ -1,0 +1,9 @@
+{
+	"name": "Bomb",
+	"id": "bomb",
+	"sprite": "bomb.png",
+	"boundingbox": {
+		"type": "polygon",
+		"points": [[0, 0], [1, 1], [0, 1]]
+	}
+}

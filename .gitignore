@@ -35,3 +35,5 @@ jni/src/Assets.cpp
 local.properties
 
 
+.cache
+debug

@@ -23,25 +23,15 @@ public:
 	Planet();
 	virtual ~Planet();
 
-	void initialize();
-
-	// --- Drawable ---
-	unsigned int sprite() const;
-	inline float angle() const { return 0.0; }
-
-	// --- Drawable/Toucable ---
-	inline b2Vec2 pos() const { return pos_; }
-	inline b2Vec2 dimensions() const { return b2Vec2(128, 128); }
-
-	// --- Touchable ---
-	inline void SetBody(b2Body* body) { body_ = body; } // XXX: remove this...
-	inline b2Body* getBody() const { return body_; }
+	inline Sprite* sprite() const { return sprite_; }
+	inline b2Vec2 dimensions() const { return b2Vec2(2 * RADIUS, 2 * RADIUS); }
 	void touched(const b2Vec2& touchPosition);
 
-private:
-	b2Body* body_;
+	static const float RADIUS;
 
-	b2Vec2 pos_;
+private:
+	Sprite* sprite_;
+	b2Body* body_;
 };
 
 #endif /* PLANET_H_ */

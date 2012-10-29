@@ -4,7 +4,7 @@
 #include "SDL_log.h"
 
 #include "Screen.hpp"
-#include "Manager.hpp"
+#include "Game.hpp"
 #include "interfaces/Drawable.hpp"
 #include "interfaces/Touchable.hpp"
 #include "objects/Sprite.hpp"
@@ -45,30 +45,48 @@ void Screen::destroy()
 	SDL_Quit();
 }
 
-void Screen::drawAll()
+void Screen::draw()
 {
 	// Clear the entire screen to the Renderer's base colour.
 	SDL_RenderClear(renderer_);
 
-	Manager::instance().withObjects<Drawable>([](Drawable* obj)
-	{
-		Manager::instance().withObject<Sprite>(obj->sprite(), [&](Sprite* sprite) {
-			sprite->draw(obj);
-		});
-	});
+	b2Body* body = Game::instance().world()->GetBodyList();
+	while (body != NULL) {
+		Drawable* obj = dynamic_cast<Drawable*>((Object*)body->GetUserData());
+		if (obj != NULL) {
+			obj->sprite()->draw(body);
+		}
+
+		body = body->GetNext();
+	}
 
 	// Flip the shown and hidden buffers to refresh the screen.
 	SDL_RenderPresent(renderer_);
 }
 
-bool Screen::processInput()
+bool Screen::Hit::ReportFixture(b2Fixture *fixture)
+{
+	// SDL_Log("Fixture touched");
+	b2Body* body = fixture->GetBody();
+	Touchable* touchable = dynamic_cast<Touchable*>((Object*)body->GetUserData());
+	if (touchable != NULL && fixture->TestPoint(p_)) {
+		touchable->touched(p_);
+	}
+	return true;
+}
+
+void Screen::processInput()
 {
 	static SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
-		if (event.type == SDL_QUIT)
+		if (
+			(event.type == SDL_QUIT)
+		 || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_AC_BACK)
+			)
 		{
-			return false;
+			SDL_Log("%i", event.tbutton.button);
+			Game::instance().stop();
 		}
 		else if (event.type == SDL_WINDOWEVENT)
 		{
@@ -91,37 +109,42 @@ bool Screen::processInput()
 			else if (event.type == SDL_FINGERDOWN)
 			{
 				p.Set(event.tfinger.x, event.tfinger.y);
+				SDL_Log("Touch point (%f, %f)", p.x, p.y);
+
+				// Quess: Touch points are represented with values from
+				// 0 to 32768
+				p.x = (p.x * DEF_SCREEN_WIDTH) / 32768;
+				p.y = (p.y * DEF_SCREEN_HEIGHT) / 32768;
 			}
+
+			p.x -= w_ / 2;
+			p.y -= h_ / 2;
+
+			p = toMeters(p);
 
 			SDL_Log("Mouse/Touch down, (%f, %f)", p.x, p.y);
 
-			Manager::instance().withObjects<Touchable>([&](Touchable* obj) {
-				b2Body* body = obj->getBody();
-				b2Fixture* fixture = body->GetFixtureList();
-				while (fixture) {
-					b2Shape* shape = fixture->GetShape();
-					b2Transform fuu(b2Vec2(0, 0), b2Rot(0)); // XXX: FUU
-					if (shape->TestPoint(fuu, p)) {
-						obj->touched(p);
-					}
-					fixture = fixture->GetNext();
-				}
-			});
+			Hit hit;
+			hit.setPoint(p);
+
+			b2AABB aabb;
+			aabb.lowerBound = b2Vec2(p);
+			aabb.upperBound = b2Vec2(p);
+			Game::instance().world()->QueryAABB(&hit, aabb);
 		}
 		else
 		{
-			// SDL_Log("%i", event.type);
+			SDL_Log("%i", event.type);
+			if (event.type == SDL_KEYDOWN) {
+				SDL_Log("key %s", SDL_GetScancodeName(event.key.keysym.scancode));
+			}
 		}
 	}
-	return true;
 }
 
 void Screen::resized()
 {
 	SDL_GetWindowSize(window_, &w_, &h_);
-	scale_ = static_cast<float>(w_) / DEF_SCREEN_WIDTH;
-
-	SDL_Log("Screen resolution %ix%i, scale %f", w_, h_, scale_);
 
 	SDL_Rect rect;
 	rect.x = 0;
@@ -129,27 +152,31 @@ void Screen::resized()
 	rect.w = w_;
 	rect.h = h_;
 
+	// Compute new pixels per meter
+	// Planet is 4 meters and should be 128px on 800px wide screen.
+	pixelsPerMeter_ = 128.0 * w_ / (DEF_SCREEN_WIDTH * 4.0);
+
+	SDL_Log("Screen resolution %ix%i, pixels per meter %i", w_, h_, pixelsPerMeter_);
+
 	// Render viewport needs to be fixed after resize or it will be
 	// messed up after window shrinking.
 	SDL_RenderSetViewport(renderer_, &rect);
 }
 
-// b2Vec2 Screen::toScreenCoordinates(const b2Vec2 &coord) const
-// {
-// 	b2Vec2 copy(coord);
-// 	toScreenCoordinates(copy.x, copy.y);
-// 	return copy;
-// }
-
-SDL_Rect Screen::toScreenCoordinates(const SDL_Rect &rect) const
+b2Vec2 Screen::toPixels(const b2Vec2 &coord, bool center) const
 {
-	SDL_Rect copy(rect);
-	toScreenCoordinates(copy.x, copy.y);
-	toScreenCoordinates(copy.w, copy.h);
+	b2Vec2 copy(coord);
+	copy *= pixelsPerMeter_;
+	if (center)
+	{
+		copy.x += w_ / 2;
+		copy.y += h_ / 2;
+	}
+	return copy;
+}
 
-	// Move to window coordinate system. = 0,0 window topleft.
-	// For drawing we need topleft coordinate instead of obj center coordinates.
-	copy.x += w_ / 2 - copy.w / 2;
-	copy.y += h_ / 2 - copy.h / 2;
+b2Vec2 Screen::toMeters(const b2Vec2 &coord) const
+{
+	b2Vec2 copy(coord.x / pixelsPerMeter_, coord.y / pixelsPerMeter_);
 	return copy;
 }
