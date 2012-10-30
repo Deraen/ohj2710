@@ -9,47 +9,30 @@
 #define ASTEROID_H_
 
 #include "Box2D/Box2D.h"
-
 #include "Object.hpp"
+#include "interfaces/Drawable.hpp"
 
-class Asteroid: public Object
+class Asteroid: public Object, public Drawable
 {
 public:
-	Asteroid();
+	Asteroid(b2Body* planet);
 	virtual ~Asteroid();
-
-	void initialize(const unsigned int planet);
-
-	void reset_inner();
 
 	// Own functions
 	/*
-	 * Fuu.
+	 * XXX: Fuu.
 	 */
 	void move();
 
+	inline b2Body* getBody() const { return body_; }
+
+	// --- Drawable ---
+	inline Sprite* sprite() const { return sprite_; }
+	inline b2Vec2 dimensions() const { return b2Vec2(0.2, 0.2); }
+
 private:
-	/*
-	 * Asteroid doesn't own planet.
-	 */
-	unsigned int planet_;
-
-	/*
-	 * Asteroid owns hitbox.
-	 */
-	unsigned int hitbox_;
-
-	/*
-	 * Asteroid has drawable.
-	 */
-	unsigned int drawable_;
-
-	/*
-	 * Velocity.
-	 */
-	b2Vec2 vel_;
-
-	b2Vec2 pos_;
+	Sprite* sprite_;
+	b2Body* body_;
 };
 
 #endif /* ASTEROID_H_ */

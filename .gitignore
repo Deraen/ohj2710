@@ -29,8 +29,11 @@ bin/
 gen/
 obj/
 libs/
+jni/src/Assets.cpp
 
 # Local configuration file (sdk path, etc)
 local.properties
 
 
+.cache
+debug

@@ -8,81 +8,108 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "Asteroid.hpp"
-#include "managers/DrawableManager.hpp"
-#include "managers/PlanetManager.hpp"
+#include "objects/Asteroid.hpp"
+#include "Game.hpp"
+#include "objects/Planet.hpp"
+#include "Assets.hpp"
 
-Asteroid::Asteroid() {
-	// TODO Auto-generated constructor stub
-
-}
-
-Asteroid::~Asteroid() {
-	// TODO Auto-generated destructor stub
-}
-
-void Asteroid::reset_inner()
+Asteroid::Asteroid(b2Body* planet):
+	Object(),
+	Drawable()
 {
-
-}
-
-void Asteroid::initialize(const unsigned int planet)
-{
-	planet_ = planet;
+	sprite_ = Assets::instance().getSprite("asteroid");
 
 	// Random number between 0 and 2*PI
 	float pos = (rand() % 2000) * M_PI / 1000.0;
 
-	// Init pos
-	pos_.x = 200 * std::cos(pos);
-	pos_.y = 200 * std::sin(pos);
+	// Init Box2D
+	b2BodyDef temp;
+	temp.userData = this;
+	temp.position = planet->GetPosition() + b2Vec2(5.0f * std::cos(pos), 5.0f * std::sin(pos));
+	temp.type = b2_dynamicBody;
+	body_ = Game::instance().world()->CreateBody(&temp);
 
-	drawable_ = DrawableManager::instance().newObject();
-	DrawableManager::instance().withObject(drawable_, [this](Drawable* obj)
-	{
-		obj->initialize(pos_, b2Vec2(10, 10));
-	});
+	b2PolygonShape dynamicBox;
+	dynamicBox.SetAsBox(0.2, 0.2);
 
-	// Init speed
-	// Distance from planet to asteroid
-	b2Vec2 ppos;
-	PlanetManager::instance().withObject(planet_, [&](Planet* obj)
-	{
-		ppos = obj->getPos();
-	});
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &dynamicBox;
+	fixtureDef.density = 1.0f;
+	fixtureDef.friction = 1.0f;
+	fixtureDef.restitution = 0.1f;
 
-	b2Vec2 vec = ppos - pos_;
-	float len = vec.Length();
-	vel_ = b2Vec2(-vec.y / len, vec.x / len);
+	body_->CreateFixture(&fixtureDef);
+	body_->ApplyForce(b2Vec2(4.0f, 0.0f), body_->GetWorldCenter());
+	SDL_Log("Asteroid created (%f, %f)", body_->GetPosition().x, body_->GetPosition().y);
+}
 
-	// Random...
-	vel_ *= 2.58;
+Asteroid::~Asteroid()
+{
 }
 
 void Asteroid::move()
 {
-	// Etäisyys planeettaan
-	b2Vec2 ppos;
-	PlanetManager::instance().withObject(planet_, [&](Planet* obj)
+	b2Vec2 asteroidPos = body_->GetPosition();
+	float asteroidDistance = asteroidPos.LengthSquared();
+
+	if (asteroidDistance < 10 * Planet::RADIUS * Planet::RADIUS)
 	{
-		ppos = obj->getPos();
-	});
+		b2Vec2 superForce(0.0f, 0.0f);
+		asteroidPos *= -1.0f;
+		float vecSum = abs(asteroidPos.x) + abs(asteroidPos.y);
+		asteroidPos *= (1.0 / vecSum) * (4.0f / asteroidDistance);
 
-	b2Vec2 vec = ppos - pos_;
-	float len = vec.LengthSquared();
+		b2Vec2 F(asteroidPos);
+		F *= 0.5;
+		superForce += F;
 
-	const float gravity = 6.67e-11;
-	const float mass_planet = 100000000;
-	const float mass_asteroid = 1000;
+		/*for(int i = 1; i <= asteroidDistance; ++i)
+		{
+			float speedD = body_->GetLinearVelocity().Length();
+			b2Vec2 extraForce((asteroidPos.x * speedD)/ pow(float(i), 2.0f),
+					(asteroidPos.y * speedD)/ (float(i), 2.0f));
+			superForce += extraForce;
 
-	float32 force = (gravity * mass_planet * mass_asteroid) / len;
-	vec *= force;
-	vel_ += vec;
+			float mm = SCALE(speedD, 0.0f, 45.0f, 2.0f, 3.0f);
+			float dampValue = (0.0314f * speedD) / mm;
+			//body_->SetLinearDamping(dampValue);
+		}
 
-	pos_ += vel_;
+		if (velocity_.Length() > body_->GetLinearVelocity().Length())
+		{
+			float verschil2 = velocity_.Length() - body_->GetLinearVelocity().Length();
 
-	DrawableManager::instance().withObject(drawable_, [this](Drawable* obj)
-	{
-		obj->updatePos(pos_);
-	});
+			float forceMultiplier = body_->GetLinearVelocity().Length() * (verschil2 * 2.0f);
+			b2Vec2 newF = forceMultiplier * F;
+
+			float diffDistance = pos_.Length() - asteroidDistance;
+
+			if (diffDistance > 0.0f)
+			{
+				superForce += newF;
+			}
+
+			float speedD = body_->GetLinearVelocity().Length();
+			float mm2 = SCALE(speedD, 0.0f, 45.0f, 2.0f, 3.0f);
+
+			float dampValue2 = (0.0314f * speedD) / mm2;
+			//body_->SetLinearDamping(dampValue2 * 2.0f);
+		}*/
+
+		//SDL_Log("(%f, %f)", superForce.x, superForce.y);
+
+		//superForce *= 1000.0f;
+		body_->ApplyForce(superForce, body_->GetWorldCenter());
+	}
+
+	/*b2Vec2 verschil = velocity_ - body_->GetLinearVelocity();
+
+	double forceMultiplier = body_->GetLinearVelocity().Length() * (verschil * 2.0);
+	b2Vec2 newForce()
+	pos_ = body_->GetPosition();*/
+	//SDL_Log("(%f, %f)", pos_.x, pos_.y);
+	//body_->ApplyForce(b2Vec2(4,2), body_->GetWorldCenter());
+	//body_->SetLinearDamping(10.0f);
+	//pos_= body_->GetPosition();
+	// SDL_Log("Asteroid moved (%f, %f)", body_->GetPosition().x, body_->GetPosition().y);
 }

@@ -7,35 +7,51 @@
 
 #include "SDL_log.h"
 
-#include "Planet.hpp"
-#include "managers/DrawableManager.hpp"
+#include "objects/Planet.hpp"
+#include "Game.hpp"
+#include "objects/Asteroid.hpp"
+#include "Assets.hpp"
+#include "objects/Bomb.hpp"
 
-Planet::Planet()
+const float Planet::RADIUS = 2.0;
+
+Planet::Planet():
+	Object(),
+	Drawable(),
+	Touchable()
 {
-	// TODO Auto-generated constructor stub
+	sprite_ = Assets::instance().getSprite("earth");
 
+	b2BodyDef temp;
+	temp.userData = this;
+	temp.position = b2Vec2(0.0, 0.0);
+	temp.type = b2_staticBody;
+	body_ = Game::instance().world()->CreateBody(&temp);
+
+	b2CircleShape circle;
+
+	circle.m_radius = RADIUS;
+
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &circle;
+	fixtureDef.density = 1.0f;
+	fixtureDef.friction = 1.0f;
+	fixtureDef.restitution = 0.1f;
+
+	body_->CreateFixture(&fixtureDef);
+
+	for (unsigned int i = 0; i < 8; ++i)
+	{
+		new Asteroid(body_);
+	}
 }
 
 Planet::~Planet()
 {
-	// TODO Auto-generated destructor stub
 }
 
-
-void Planet::initialize(const unsigned int player)
+void Planet::touched(const b2Vec2 &touchPosition)
 {
-	player_ = player;
-
-	drawable_ = DrawableManager::instance().newObject();
-	DrawableManager::instance().withObject(drawable_, [](Drawable* obj)
-	{
-		obj->initialize(b2Vec2(0, 0), b2Vec2(80, 80));
-	});
-
-	pos_.x = 0.0;
-	pos_.y = 0.0;
-}
-
-void Planet::reset_inner() {
-	DrawableManager::instance().releaseObject(drawable_);
+	SDL_Log("Planet has been touched!");
+	new Bomb(body_);
 }

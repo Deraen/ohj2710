@@ -11,40 +11,27 @@
 #include "Box2D/Box2D.h"
 
 #include "Object.hpp"
+#include "interfaces/Drawable.hpp"
+#include "interfaces/Touchable.hpp"
 
-class Planet: public Object
+/*
+ * A planet is a player.
+ */
+class Planet: public Object, public Drawable, public Touchable
 {
 public:
 	Planet();
 	virtual ~Planet();
 
-	void initialize(const unsigned int player);
+	inline Sprite* sprite() const { return sprite_; }
+	inline b2Vec2 dimensions() const { return b2Vec2(2 * RADIUS, 2 * RADIUS); }
+	void touched(const b2Vec2& touchPosition);
 
-	void reset_inner();
-
-	// Own functions
-	b2Vec2 getPos() const
-	{
-		return pos_;
-	}
+	static const float RADIUS;
 
 private:
-	/*
-	 * Planet doesn't own player.
-	 */
-	unsigned int player_;
-
-	/*
-	 * Planet owns hitbox.
-	 */
-	unsigned int hitbox_;
-
-	/*
-	 * Planet owns drawable.
-	 */
-	unsigned int drawable_;
-
-	b2Vec2 pos_;
+	Sprite* sprite_;
+	b2Body* body_;
 };
 
 #endif /* PLANET_H_ */

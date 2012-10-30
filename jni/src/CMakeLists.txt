@@ -2,18 +2,23 @@ include_directories(${SDL2_INCLUDE_DIR})
 include_directories(${BOX2D_INCLUDE})
 include_directories(.)
 
+add_custom_target(build-assets
+	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/build-assets.py"
+	COMMENT "Generating Assets.cpp/hpp"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+	)
+
 SET(CMAKE_CXX_FLAGS "-std=c++0x")
 
 set(SOURCES
 	main.cpp
-	Object.cpp
-	managers/DrawableManager.cpp
+	Game.cpp
+	Screen.cpp
+	Assets.cpp
 	objects/Asteroid.cpp
 	objects/Bomb.cpp
-	objects/Hitbox.cpp
 	objects/Planet.cpp
-	objects/Player.cpp
-	objects/Drawable.cpp
+	objects/Sprite.cpp
 	)
 
 add_executable(
@@ -28,3 +33,5 @@ target_link_libraries (
 	${SDL2_LIBRARY}
 	Box2D
 )
+
+add_dependencies(peli build-assets)
