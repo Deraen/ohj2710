@@ -85,7 +85,6 @@ void Screen::processInput()
 		 || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_AC_BACK)
 			)
 		{
-			SDL_Log("%i", event.tbutton.button);
 			Game::instance().stop();
 		}
 		else if (event.type == SDL_WINDOWEVENT)
