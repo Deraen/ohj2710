@@ -23,6 +23,7 @@ Bomb::Bomb(b2Body* planet):
 	temp.userData = this;
 	temp.position = planet->GetPosition() + b2Vec2(Planet::RADIUS * std::cos(pos), Planet::RADIUS * std::sin(pos));
 	temp.type = b2_dynamicBody;
+	temp.angle = pos + (M_PI / 2);
 	body_ = Game::instance().world()->CreateBody(&temp);
 
 	b2PolygonShape dynamicBox;

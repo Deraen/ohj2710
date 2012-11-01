@@ -59,7 +59,7 @@ void Sprite::draw(b2Body* body) const
 	Drawable* drawable = (Drawable*)body->GetUserData();
 	b2Vec2 dim = Screen::instance().toPixels(drawable->dimensions());
 	b2Vec2 pos = Screen::instance().toPixels(body->GetPosition(), true);
-	// body->GetAngle()
+	double angle = 180.0 / M_PI * body->GetAngle();
 
 	SDL_Rect dst;
 	dst.w = dim.x;
@@ -69,6 +69,7 @@ void Sprite::draw(b2Body* body) const
 
 	SDL_Renderer* renderer = Screen::instance().renderer();
 
-	// NULL = Entire texture
-	SDL_RenderCopy(renderer, texture_, NULL, &dst);
+	// 3th: NULL = Entire texture
+	// 6th: NULL = rotate around center
+	SDL_RenderCopyEx(renderer, texture_, NULL, &dst, angle, NULL, SDL_FLIP_NONE);
 }
