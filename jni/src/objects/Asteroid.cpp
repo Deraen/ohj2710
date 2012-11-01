@@ -17,7 +17,7 @@ Asteroid::Asteroid(b2Body* planet):
 	Object(),
 	Drawable()
 {
-	sprite_ = Assets::instance().getSprite("asteroid");
+	sprite_ = Object::sprite("asteroid");
 
 	// Random number between 0 and 2*PI
 	float pos = (rand() % 2000) * M_PI / 1000.0;
@@ -29,17 +29,10 @@ Asteroid::Asteroid(b2Body* planet):
 	temp.type = b2_dynamicBody;
 	body_ = Game::instance().world()->CreateBody(&temp);
 
-	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox(0.2, 0.2);
+	b2FixtureDef def = Object::fixtureDef("asteroid");
 
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &dynamicBox;
-	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 1.0f;
-	fixtureDef.restitution = 0.1f;
-
-	body_->CreateFixture(&fixtureDef);
-	body_->ApplyForce(b2Vec2(4.0f, 0.0f), body_->GetWorldCenter());
+	body_->CreateFixture(&def);
+	body_->ApplyForce(b2Vec2(1.5f, 0.0f), body_->GetWorldCenter());
 	SDL_Log("Asteroid created (%f, %f)", body_->GetPosition().x, body_->GetPosition().y);
 }
 

@@ -1,9 +1,10 @@
 {
-	"name": "Asteroid",
+	"class": "Asteroid",
 	"id": "asteroid",
 	"sprite": "asteroid.png",
-	"boundingbox": {
-		"type": "polygon",
-		"points": [[0, 0], [1, 1], [0, 1]]
+	"size": [0.2, 0.2],
+	"shape": {
+		"type": "b2PolygonShape",
+		"points": [[-8, -8], [8, 0], [-8, 8]]
 	}
 }

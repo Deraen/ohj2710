@@ -15,6 +15,7 @@ set(SOURCES
 	Game.cpp
 	Screen.cpp
 	Assets.cpp
+	Object.cpp
 	objects/Asteroid.cpp
 	objects/Bomb.cpp
 	objects/Planet.cpp

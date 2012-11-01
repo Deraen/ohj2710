@@ -20,7 +20,8 @@ LOCAL_SRC_FILES := \
 	objects/Bomb.cpp \
 	Game.cpp \
 	Screen.cpp \
-	Assets.cpp
+	Assets.cpp \
+	Object.cpp
 
 LOCAL_SHARED_LIBRARIES := SDL2 Box2D
 

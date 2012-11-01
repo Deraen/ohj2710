@@ -1,0 +1,10 @@
+{
+	"class": "Bomb",
+	"id": "normal",
+	"sprite": "normal.png",
+	"size": [0.2, 0.2],
+	"shape": {
+		"type": "b2PolygonShape",
+		"points": [[-8, -8], [0, -8], [8, 0], [0, 8], [-8, 8]]
+	}
+}

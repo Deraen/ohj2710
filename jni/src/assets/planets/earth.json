@@ -1,9 +1,10 @@
 {
-	"name": "Earth",
+	"class": "Planet",
 	"id": "earth",
 	"sprite": "earth.png",
-	"boundingbox": {
-		"type": "circle",
+	"size": [4.0, 4.0],
+	"shape": {
+		"type": "b2CircleShape",
 		"r": 32
 	}
 }

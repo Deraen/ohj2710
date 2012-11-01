@@ -25,7 +25,7 @@ void Screen::init()
 	 * is used instead.
 	 * Windows are never resizable on Android.
 	 */
-	window_ = SDL_CreateWindow("My SDL 1.3 Test",
+	window_ = SDL_CreateWindow("PELI",
 	                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 	                           1280, 900, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
@@ -133,9 +133,9 @@ void Screen::processInput()
 		}
 		else
 		{
-			SDL_Log("%i", event.type);
+			// SDL_Log("%i", event.type);
 			if (event.type == SDL_KEYDOWN) {
-				SDL_Log("key %s", SDL_GetScancodeName(event.key.keysym.scancode));
+				// SDL_Log("key %s", SDL_GetScancodeName(event.key.keysym.scancode));
 			}
 		}
 	}

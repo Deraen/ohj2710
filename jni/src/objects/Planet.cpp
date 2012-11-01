@@ -20,7 +20,7 @@ Planet::Planet():
 	Drawable(),
 	Touchable()
 {
-	sprite_ = Assets::instance().getSprite("earth");
+	sprite_ = Object::sprite("earth");
 
 	b2BodyDef temp;
 	temp.userData = this;
@@ -28,17 +28,9 @@ Planet::Planet():
 	temp.type = b2_staticBody;
 	body_ = Game::instance().world()->CreateBody(&temp);
 
-	b2CircleShape circle;
+	b2FixtureDef def = Object::fixtureDef("earth");
 
-	circle.m_radius = RADIUS;
-
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &circle;
-	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 1.0f;
-	fixtureDef.restitution = 0.1f;
-
-	body_->CreateFixture(&fixtureDef);
+	body_->CreateFixture(&def);
 
 	for (unsigned int i = 0; i < 8; ++i)
 	{

@@ -15,7 +15,7 @@ Bomb::Bomb(b2Body* planet):
 	Object(),
 	Drawable()
 {
-	sprite_ = Assets::instance().getSprite("bomb");
+	sprite_ = Object::sprite("normal");
 
 	float pos = (rand() % 2000) * M_PI / 1000.0;
 
@@ -26,16 +26,9 @@ Bomb::Bomb(b2Body* planet):
 	temp.angle = pos + (M_PI / 2);
 	body_ = Game::instance().world()->CreateBody(&temp);
 
-	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox(0.2, 0.2);
+	b2FixtureDef def = Object::fixtureDef("normal");
 
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &dynamicBox;
-	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 1.0f;
-	fixtureDef.restitution = 0.1f;
-
-	body_->CreateFixture(&fixtureDef);
+	body_->CreateFixture(&def);
 
 	body_->ApplyForce(b2Vec2(4.0 * std::cos(pos), 4.0 * std::sin(pos)), body_->GetWorldCenter());
 	SDL_Log("Bomb created (%f, %f)", body_->GetPosition().x, body_->GetPosition().y);
