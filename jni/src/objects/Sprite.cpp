@@ -17,17 +17,9 @@ namespace
 	}
 }
 
-Sprite::Sprite():
+Sprite::Sprite(int x, int y, unsigned char* data):
 	surface_(NULL),
 	texture_(NULL)
-{
-}
-
-Sprite::~Sprite()
-{
-}
-
-void Sprite::initialize(int x, int y, unsigned char* data)
 {
 	Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -44,7 +36,6 @@ void Sprite::initialize(int x, int y, unsigned char* data)
 
 	src_.x = 0;
 	src_.y = 0;
-	// XXX: Dimensions of source image
 	src_.w = x;
 	src_.h = y;
 
@@ -52,6 +43,10 @@ void Sprite::initialize(int x, int y, unsigned char* data)
 	surface_ = SDL_CreateRGBSurfaceFrom(data, src_.w, src_.h, 32, src_.w * 4, rmask, gmask, bmask, amask);
 
 	texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface_);
+}
+
+Sprite::~Sprite()
+{
 }
 
 void Sprite::draw(b2Body* body) const

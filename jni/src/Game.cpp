@@ -12,12 +12,13 @@
 #include "Screen.hpp"
 
 Game::Game():
-	world_(b2Vec2(0.0f,0.0f)),
+	world_(b2Vec2(0.0, 0.0)),
 	running_(true)
 {
 }
 
-Game::~Game() {
+Game::~Game()
+{
 }
 
 void Game::init()
@@ -30,7 +31,7 @@ void Game::loop()
 	while(running_)
 	{
 		Screen::instance().draw();
-		Game::instance().Step();
+		Step();
 
 		Screen::instance().processInput();
 
@@ -41,13 +42,15 @@ void Game::loop()
 
 void Game::Step()
 {
-	world_.Step(1.0f/30.0f, 10, 10);
+	world_.Step(1.0 / 30.0, 10, 10);
 	world_.ClearForces();
 
 	b2Body* body = world_.GetBodyList();
-	while (body != NULL) {
+	while (body != NULL)
+	{
 		Asteroid* obj = dynamic_cast<Asteroid*>((Object*)body->GetUserData());
-		if (obj != NULL) {
+		if (obj != NULL)
+		{
 			obj->move();
 		}
 

@@ -11,6 +11,7 @@
 #include "Box2D/Box2D.h"
 #include "Object.hpp"
 #include "interfaces/Drawable.hpp"
+#include "Assets.hpp"
 
 class Asteroid: public Object, public Drawable
 {
@@ -27,11 +28,11 @@ public:
 	inline b2Body* getBody() const { return body_; }
 
 	// --- Drawable ---
-	inline Sprite* sprite() const { return sprite_; }
-	inline b2Vec2 dimensions() const { return b2Vec2(0.2, 0.2); }
+	inline Sprite* sprite() const { return type_.sprite; }
+	inline b2Vec2 dimensions() const { return type_.meters; }
 
 private:
-	Sprite* sprite_;
+	Assets::Type type_;
 	b2Body* body_;
 };
 

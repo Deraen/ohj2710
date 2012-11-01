@@ -24,17 +24,6 @@ public:
 	virtual Sprite* sprite() const = 0;
 
 	/*
-	 * In what angle should the texture be drawn.
-	 */
-	// virtual float angle() const = 0;
-
-	/*
-	 * Position of object.
-	 * XXX: On what coordinate system?
-	 */
-	// virtual b2Vec2 pos() const = 0;
-
-	/*
 	 * Dimension of sprite on screen.
 	 */
 	virtual b2Vec2 dimensions() const = 0;

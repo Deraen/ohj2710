@@ -20,7 +20,7 @@ Planet::Planet():
 	Drawable(),
 	Touchable()
 {
-	sprite_ = Object::sprite("earth");
+	type_ = Assets::instance().info("Planet", "EARTH");
 
 	b2BodyDef temp;
 	temp.userData = this;
@@ -28,9 +28,7 @@ Planet::Planet():
 	temp.type = b2_staticBody;
 	body_ = Game::instance().world()->CreateBody(&temp);
 
-	b2FixtureDef def = Object::fixtureDef("earth");
-
-	body_->CreateFixture(&def);
+	body_->CreateFixture(type_.def);
 
 	for (unsigned int i = 0; i < 8; ++i)
 	{

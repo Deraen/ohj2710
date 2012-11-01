@@ -15,7 +15,15 @@ Bomb::Bomb(b2Body* planet):
 	Object(),
 	Drawable()
 {
-	sprite_ = Object::sprite("normal");
+	int a = rand() % 2;
+	if (a == 0)
+	{
+		type_ = Assets::instance().info("Bomb", "NORMAL");
+	}
+	else
+	{
+		type_ = Assets::instance().info("Bomb", "SPLASH");
+	}
 
 	float pos = (rand() % 2000) * M_PI / 1000.0;
 
@@ -23,14 +31,13 @@ Bomb::Bomb(b2Body* planet):
 	temp.userData = this;
 	temp.position = planet->GetPosition() + b2Vec2(Planet::RADIUS * std::cos(pos), Planet::RADIUS * std::sin(pos));
 	temp.type = b2_dynamicBody;
-	temp.angle = pos + (M_PI / 2);
+	temp.angle = pos;
 	body_ = Game::instance().world()->CreateBody(&temp);
 
-	b2FixtureDef def = Object::fixtureDef("normal");
-
-	body_->CreateFixture(&def);
+	body_->CreateFixture(type_.def);
 
 	body_->ApplyForce(b2Vec2(4.0 * std::cos(pos), 4.0 * std::sin(pos)), body_->GetWorldCenter());
+	body_->SetBullet(true);
 	SDL_Log("Bomb created (%f, %f)", body_->GetPosition().x, body_->GetPosition().y);
 }
 

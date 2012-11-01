@@ -1,3 +1,4 @@
+
 /*
  * Planet.h
  *
@@ -13,6 +14,7 @@
 #include "Object.hpp"
 #include "interfaces/Drawable.hpp"
 #include "interfaces/Touchable.hpp"
+#include "Assets.hpp"
 
 /*
  * A planet is a player.
@@ -23,15 +25,16 @@ public:
 	Planet();
 	virtual ~Planet();
 
-	inline Sprite* sprite() const { return sprite_; }
-	inline b2Vec2 dimensions() const { return b2Vec2(2 * RADIUS, 2 * RADIUS); }
+	inline Sprite* sprite() const { return type_.sprite; }
+	inline b2Vec2 dimensions() const { return type_.meters; }
+
 	void touched(const b2Vec2& touchPosition);
 
 	static const float RADIUS;
 
 private:
-	Sprite* sprite_;
 	b2Body* body_;
+	Assets::Type type_;
 };
 
 #endif /* PLANET_H_ */

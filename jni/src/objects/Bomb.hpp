@@ -1,3 +1,4 @@
+
 /*
  * Bomb.h
  *
@@ -11,6 +12,7 @@
 #include "Box2D/Box2D.h"
 #include "Object.hpp"
 #include "interfaces/Drawable.hpp"
+#include "Assets.hpp"
 
 class Sprite;
 
@@ -26,17 +28,12 @@ public:
 	Bomb(b2Body* planet);
 	virtual ~Bomb();
 
-	inline Sprite* sprite() const { return sprite_; }
-	inline b2Vec2 dimensions() const { return b2Vec2(0.2, 0.2); }
+	inline Sprite* sprite() const { return type_.sprite; }
+	inline b2Vec2 dimensions() const { return type_.meters; }
 
 private:
 	b2Body* body_;
-	Sprite* sprite_;
-
-	/*
-	 *
-	 */
-	BombType type_;
+	Assets::Type type_;
 };
 
 #endif /* BOMB_H_ */

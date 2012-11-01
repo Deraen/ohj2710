@@ -11,10 +11,8 @@
 class Sprite
 {
 public:
-	Sprite();
+	Sprite(int x, int y, unsigned char* data);
 	virtual ~Sprite();
-
-	void initialize(int x, int y, unsigned char* data);
 
 	void draw(b2Body* body) const;
 

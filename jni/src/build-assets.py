@@ -5,86 +5,90 @@ from PIL import Image
 from os import path
 import json
 
-data = ""
-sprites = ""
-shapes = ""
-objects = ""
-includes = ""
+data = ''
+sprites = ''
+objects = ''
 
+includes = set(['objects/Sprite.hpp', 'Assets.hpp'])
 spriteFiles = set()
-classNames = set()
 
-for assetFile in glob("assets/*.json") + glob("assets/*/*.json"):
+
+def px2m(px, dimPx, dimM):
+    return (float(px) / dimPx) * dimM
+
+
+def name(file):
+    return file.replace('.', '').replace('/', '')
+
+objects += '    Type info;'
+for assetFile in glob('assets/*.json') + glob('assets/*/*.json'):
     with open(assetFile) as f:
         d = json.load(f)
-        spriteFile = path.join(path.dirname(assetFile), d["sprite"])
+        spriteFile = path.join(path.dirname(assetFile), d['sprite'])
         spriteFiles.add(spriteFile)
-        classNames.add(d["class"])
+
+        includes.add('objects/{class_}.hpp'.format(class_=d['class']))
 
         img = Image.open(spriteFile)
         w, h = img.size
 
-        shape = d["shape"]["type"]
-        shapeDataName = "{className}{id}Shape".format(className=d["class"], id=d["id"])
-        shape_data = "{type} {name};\n".format(type=shape, name=shapeDataName)
+        shapeVar = '{className}{id}Shape'.format(className=d['class'], id=d['type'])
+        fixtureVar = '{className}{id}Def'.format(className=d['class'], id=d['type'])
 
-        shape_data_init = ""
+        objects += '\n    // {class_}::{type}\n'.format(class_=d['class'], type=d['type'])
 
-        if shape == "b2CircleShape":
-            r = (float(d["shape"]["r"]) / w) * d["size"][0]
-            shape_data_init += "{name}.m_radius = {r};".format(name=shapeDataName, r=r)
-        elif shape == "b2PolygonShape":
-            shape_data += "b2Vec2 {name}Polygon[] = {{".format(name=shapeDataName)
-            for p in d["shape"]["points"]:
-                x = (float(p[0]) / w) * d["size"][0]
-                y = (float(p[1]) / h) * d["size"][1]
-                shape_data += "b2Vec2({x}, {y}), ".format(x=x, y=y)
-            shape_data += "};\n"
+        shape = d['shape']['type']
 
-            shape_data_init += "{name}.Set({name}Polygon, {size});".format(name=shapeDataName, size=len(d["shape"]["points"]))
+        if shape == 'b2CircleShape':
+            objects += '    {name}.m_radius = {r};\n'.format(name=shapeVar, r=px2m(d['shape']['pixels'], w, d['meters'][0]))
 
-        shapes += shape_data
+        elif shape == 'b2PolygonShape':
+            data += 'b2Vec2 {name}Polygon[] = {{'.format(name=shapeVar)
+            for p in d['shape']['pixels']:
+                data += 'b2Vec2({x}, {y}), '.format(x=px2m(p[0], w, d['meters'][0]), y=px2m(p[1], h, d['meters'][1]))
+            data += '};\n'
 
-        objects += """
-    // {className}
-    {shape_data_init}
-    {className}::addType("{id}", &{shapeDataName}, {spriteName}Ptr, b2Vec2({x}, {y}));
-""".format(className=d["class"], shape_data_init=shape_data_init, id=d["id"], shape=shape, spriteName=spriteFile.replace(".", "").replace("/", ""), shapeDataName=shapeDataName, x=0, y=0)
+            objects += '    {name}.Set({name}Polygon, {size});\n'.format(name=shapeVar, size=len(d['shape']['pixels']))
 
-for name in classNames:
-    includes += "#include \"objects/{name}.hpp\"\n".format(name=name)
+        data += '{type} {name};\n'.format(type=shape, name=shapeVar)
+        data += 'b2FixtureDef {name};\n'.format(name=fixtureVar)
+
+        objects += '    {name}.shape = &{shapeVar};\n'.format(name=fixtureVar, shapeVar=shapeVar)
+        objects += '    {name}.density = {val};\n'.format(name=fixtureVar, val=d['physics']['density'])
+        objects += '    {name}.friction = {val};\n'.format(name=fixtureVar, val=d['physics']['friction'])
+        objects += '    {name}.restitution = {val};\n'.format(name=fixtureVar, val=d['physics']['restitution'])
+        objects += '    info.def = &{fixture};\n'.format(fixture=fixtureVar)
+        objects += '    info.sprite = {sprite};\n'.format(sprite=name(spriteFile))
+        objects += '    info.meters = b2Vec2({x}, {y});\n'.format(x=d['meters'][0], y=d['meters'][1])
+        objects += '    types_[\"{class_}\"][\"{type}\"] = info;\n'.format(class_=d['class'], type=d['type'])
 
 for spriteFile in spriteFiles:
     img = Image.open(spriteFile)
     pix = img.load()
-    spriteId = spriteFile.replace(".", "").replace("/", "")
 
-    hex = ""
+    data += 'unsigned char {name}Data[] = {{'.format(name=name(spriteFile))
+
     for y in range(0, img.size[1]):
         for x in range(0, img.size[0]):
             p = pix[x, y]
-            hex += "0x%X, 0x%X, 0x%X, 0x%X, " % (p[0], p[1], p[2], p[3])
+            data += '0x%X, 0x%X, 0x%X, 0x%X, ' % (p[0], p[1], p[2], p[3])
             pass
 
-    data += "unsigned char {id}Data[] = {{{hex}}};\n".format(id=spriteId, hex=hex)
+    data += '};\n'
 
     x, y = img.size
-    sprites += """
-    // {spriteFile}
-    Sprite* {id}Ptr = new Sprite();
-    {id}Ptr->initialize({x}, {y}, {id}Data);
-""".format(spriteFile=spriteFile, id=spriteId, x=x, y=y)
+    sprites += '    // {file}\n'.format(file=spriteFile)
+    sprites += '    Sprite* {name} = new Sprite({x}, {y}, {name}Data);\n'.format(name=name(spriteFile), x=x, y=y)
 
 
-code = open("Assets.cpp", "w")
-code.write("""/* GENERATED BY build-assets.py */
-#include "objects/Sprite.hpp"
-#include "Assets.hpp"
-""")
-code.write(includes)
+code = open('Assets.cpp', 'w')
+code.write('/*\n * GENERATED BY build-assets.py\n */\n\n')
+
+for name in includes:
+    code.write('#include \"{name}\"\n'.format(name=name))
+
 code.write(data)
-code.write(shapes)
-code.write("""
+code.write('''
 
 Assets& Assets::instance()
 {
@@ -94,7 +98,7 @@ Assets& Assets::instance()
 
 void Assets::init()
 {
-""")
+''')
 code.write(sprites)
 code.write(objects)
-code.write("}\n")
+code.write('}\n')

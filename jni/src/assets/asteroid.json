@@ -1,10 +1,15 @@
 {
 	"class": "Asteroid",
-	"id": "asteroid",
+	"type": "NORMAL",
 	"sprite": "asteroid.png",
-	"size": [0.2, 0.2],
+	"meters": [0.2, 0.2],
 	"shape": {
 		"type": "b2PolygonShape",
-		"points": [[-8, -8], [8, 0], [-8, 8]]
+		"pixels": [[-8, -8], [8, 0], [-8, 8]]
+	},
+	"physics": {
+		"density": 1.0,
+		"friction": 1.0,
+		"restitution": 0.1
 	}
 }
