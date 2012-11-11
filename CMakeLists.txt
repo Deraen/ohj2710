@@ -10,6 +10,12 @@ if ( NOT SDL2_FOUND )
    message ( FATAL_ERROR "SDL2 not found!" )
 endif ( NOT SDL2_FOUND )
 
+Find_Package (SDL2GFX REQUIRED )
+
+if ( NOT SDL2GFX_FOUND )
+   message ( FATAL_ERROR "SDL2_gfx not found!" )
+endif ( NOT SDL2GFX_FOUND )
+
 set(BOX2D_VERSION 2.1.0)
 set(BOX2D_BUILD_STATIC ON)
 add_subdirectory(${CMAKE_SOURCE_DIR}/jni/Box2D/)

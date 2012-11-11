@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "SDL.h"
 #include "SDL_log.h"
 
@@ -8,6 +6,19 @@
 #include "interfaces/Drawable.hpp"
 #include "interfaces/Touchable.hpp"
 #include "objects/Sprite.hpp"
+#include "DebugDraw.hpp"
+
+Screen::Screen():
+	window_(NULL),
+	pixelsPerMeter_(0),
+	renderer_(NULL),
+	surface_(NULL),
+	w_(0),
+	h_(0),
+	debug_(true),
+	debugger_(NULL)
+{
+}
 
 void Screen::init()
 {
@@ -34,8 +45,12 @@ void Screen::init()
 
 	resized();
 
-	// Black base color.
-	SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+	debugger_ = new DebugDraw();
+	debugger_->SetFlags(b2Draw::e_shapeBit
+	                    | b2Draw::e_aabbBit
+	                    | b2Draw::e_jointBit
+	                    | b2Draw::e_centerOfMassBit);
+	Game::instance().world()->SetDebugDraw(debugger_);
 }
 
 void Screen::destroy()
@@ -47,6 +62,8 @@ void Screen::destroy()
 
 void Screen::draw()
 {
+	// Black base color.
+	SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
 	// Clear the entire screen to the Renderer's base colour.
 	SDL_RenderClear(renderer_);
 
@@ -58,6 +75,11 @@ void Screen::draw()
 		}
 
 		body = body->GetNext();
+	}
+
+	if (debug_)
+	{
+		Game::instance().world()->DrawDebugData();
 	}
 
 	// Flip the shown and hidden buffers to refresh the screen.

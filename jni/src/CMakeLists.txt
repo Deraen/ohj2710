@@ -18,6 +18,7 @@ set(SOURCES
 	Screen.cpp
 	Assets.cpp
 	Object.cpp
+	DebugDraw.cpp
 	objects/Asteroid.cpp
 	objects/Bomb.cpp
 	objects/Planet.cpp
@@ -34,6 +35,7 @@ add_executable(
 target_link_libraries (
 	peli
 	${SDL2_LIBRARY}
+	${SDL2GFX_LIBRARY}
 	Box2D
 )
 

@@ -8,12 +8,12 @@
 
 #include "Object.hpp"
 
+class DebugDraw;
+
 class Screen
 {
 public:
-	Screen()
-	{
-	}
+	Screen();
 
 	virtual ~Screen()
 	{
@@ -37,6 +37,8 @@ public:
 	inline SDL_Renderer* renderer() const { return renderer_; }
 
 	void resized();
+
+	unsigned int pixelsPerMeter() const { return pixelsPerMeter_; }
 
 	// Meters -> Pixels
 	b2Vec2 toPixels(const b2Vec2& coord, bool center = false) const;
@@ -70,6 +72,9 @@ private:
 
 	int w_;
 	int h_;
+
+	bool debug_;
+	DebugDraw* debugger_;
 };
 
 #endif /* SCREEN_HPP_ */

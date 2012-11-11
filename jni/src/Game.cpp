@@ -31,6 +31,7 @@ void Game::loop()
 	while(running_)
 	{
 		Screen::instance().draw();
+
 		Step();
 
 		Screen::instance().processInput();

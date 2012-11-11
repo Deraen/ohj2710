@@ -55,6 +55,7 @@ public class SDLActivity extends Activity {
     static {
         System.loadLibrary("gnustl_shared");
         System.loadLibrary("SDL2");
+        System.loadLibrary("SDL2GFX");
         System.loadLibrary("Box2D");
         //System.loadLibrary("SDL2_mixer");
         //System.loadLibrary("SDL2_ttf");
