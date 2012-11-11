@@ -16,7 +16,11 @@ public:
 	/*
 	 * Callback.
 	 */
-	virtual void touched(const b2Vec2& touchPosition) = 0;
+	virtual void TouchStart() = 0;
+
+	virtual void TouchMovement(const b2Vec2& p) = 0;
+
+	virtual void TouchEnd() = 0;
 private:
 };
 

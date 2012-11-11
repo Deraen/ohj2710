@@ -14,7 +14,7 @@ public:
 	Sprite(int x, int y, unsigned char* data);
 	virtual ~Sprite();
 
-	void draw(b2Body* body) const;
+	void Draw(b2Body* body, const b2Vec2& dimensions) const;
 
 private:
 	SDL_Surface* surface_;

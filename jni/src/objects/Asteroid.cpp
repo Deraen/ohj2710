@@ -30,29 +30,10 @@ Asteroid::Asteroid(b2Body* planet):
 	body_ = Game::instance().world()->CreateBody(&temp);
 
 	body_->CreateFixture(type_.def);
-	body_->ApplyForce(b2Vec2(1.5, 0.0), body_->GetWorldCenter());
-	SDL_Log("Asteroid created (%f, %f)", body_->GetPosition().x, body_->GetPosition().y);
+	body_->ApplyForce(b2Vec2(11, 0.0), body_->GetWorldCenter());
+	SDL_Log("Asteroid m=%f @(%f, %f)", body_->GetMass(), body_->GetPosition().x, body_->GetPosition().y);
 }
 
 Asteroid::~Asteroid()
 {
-}
-
-void Asteroid::move()
-{
-	b2Vec2 asteroidPos = body_->GetPosition();
-	float asteroidDistance = asteroidPos.LengthSquared();
-
-	if (asteroidDistance < 10 * Planet::RADIUS * Planet::RADIUS)
-	{
-		b2Vec2 superForce(0.0, 0.0);
-		asteroidPos *= -1.0;
-		float vecSum = abs(asteroidPos.x) + abs(asteroidPos.y);
-		asteroidPos *= (1.0 / vecSum) * (4.0 / asteroidDistance);
-
-		b2Vec2 F(asteroidPos);
-		F *= 0.5;
-		superForce += F;
-		body_->ApplyForce(superForce, body_->GetWorldCenter());
-	}
 }

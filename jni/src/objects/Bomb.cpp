@@ -11,7 +11,7 @@
 #include "interfaces/Drawable.hpp"
 #include "objects/Planet.hpp"
 
-Bomb::Bomb(b2Body* planet):
+Bomb::Bomb(b2Body* planet, float radians, float force):
 	Object(),
 	Drawable()
 {
@@ -25,18 +25,18 @@ Bomb::Bomb(b2Body* planet):
 		type_ = Assets::instance().info("Bomb", "SPLASH");
 	}
 
-	float pos = (rand() % 2000) * M_PI / 1000.0;
-
 	b2BodyDef temp;
 	temp.userData = this;
-	temp.position = planet->GetPosition() + b2Vec2(Planet::RADIUS * std::cos(pos), Planet::RADIUS * std::sin(pos));
+	// XXX: ask planet body for the radius
+	temp.position = planet->GetPosition() + b2Vec2(Planet::RADIUS * std::cos(radians), Planet::RADIUS * std::sin(radians));
 	temp.type = b2_dynamicBody;
-	temp.angle = pos;
+	temp.angle = radians;
 	body_ = Game::instance().world()->CreateBody(&temp);
 
 	body_->CreateFixture(type_.def);
 
-	body_->ApplyForce(b2Vec2(4.0 * std::cos(pos), 4.0 * std::sin(pos)), body_->GetWorldCenter());
+	force *= 10;
+	body_->ApplyForce(b2Vec2(force  * std::cos(radians), force * std::sin(radians)), body_->GetWorldCenter());
 	body_->SetBullet(true);
 	SDL_Log("Bomb created (%f, %f)", body_->GetPosition().x, body_->GetPosition().y);
 }

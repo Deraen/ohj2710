@@ -25,16 +25,21 @@ public:
 	Planet();
 	virtual ~Planet();
 
-	inline Sprite* sprite() const { return type_.sprite; }
-	inline b2Vec2 dimensions() const { return type_.meters; }
+	void Draw(b2Body* body) const;
+	inline Sprite* GetSprite() const { return type_.sprite; }
+	inline b2Vec2 GetDimensions() const { return type_.meters; }
 
-	void touched(const b2Vec2& touchPosition);
+	void TouchStart();
+	void TouchMovement(const b2Vec2& p);
+	void TouchEnd();
 
 	static const float RADIUS;
-
 private:
 	b2Body* body_;
 	Assets::Type type_;
+
+	bool touched_;
+	b2Vec2 touchPosition_;
 };
 
 #endif /* PLANET_H_ */

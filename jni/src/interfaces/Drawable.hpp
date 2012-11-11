@@ -5,8 +5,6 @@
 #ifndef DRAWABLE_HPP_
 #define DRAWABLE_HPP_
 
-#include <string>
-
 #include "SDL.h"
 #include "Box2D/Box2D.h"
 
@@ -18,15 +16,17 @@ public:
 	Drawable() {};
 	virtual ~Drawable() {};
 
+	virtual void Draw(b2Body* body) const;
+
 	/*
 	 * Returns name of the texture that shold represent this object.
 	 */
-	virtual Sprite* sprite() const = 0;
+	virtual Sprite* GetSprite() const = 0;
 
 	/*
 	 * Dimension of sprite on screen.
 	 */
-	virtual b2Vec2 dimensions() const = 0;
+	virtual b2Vec2 GetDimensions() const = 0;
 private:
 };
 

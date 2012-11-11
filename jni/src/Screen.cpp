@@ -10,13 +10,19 @@
 
 Screen::Screen():
 	window_(NULL),
-	pixelsPerMeter_(0),
 	renderer_(NULL),
 	surface_(NULL),
 	w_(0),
 	h_(0),
+	pixelsPerMeter_(0),
 	debug_(true),
-	debugger_(NULL)
+	debugger_(NULL),
+	touchPoint_(0, 0),
+	touchObject_(NULL)
+{
+}
+
+Screen::~Screen()
 {
 }
 
@@ -71,7 +77,7 @@ void Screen::draw()
 	while (body != NULL) {
 		Drawable* obj = dynamic_cast<Drawable*>((Object*)body->GetUserData());
 		if (obj != NULL) {
-			obj->sprite()->draw(body);
+			obj->Draw(body);
 		}
 
 		body = body->GetNext();
@@ -86,15 +92,45 @@ void Screen::draw()
 	SDL_RenderPresent(renderer_);
 }
 
-bool Screen::Hit::ReportFixture(b2Fixture *fixture)
+bool Screen::ReportFixture(b2Fixture *fixture)
 {
 	// SDL_Log("Fixture touched");
 	b2Body* body = fixture->GetBody();
 	Touchable* touchable = dynamic_cast<Touchable*>((Object*)body->GetUserData());
-	if (touchable != NULL && fixture->TestPoint(p_)) {
-		touchable->touched(p_);
+	if (touchable != NULL && fixture->TestPoint(touchPoint_)) {
+		touchObject_ = touchable;
 	}
 	return true;
+}
+
+b2Vec2 Screen::TouchPosition(const SDL_Event &event)
+{
+	b2Vec2 p;
+	if (event.type == SDL_MOUSEBUTTONDOWN
+	 || event.type == SDL_MOUSEMOTION
+	 || event.type == SDL_MOUSEBUTTONUP)
+	{
+		p.Set(event.button.x, event.button.y);
+	}
+	else if (event.type == SDL_FINGERDOWN
+	      || event.type == SDL_FINGERMOTION
+	      || event.type == SDL_FINGERUP)
+	{
+		p.Set(event.tfinger.x, event.tfinger.y);
+		SDL_Log("Touch point (%f, %f)", p.x, p.y);
+
+		// Quess: Touch points are represented with values from
+		// 0 to 32768
+		p.x = (p.x * w_) / 32768;
+		p.y = (p.y * h_) / 32768;
+	}
+
+	p.x -= w_ / 2;
+	p.y -= h_ / 2;
+
+	p = toMeters(p);
+
+	return p;
 }
 
 void Screen::processInput()
@@ -102,10 +138,8 @@ void Screen::processInput()
 	static SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
-		if (
-			(event.type == SDL_QUIT)
-		 || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_AC_BACK)
-			)
+		if (event.type == SDL_QUIT
+		 || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_AC_BACK))
 		{
 			Game::instance().stop();
 		}
@@ -113,51 +147,43 @@ void Screen::processInput()
 		{
 			if (event.window.event == SDL_WINDOWEVENT_RESIZED)
 			{
-				Screen::instance().resized();
+				resized();
 			}
 		}
-		else if (
-				(event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
-			 || (event.type == SDL_FINGERDOWN)
-				)
+		else if ((event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+			  || (event.type == SDL_FINGERDOWN))
 		{
-			b2Vec2 p;
+			touchPoint_ = TouchPosition(event);
 
-			if (event.type == SDL_MOUSEBUTTONDOWN)
-			{
-				p.Set(event.button.x, event.button.y);
-			}
-			else if (event.type == SDL_FINGERDOWN)
-			{
-				p.Set(event.tfinger.x, event.tfinger.y);
-				SDL_Log("Touch point (%f, %f)", p.x, p.y);
-
-				// Quess: Touch points are represented with values from
-				// 0 to 32768
-				p.x = (p.x * DEF_SCREEN_WIDTH) / 32768;
-				p.y = (p.y * DEF_SCREEN_HEIGHT) / 32768;
-			}
-
-			p.x -= w_ / 2;
-			p.y -= h_ / 2;
-
-			p = toMeters(p);
-
-			SDL_Log("Mouse/Touch down, (%f, %f)", p.x, p.y);
-
-			Hit hit;
-			hit.setPoint(p);
+			SDL_Log("Mouse/Touch down, (%f, %f)", touchPoint_.x, touchPoint_.y);
 
 			b2AABB aabb;
-			aabb.lowerBound = b2Vec2(p);
-			aabb.upperBound = b2Vec2(p);
-			Game::instance().world()->QueryAABB(&hit, aabb);
+			aabb.lowerBound = touchPoint_;
+			aabb.upperBound = touchPoint_;
+
+			// This will call ReportFixture.
+			Game::instance().world()->QueryAABB(this, aabb);
+
+			if (touchObject_ != NULL) {
+				touchObject_->TouchStart();
+				touchObject_->TouchMovement(touchPoint_);
+			}
 		}
-		else
+		else if (event.type == SDL_MOUSEMOTION
+			  || (event.type == SDL_FINGERMOTION))
 		{
-			// SDL_Log("%i", event.type);
-			if (event.type == SDL_KEYDOWN) {
-				// SDL_Log("key %s", SDL_GetScancodeName(event.key.keysym.scancode));
+			if (touchObject_ != NULL) {
+				touchObject_->TouchMovement(TouchPosition(event));
+			}
+		}
+		else if ((event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
+			  || (event.type == SDL_FINGERUP))
+		{
+			if (touchObject_ != NULL)
+			{
+				touchObject_->TouchMovement(TouchPosition(event));
+				touchObject_->TouchEnd();
+				touchObject_ = NULL;
 			}
 		}
 	}

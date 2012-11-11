@@ -8,7 +8,7 @@
 		"pixels": 32
 	},
 	"physics": {
-		"density": 1.0,
+		"density": 10.0,
 		"friction": 1.0,
 		"restitution": 0.1
 	}

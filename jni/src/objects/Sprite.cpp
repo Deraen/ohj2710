@@ -49,10 +49,9 @@ Sprite::~Sprite()
 {
 }
 
-void Sprite::draw(b2Body* body) const
+void Sprite::Draw(b2Body* body, const b2Vec2& dimensions) const
 {
-	Drawable* drawable = (Drawable*)body->GetUserData();
-	b2Vec2 dim = Screen::instance().toPixels(drawable->dimensions());
+	b2Vec2 dim = Screen::instance().toPixels(dimensions);
 	b2Vec2 pos = Screen::instance().toPixels(body->GetPosition(), true);
 	double angle = 180.0 / M_PI * body->GetAngle();
 

@@ -19,6 +19,7 @@ set(SOURCES
 	Assets.cpp
 	Object.cpp
 	DebugDraw.cpp
+	interfaces/Drawable.cpp
 	objects/Asteroid.cpp
 	objects/Bomb.cpp
 	objects/Planet.cpp

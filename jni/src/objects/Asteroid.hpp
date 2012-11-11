@@ -19,17 +19,11 @@ public:
 	Asteroid(b2Body* planet);
 	virtual ~Asteroid();
 
-	// Own functions
-	/*
-	 * XXX: Fuu.
-	 */
-	void move();
-
 	inline b2Body* getBody() const { return body_; }
 
 	// --- Drawable ---
-	inline Sprite* sprite() const { return type_.sprite; }
-	inline b2Vec2 dimensions() const { return type_.meters; }
+	inline Sprite* GetSprite() const { return type_.sprite; }
+	inline b2Vec2 GetDimensions() const { return type_.meters; }
 
 private:
 	Assets::Type type_;

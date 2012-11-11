@@ -25,11 +25,11 @@ public:
 		CHAINREACTION
 	};
 
-	Bomb(b2Body* planet);
+	Bomb(b2Body* planet, float radians, float force);
 	virtual ~Bomb();
 
-	inline Sprite* sprite() const { return type_.sprite; }
-	inline b2Vec2 dimensions() const { return type_.meters; }
+	inline Sprite* GetSprite() const { return type_.sprite; }
+	inline b2Vec2 GetDimensions() const { return type_.meters; }
 
 private:
 	b2Body* body_;

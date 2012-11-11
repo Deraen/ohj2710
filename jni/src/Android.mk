@@ -20,6 +20,7 @@ LOCAL_SRC_FILES := \
 	objects/Sprite.cpp \
 	objects/Asteroid.cpp \
 	objects/Bomb.cpp \
+	interfaces/Drawable.cpp \
 	Game.cpp \
 	DebugDraw.cpp \
 	Screen.cpp \

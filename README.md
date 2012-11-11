@@ -39,7 +39,7 @@ distribution doesn't recent enough packages).
 
 	mkdir debug
 	cd debug
-	cmake CMAKE_BUILD_TYPE=Debug ..
+	cmake -DCMAKE_BUILD_TYPE=Debug ..
 	make -j5
 	gdb ./jni/src/peli
 
