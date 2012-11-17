@@ -1,5 +1,6 @@
 include_directories(${SDL2_INCLUDE_DIR})
 include_directories(${BOX2D_INCLUDE})
+include_directories(${SDL2TTF_INCLUDE_DIR})
 include_directories(.)
 
 add_custom_target(build-assets
@@ -19,6 +20,7 @@ set(SOURCES
 	Assets.cpp
 	Object.cpp
 	DebugDraw.cpp
+	UI.cpp
 	interfaces/Drawable.cpp
 	objects/Asteroid.cpp
 	objects/Bomb.cpp
@@ -37,6 +39,7 @@ target_link_libraries (
 	peli
 	${SDL2_LIBRARY}
 	${SDL2GFX_LIBRARY}
+	${SDL2TTF_LIBRARY}
 	Box2D
 )
 

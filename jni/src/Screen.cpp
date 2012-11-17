@@ -1,5 +1,6 @@
 #include "SDL.h"
 #include "SDL_log.h"
+#include "SDL_ttf.h"
 
 #include "Screen.hpp"
 #include "Game.hpp"
@@ -7,18 +8,21 @@
 #include "interfaces/Touchable.hpp"
 #include "objects/Sprite.hpp"
 #include "DebugDraw.hpp"
+#include "UI.hpp"
 
 Screen::Screen():
 	window_(NULL),
 	renderer_(NULL),
 	surface_(NULL),
+	font_(NULL),
 	w_(0),
 	h_(0),
 	pixelsPerMeter_(0),
-	debug_(true),
+	debug_(false),
 	debugger_(NULL),
 	touchPoint_(0, 0),
-	touchObject_(NULL)
+	touchObject_(NULL),
+	ui_(NULL)
 {
 }
 
@@ -31,6 +35,12 @@ void Screen::init()
 	// Initialize SDL.
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) // | SDL_INIT_AUDIO
 	{
+		return;
+	}
+
+	if (TTF_Init() == -1)
+	{
+		printf("TTF_Init: %s\n", TTF_GetError());
 		return;
 	}
 
@@ -57,6 +67,8 @@ void Screen::init()
 	                    | b2Draw::e_jointBit
 	                    | b2Draw::e_centerOfMassBit);
 	Game::instance().world()->SetDebugDraw(debugger_);
+
+	ui_ = new UI();
 }
 
 void Screen::destroy()
@@ -83,6 +95,8 @@ void Screen::draw()
 		body = body->GetNext();
 	}
 
+	ui_->Draw();
+
 	if (debug_)
 	{
 		Game::instance().world()->DrawDebugData();
@@ -103,34 +117,38 @@ bool Screen::ReportFixture(b2Fixture *fixture)
 	return true;
 }
 
-b2Vec2 Screen::TouchPosition(const SDL_Event &event)
+std::pair<unsigned int, unsigned int> Screen::TouchPosition(const SDL_Event &event)
 {
-	b2Vec2 p;
+	std::pair<unsigned int, unsigned int> p;
 	if (event.type == SDL_MOUSEBUTTONDOWN
 	 || event.type == SDL_MOUSEMOTION
 	 || event.type == SDL_MOUSEBUTTONUP)
 	{
-		p.Set(event.button.x, event.button.y);
+		p.first = event.button.x;
+		p.second = event.button.y;
 	}
 	else if (event.type == SDL_FINGERDOWN
 	      || event.type == SDL_FINGERMOTION
 	      || event.type == SDL_FINGERUP)
 	{
-		p.Set(event.tfinger.x, event.tfinger.y);
-		SDL_Log("Touch point (%f, %f)", p.x, p.y);
-
 		// Quess: Touch points are represented with values from
 		// 0 to 32768
-		p.x = (p.x * w_) / 32768;
-		p.y = (p.y * h_) / 32768;
+		p.first = (event.tfinger.x * w_) / 32768;
+		p.second = (event.tfinger.y * h_) / 32768;
 	}
 
+	return p;
+}
+
+b2Vec2 Screen::TouchPositionMeters(const SDL_Event &event)
+{
+	auto p2 = TouchPosition(event);
+
+	b2Vec2 p(p2.first, p2.second);
 	p.x -= w_ / 2;
 	p.y -= h_ / 2;
 
-	p = toMeters(p);
-
-	return p;
+	return toMeters(p);
 }
 
 void Screen::processInput()
@@ -153,9 +171,7 @@ void Screen::processInput()
 		else if ((event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
 			  || (event.type == SDL_FINGERDOWN))
 		{
-			touchPoint_ = TouchPosition(event);
-
-			SDL_Log("Mouse/Touch down, (%f, %f)", touchPoint_.x, touchPoint_.y);
+			touchPoint_ = TouchPositionMeters(event);
 
 			b2AABB aabb;
 			aabb.lowerBound = touchPoint_;
@@ -168,12 +184,16 @@ void Screen::processInput()
 				touchObject_->TouchStart();
 				touchObject_->TouchMovement(touchPoint_);
 			}
+			else
+			{
+				ui_->Touch(TouchPosition(event));
+			}
 		}
 		else if (event.type == SDL_MOUSEMOTION
 			  || (event.type == SDL_FINGERMOTION))
 		{
 			if (touchObject_ != NULL) {
-				touchObject_->TouchMovement(TouchPosition(event));
+				touchObject_->TouchMovement(TouchPositionMeters(event));
 			}
 		}
 		else if ((event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
@@ -181,9 +201,13 @@ void Screen::processInput()
 		{
 			if (touchObject_ != NULL)
 			{
-				touchObject_->TouchMovement(TouchPosition(event));
+				touchObject_->TouchMovement(TouchPositionMeters(event));
 				touchObject_->TouchEnd();
 				touchObject_ = NULL;
+			}
+			else
+			{
+				ui_->TouchEnd();
 			}
 		}
 	}
@@ -208,6 +232,15 @@ void Screen::resized()
 	// Render viewport needs to be fixed after resize or it will be
 	// messed up after window shrinking.
 	SDL_RenderSetViewport(renderer_, &rect);
+
+	unsigned int size = h_ / 10;
+
+	font_ = TTF_OpenFont("DroidSans.ttf", size);
+	if (!font_)
+	{
+		printf("TTF_OpenFont: %s\n", TTF_GetError());
+		return;
+	}
 }
 
 b2Vec2 Screen::toPixels(const b2Vec2 &coord, bool center) const
