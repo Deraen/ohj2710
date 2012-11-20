@@ -13,6 +13,8 @@
 #include "objects/Planet.hpp"
 #include "Assets.hpp"
 
+unsigned int Asteroid::count_ = 0;
+
 Asteroid::Asteroid(b2Body* planet):
 	Object(),
 	Drawable()
@@ -24,16 +26,21 @@ Asteroid::Asteroid(b2Body* planet):
 
 	// Init Box2D
 	b2BodyDef temp;
-	temp.userData = this;
 	temp.position = planet->GetPosition() + b2Vec2(5.0 * std::cos(pos), 5.0 * std::sin(pos));
 	temp.type = b2_dynamicBody;
-	body_ = Game::instance().world()->CreateBody(&temp);
+	CreateBody(temp, type_.def);
 
-	body_->CreateFixture(type_.def);
-	body_->ApplyForce(b2Vec2(11, 0.0), body_->GetWorldCenter());
-	SDL_Log("Asteroid m=%f @(%f, %f)", body_->GetMass(), body_->GetPosition().x, body_->GetPosition().y);
+	// + or - 90°
+	pos += (((rand() % 1) * 2) - 1) * M_PI / 2;
+
+	GetBody()->ApplyForce(b2Vec2(11.0 * std::cos(pos), 11.0 * std::sin(pos)), GetBody()->GetWorldCenter());
+	SDL_Log("Asteroid m=%f @(%f, %f)", GetBody()->GetMass(), GetBody()->GetPosition().x, GetBody()->GetPosition().y);
+
+	++count_;
 }
 
 Asteroid::~Asteroid()
 {
+	--count_;
+	SDL_Log("~Asteroid");
 }

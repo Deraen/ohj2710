@@ -19,15 +19,14 @@ public:
 	Asteroid(b2Body* planet);
 	virtual ~Asteroid();
 
-	inline b2Body* getBody() const { return body_; }
-
 	// --- Drawable ---
 	inline Sprite* GetSprite() const { return type_.sprite; }
 	inline b2Vec2 GetDimensions() const { return type_.meters; }
 
 private:
 	Assets::Type type_;
-	b2Body* body_;
+
+	static unsigned int count_;
 };
 
 #endif /* ASTEROID_H_ */

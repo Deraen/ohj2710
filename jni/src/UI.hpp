@@ -14,6 +14,7 @@ public:
 
 	void Draw() const;
 
+	void TouchStart(std::pair<unsigned int, unsigned int> p);
 	void Touch(std::pair<unsigned int, unsigned int> p);
 	void TouchEnd();
 private:

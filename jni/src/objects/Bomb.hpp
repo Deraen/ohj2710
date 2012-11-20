@@ -22,18 +22,20 @@ public:
 	enum BombType {
 		NORMAL,
 		SPLASH,
-		CHAINREACTION
+		CHAINREACTION,
+		LASER
 	};
 
-	Bomb(b2Body* planet, float radians, float force);
+	Bomb(b2Body* parent, float radians, float force);
 	virtual ~Bomb();
 
 	inline Sprite* GetSprite() const { return type_.sprite; }
 	inline b2Vec2 GetDimensions() const { return type_.meters; }
 
 private:
-	b2Body* body_;
 	Assets::Type type_;
+
+	static unsigned int count_;
 };
 
 #endif /* BOMB_H_ */

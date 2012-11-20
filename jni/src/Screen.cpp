@@ -186,14 +186,19 @@ void Screen::processInput()
 			}
 			else
 			{
-				ui_->Touch(TouchPosition(event));
+				ui_->TouchStart(TouchPosition(event));
 			}
 		}
 		else if (event.type == SDL_MOUSEMOTION
 			  || (event.type == SDL_FINGERMOTION))
 		{
-			if (touchObject_ != NULL) {
+			if (touchObject_ != NULL)
+			{
 				touchObject_->TouchMovement(TouchPositionMeters(event));
+			}
+			else
+			{
+				ui_->Touch(TouchPosition(event));
 			}
 		}
 		else if ((event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)

@@ -114,6 +114,46 @@ void UI::Draw() const
 	}
 }
 
+void UI::TouchStart(std::pair<unsigned int, unsigned int> p)
+{
+	SDL_Rect dst;
+	dst.w = Screen::instance().ResX() / 10;
+	dst.h = Screen::instance().ResY() / 10;
+	for (unsigned int i = 0; i < 4; ++i)
+	{
+		Menu* menu = menus_[i];
+
+		// 0  1
+		// 2  3
+		dst.x = 0;
+		dst.y = 0;
+		if (i == 1 || i == 3)
+		{
+			dst.x = Screen::instance().ResX() - dst.w;
+		}
+
+		if (i == 2 || i == 3)
+		{
+			dst.y = Screen::instance().ResY() - dst.h;
+		}
+
+		if (dst.x <= p.first && p.first <= dst.x + dst.w
+		 && dst.y <= p.second && p.second <= dst.y + dst.h)
+		{
+			if (activeMenu_ != NULL)
+			{
+				activeMenu_->active = false;
+				activeMenu_ = NULL;
+			}
+
+			menu->active = true;
+			activeMenu_ = menu;
+			return;
+		}
+	}
+}
+
+
 void UI::Touch(std::pair<unsigned int, unsigned int> p)
 {
 	SDL_Rect dst;
@@ -163,28 +203,6 @@ void UI::Touch(std::pair<unsigned int, unsigned int> p)
 				button = button->next;
 			}
 		}
-		else
-		{
-			if (dst.x <= p.first && p.first <= dst.x + dst.w
-			 && dst.y <= p.second && p.second <= dst.y + dst.h)
-			{
-				if (activeMenu_ != NULL)
-				{
-					activeMenu_->active = false;
-					activeMenu_ = NULL;
-				}
-
-				menu->active = true;
-				activeMenu_ = menu;
-				return;
-			}
-		}
-	}
-
-	if (activeMenu_ != NULL)
-	{
-		activeMenu_->active = false;
-		activeMenu_ = NULL;
 	}
 }
 
@@ -195,5 +213,11 @@ void UI::TouchEnd()
 		activeButton_->f();
 		activeButton_->active = false;
 		activeButton_ = NULL;
+	}
+
+	if (activeMenu_ != NULL)
+	{
+		activeMenu_->active = false;
+		activeMenu_ = NULL;
 	}
 }
