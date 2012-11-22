@@ -1,3 +1,4 @@
+
 /*
  * Game.hh
  *
@@ -8,12 +9,18 @@
 #ifndef GAME_HH_
 #define GAME_HH_
 
+#include <queue>
+
 #include "Box2D/Box2D.h"
 
 #include "objects/Bomb.hpp"
 
-class Game {
+class Asteroid;
+
+class Game: public b2ContactListener {
 public:
+	enum Events { COLLISION_ASTEROID_PLANET, COLLISION_BOMB_PLANET, COLLISION_ASTEROID_BOMB, COLLISION_BOMB_BOMB, DELETE_BODY };
+
 	Game();
 
 	virtual ~Game();
@@ -36,6 +43,11 @@ public:
 
 	void Shoot(b2Body* planet, float radians, float force);
 	inline void SelectWeapon(const Bomb::BombType weapon) { selectedWeapon_ = weapon; }
+
+	void BeginContact(b2Contact* contact);
+	// void EndContact(b2Contact* contact);
+
+	void HandleEvent(SDL_Event& event);
 
 private:
 	b2World world_;

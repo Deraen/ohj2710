@@ -9,6 +9,7 @@
 
 #include "objects/Planet.hpp"
 #include "objects/Asteroid.hpp"
+ #include "objects/Bomb.hpp"
 #include "Screen.hpp"
 
 Game::Game():
@@ -23,6 +24,7 @@ Game::~Game()
 
 void Game::init()
 {
+	world_.SetContactListener(this);
 	new Planet();
 }
 
@@ -52,13 +54,19 @@ void Game::Step()
 	b2Body* body = world_.GetBodyList();
 	while (body != NULL)
 	{
+		Object* obj = (Object*)body->GetUserData();
+		float m1 = obj->GetMass();
+
 		b2Body* body2 = world_.GetBodyList();
-		while (body2 != NULL)
+		while (m1 != 0 && body2 != NULL)
 		{
-			if (body != body2)
+			Object* obj2 = (Object*)body2->GetUserData();
+			float m2 = obj2->GetMass();
+
+			if (m2 != 0 && body2->GetType() != b2_staticBody && body != body2)
 			{
 				b2Vec2 d = body->GetPosition() - body2->GetPosition();
-				float f = (G * body->GetMass() * body2->GetMass()) / d.LengthSquared();
+				float f = (G * m1 * m2) / d.LengthSquared();
 				d.Normalize();
 				d *= f;
 
@@ -75,4 +83,90 @@ void Game::Step()
 void Game::Shoot(b2Body *planet, float radians, float force)
 {
 	new Bomb(planet, selectedWeapon_, radians, force);
+}
+
+void Game::BeginContact(b2Contact *contact)
+{
+	b2Body* b1 = contact->GetFixtureA()->GetBody();
+	b2Body* b2 = contact->GetFixtureB()->GetBody();
+	Object* obj1 = (Object*)b1->GetUserData();
+	Object* obj2 = (Object*)b2->GetUserData();
+
+	SDL_Event event;
+	event.type = SDL_USEREVENT;
+
+	// Planet is static, it won't collide with others
+	if (dynamic_cast<Asteroid*>(obj1) != NULL && dynamic_cast<Planet*>(obj2))
+	{
+		SDL_Log("Contact: Asteroid <-> Planet");
+		event.user.code = COLLISION_ASTEROID_PLANET;
+	}
+	else if (dynamic_cast<Bomb*>(obj1) != NULL && dynamic_cast<Planet*>(obj2))
+	{
+		SDL_Log("Contact: Bomb <-> Planet");
+		event.user.code = COLLISION_BOMB_PLANET;
+	}
+	else if (dynamic_cast<Asteroid*>(obj1) != NULL && dynamic_cast<Bomb*>(obj2))
+	{
+		SDL_Log("Contact: Asteroid <-> Bomb");
+		event.user.code = COLLISION_ASTEROID_BOMB;
+	}
+	else if (dynamic_cast<Bomb*>(obj1) != NULL && dynamic_cast<Asteroid*>(obj2))
+	{
+		SDL_Log("Contact: Asteroid <-> Bomb");
+		event.user.code = COLLISION_ASTEROID_BOMB;
+		// invert bodies
+		b2Body* tmp = b1;
+		b1 = b2;
+		b2 = tmp;
+	}
+	else if (dynamic_cast<Bomb*>(obj1) != NULL && dynamic_cast<Bomb*>(obj2))
+	{
+		SDL_Log("Contact: Bomb <-> Bomb");
+		event.user.code = COLLISION_BOMB_BOMB;
+	}
+	else
+	{
+		return;
+	}
+	//if (dynamic_cast<Asteroid*>(obj1) != NULL && dynamic_cast<Asteroid*>(obj2)) {
+
+	event.user.data1 = b1;
+	event.user.data2 = b2;
+
+	SDL_PushEvent(&event);
+}
+
+// void Game::EndContact(b2Contact *contact)
+// {
+// 	SDL_Log("Kosketus loppu");
+// }
+
+void Game::HandleEvent(SDL_Event &event)
+{
+	if (event.user.code == COLLISION_ASTEROID_PLANET)
+	{
+		// - points
+
+		world_.DestroyBody((b2Body*)event.user.data1);
+	}
+	else if (event.user.code == COLLISION_BOMB_PLANET)
+	{
+		// - points
+
+		world_.DestroyBody((b2Body*)event.user.data1);
+	}
+	else if (event.user.code == COLLISION_ASTEROID_BOMB)
+	{
+		// blow up bomb
+		((Bomb*)((b2Body*)event.user.data2)->GetUserData())->Detonate((b2Body*)event.user.data1);
+	}
+	else if (event.user.code == COLLISION_BOMB_BOMB)
+	{
+		// Bombs are so smart that they'll only detonate if they hit asteroid
+	}
+	else if (event.user.code == DELETE_BODY)
+	{
+		world_.DestroyBody((b2Body*)event.user.data1);
+	}
 }

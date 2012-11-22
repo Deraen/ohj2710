@@ -25,6 +25,9 @@ public:
 	Planet();
 	virtual ~Planet();
 
+	inline float GetRadius() const { return type_.def->shape->m_radius; }
+	inline float GetMass() const { return 2 * M_PI * GetRadius() * type_.def->density; }
+
 	void Draw(b2Body* body) const;
 	inline Sprite* GetSprite() const { return type_.sprite; }
 	inline b2Vec2 GetDimensions() const { return type_.meters; }
@@ -32,10 +35,7 @@ public:
 	void TouchStart();
 	void TouchMovement(const b2Vec2& p);
 	void TouchEnd();
-
-	static const float RADIUS;
 private:
-	b2Body* body_;
 	Assets::Type type_;
 
 	bool touched_;

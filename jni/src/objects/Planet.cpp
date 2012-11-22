@@ -15,38 +15,34 @@
 #include "objects/Bomb.hpp"
 #include "Screen.hpp"
 
-const float Planet::RADIUS = 2.0;
-
 Planet::Planet():
 	Object(),
 	Drawable(),
-	Touchable()
+	Touchable(),
+	touched_(false),
+	touchPosition_()
 {
 	type_ = Assets::instance().info("Planet", "EARTH");
 
 	b2BodyDef temp;
-	temp.userData = this;
 	temp.position = b2Vec2(0.0, 0.0);
-	// temp.type = b2_staticBody;
-	temp.type = b2_dynamicBody; // Fuu. planet should be static, but static bodies have no weight
-	body_ = Game::instance().world()->CreateBody(&temp);
+	temp.type = b2_staticBody;
+	CreateBody(temp, type_.def);
 
-	body_->CreateFixture(type_.def);
-
-	SDL_Log("Planet m=%f", body_->GetMass());
-
-	for (unsigned int i = 0; i < 8; ++i)
-	{
-		new Asteroid(body_);
-	}
+	SDL_Log("Planet m=%f", GetMass());
 }
 
 Planet::~Planet()
 {
+	SDL_Log("~Planet");
 }
 
 void Planet::Draw(b2Body* body) const
 {
+	if (rand() % 50 == 1) {
+		new Asteroid(GetBody());
+	}
+
 	Drawable::Draw(body);
 
 	if (touched_)
@@ -76,7 +72,7 @@ void Planet::TouchEnd()
 {
 	touched_ = false;
 
-	b2Vec2 d = touchPosition_ - body_->GetPosition();
+	b2Vec2 d = touchPosition_ - GetBody()->GetPosition();
 
 	float force = d.Length();
 
@@ -84,5 +80,5 @@ void Planet::TouchEnd()
 
 	float radians = atan2(-d.y, -d.x);
 
-	Game::instance().Shoot(body_, radians, force);
+	Game::instance().Shoot(GetBody(), radians, force);
 }
