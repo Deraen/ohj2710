@@ -6,6 +6,7 @@
 
 #include "UI.hpp"
 #include "Screen.hpp"
+#include "Game.hpp"
 
 UI::UI():
 	activeMenu_(NULL),
@@ -22,6 +23,30 @@ UI::UI():
 	menus_[1] = new Menu("Lvl", 0, 170, 0);
 
 	menus_[2] = new Menu("Wpn", 255, 0, 0);
+
+	tmp = new Button("Normal", 255, 0, 0);
+	tmp->f = []() {
+		Game::instance().SelectWeapon(Bomb::BombType::NORMAL);
+	};
+	menus_[2]->first = tmp;
+
+	tmp = new Button("Splash", 255, 0, 0);
+	tmp->f = []() {
+		Game::instance().SelectWeapon(Bomb::BombType::SPLASH);
+	};
+	menus_[2]->first->next = tmp;
+
+	tmp = new Button("Chain", 255, 0, 0);
+	tmp->f = []() {
+		Game::instance().SelectWeapon(Bomb::BombType::CHAINREACTION);
+	};
+	menus_[2]->first->next->next = tmp;
+
+	tmp = new Button("Laser", 255, 0, 0);
+	tmp->f = []() {
+		Game::instance().SelectWeapon(Bomb::BombType::LASER);
+	};
+	menus_[2]->first->next->next->next = tmp;
 
 	menus_[3] = new Menu("Gld", 170, 170, 0);
 }

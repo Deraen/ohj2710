@@ -10,6 +10,8 @@
 
 #include "Box2D/Box2D.h"
 
+#include "objects/Bomb.hpp"
+
 class Game {
 public:
 	Game();
@@ -32,10 +34,15 @@ public:
 
 	inline b2World* world() { return &world_; }
 
+	void Shoot(b2Body* planet, float radians, float force);
+	inline void SelectWeapon(const Bomb::BombType weapon) { selectedWeapon_ = weapon; }
+
 private:
 	b2World world_;
 
 	bool running_;
+
+	Bomb::BombType selectedWeapon_;
 };
 
 #endif /* GAME_HH_ */

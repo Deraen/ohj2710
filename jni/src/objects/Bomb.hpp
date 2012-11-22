@@ -22,10 +22,12 @@ public:
 	enum BombType {
 		NORMAL,
 		SPLASH,
-		CHAINREACTION
+		CHAINREACTION,
+		LASER
 	};
+	static const std::string TYPENAMES[];
 
-	Bomb(b2Body* planet, float radians, float force);
+	Bomb(b2Body* planet, BombType type, float radians, float force);
 	virtual ~Bomb();
 
 	inline Sprite* GetSprite() const { return type_.sprite; }
@@ -34,6 +36,7 @@ public:
 private:
 	b2Body* body_;
 	Assets::Type type_;
+	BombType type__;
 };
 
 #endif /* BOMB_H_ */

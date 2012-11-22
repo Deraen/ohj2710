@@ -71,3 +71,8 @@ void Game::Step()
 	}
 
 }
+
+void Game::Shoot(b2Body *planet, float radians, float force)
+{
+	new Bomb(planet, selectedWeapon_, radians, force);
+}

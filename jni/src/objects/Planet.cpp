@@ -84,5 +84,5 @@ void Planet::TouchEnd()
 
 	float radians = atan2(-d.y, -d.x);
 
-	new Bomb(body_, radians, force);
+	Game::instance().Shoot(body_, radians, force);
 }

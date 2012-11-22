@@ -11,19 +11,16 @@
 #include "interfaces/Drawable.hpp"
 #include "objects/Planet.hpp"
 
-Bomb::Bomb(b2Body* planet, float radians, float force):
+const std::string Bomb::TYPENAMES[] = {"NORMAL", "SPLASH", "CHAIN", "LASER"};
+
+Bomb::Bomb(b2Body* planet, BombType type, float radians, float force):
 	Object(),
-	Drawable()
+	Drawable(),
+	body_(),
+	type_(),
+	type__(type)
 {
-	int a = rand() % 2;
-	if (a == 0)
-	{
-		type_ = Assets::instance().info("Bomb", "NORMAL");
-	}
-	else
-	{
-		type_ = Assets::instance().info("Bomb", "SPLASH");
-	}
+	type_ = Assets::instance().info("Bomb", TYPENAMES[type]);
 
 	b2BodyDef temp;
 	temp.userData = this;
