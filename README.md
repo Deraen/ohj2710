@@ -7,7 +7,7 @@
 #### Prequisites
 
 CMake takes care of building Box2D.
-SDL and SDL2_gfx need to be installed manually (from included sources if
+SDL, SDL2_gfx and SDL_ttf need to be installed manually (from included sources if
 distribution doesn't recent enough packages).
 
 ##### Install SDL
@@ -22,6 +22,14 @@ distribution doesn't recent enough packages).
 
 	cd jni/sdl2gfx-code
 	./autogen.sh
+	./configure --prefix=/usr/local
+	make -j5
+	sudo make install
+	cd ../..
+
+#### Install SDL_ttf
+
+	cd jni/SDL_ttf-2.0.11
 	./configure --prefix=/usr/local
 	make -j5
 	sudo make install
@@ -52,3 +60,25 @@ Ndk-build compiles c++ code. Ant compiles jave code and packages program into .a
 It will also try to send .apk to connected Android phone using adb.
 
 	make
+
+## About the game
+
+### Weapons
+
+#### Normal
+
+Detonates one asteroid. Other asteroids will go through the explosion unharmed.
+
+#### Splash
+
+Creates big explosion when it hits asteroid. Other asteroids that pass through
+explosion get destroyed.
+
+#### Chain
+
+Detonates one asteroid. If another asteroid passes through the explosion
+it'll explode continuen the chain.
+
+#### Laser
+
+Short laser beam. Easy to control and destroys everything that passes through it.
