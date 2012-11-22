@@ -7,7 +7,7 @@
     <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="20"/>
 
     <application android:label="@string/app_name" android:icon="@drawable/ic_launcher" android:debuggable="true">
-        <activity android:name="SDLActivity">
+        <activity android:screenOrientation="landscape" android:name="SDLActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 package org.libsdl.app;package org.libsdl.app;<category android:name="android.intent.category.LAUNCHER" />

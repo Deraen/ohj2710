@@ -84,6 +84,7 @@ typedef struct
  *  \sa SDL_SetWindowIcon()
  *  \sa SDL_SetWindowPosition()
  *  \sa SDL_SetWindowSize()
+ *  \sa SDL_SetWindowBordered()
  *  \sa SDL_SetWindowTitle()
  *  \sa SDL_ShowWindow()
  */
@@ -516,6 +517,42 @@ extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_Window * window, int w,
  */
 extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_Window * window, int *w,
                                                int *h);
+    
+/**
+ *  \brief Set the minimum size of a window's client area.
+ *
+ *  \note You can't change the minimum size of a fullscreen window, it
+ *        automatically matches the size of the display mode.
+ *
+ *  \sa SDL_GetWindowMinimumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_SetWindowMinimumSize(SDL_Window * window,
+                                                      int min_w, int min_h);
+    
+/**
+ *  \brief Get the minimum size of a window's client area.
+ *
+ *  \sa SDL_SetWindowMinimumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_GetWindowMinimumSize(SDL_Window * window,
+                                                      int *w, int *h);
+
+/**
+ *  \brief Set the border state of a window.
+ *
+ *  This will add or remove the window's SDL_WINDOW_BORDERLESS flag and
+ *  add or remove the border from the actual window. This is a no-op if the
+ *  window's border already matches the requested state.
+ *
+ *  \param window The window of which to change the border state.
+ *  \param bordered SDL_FALSE to remove border, SDL_TRUE to add border.
+ *
+ *  \note You can't change the border state of a fullscreen window.
+ *  
+ *  \sa SDL_GetWindowFlags()
+ */
+extern DECLSPEC void SDLCALL SDL_SetWindowBordered(SDL_Window * window,
+                                                   SDL_bool bordered);
 
 /**
  *  \brief Show a window.

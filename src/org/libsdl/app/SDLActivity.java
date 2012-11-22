@@ -1,28 +1,30 @@
 package org.libsdl.app;
 
-import java.lang.ref.WeakReference;
-
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
-//import javax.microedition.khronos.opengles.GL10;
+import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.egl.*;
 
 import android.app.*;
 import android.content.*;
 import android.content.pm.*;
 import android.view.*;
+import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsoluteLayout;
 import android.os.*;
 import android.util.Log;
 import android.graphics.*;
-//import android.text.method.*;
-//import android.text.*;
+import android.text.method.*;
+import android.text.*;
 import android.media.*;
 import android.hardware.*;
-//import android.content.*;
+import android.content.*;
 
-//import java.lang.*;
+import java.lang.*;
 
 
 /**
@@ -36,6 +38,8 @@ public class SDLActivity extends Activity {
     // Main components
     private static SDLActivity mSingleton;
     private static SDLSurface mSurface;
+    private static View mTextEdit;
+    private static ViewGroup mLayout;
 
     // This is what SDL runs in. It invokes SDL_main(), eventually
     private static Thread mSDLThread;
@@ -54,20 +58,18 @@ public class SDLActivity extends Activity {
     // Load the .so
     static {
         System.loadLibrary("gnustl_shared");
+        System.loadLibrary("Box2D");
         System.loadLibrary("SDL2");
         System.loadLibrary("SDL2GFX");
-        System.loadLibrary("Box2D");
-        //System.loadLibrary("SDL2_mixer");
-        //System.loadLibrary("SDL2_ttf");
+        System.loadLibrary("SDL2_ttf");
         System.loadLibrary("main");
     }
 
     // Setup
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         //Log.v("SDL", "onCreate()");
         super.onCreate(savedInstanceState);
-
+        
         // So we can call stuff from static callbacks
         mSingleton = this;
 
@@ -79,12 +81,18 @@ public class SDLActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // landscape
-        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        // this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
 
         // Set up the surface
         mSurface = new SDLSurface(getApplication());
-        setContentView(mSurface);
-        // SurfaceHolder holder = mSurface.getHolder();
+
+        mLayout = new AbsoluteLayout(this);
+        mLayout.addView(mSurface);
+
+        setContentView(mLayout);
+
+        SurfaceHolder holder = mSurface.getHolder();
     }
 
     // Events
@@ -100,7 +108,6 @@ public class SDLActivity extends Activity {
         // Don't call SDLActivity.nativeResume(); here, it will be called via SDLSurface::surfaceChanged->SDLActivity::startApp
     }*/
 
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.v("SDL", "onDestroy()");
@@ -122,43 +129,28 @@ public class SDLActivity extends Activity {
 
     // Messages from the SDLMain thread
     static final int COMMAND_CHANGE_TITLE = 1;
-    static final int COMMAND_KEYBOARD_SHOW = 2;
+    static final int COMMAND_UNUSED = 2;
+    static final int COMMAND_TEXTEDIT_HIDE = 3;
 
     // Handler for the messages
-    static class CommandHandler extends Handler {
-        private final WeakReference<SDLActivity> mTarget;
-        CommandHandler(SDLActivity target) {
-            mTarget = new WeakReference<SDLActivity>(target);
-        }
-
+    Handler commandHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            SDLActivity target = mTarget.get();
             switch (msg.arg1) {
             case COMMAND_CHANGE_TITLE:
-                target.setTitle((String)msg.obj);
+                setTitle((String)msg.obj);
                 break;
-            case COMMAND_KEYBOARD_SHOW:
-                InputMethodManager manager = (InputMethodManager) target.getSystemService(INPUT_METHOD_SERVICE);
-                if (manager != null) {
-                    switch (((Integer)msg.obj).intValue()) {
-                    case 0:
-                        manager.hideSoftInputFromWindow(mSurface.getWindowToken(), 0);
-                        break;
-                    case 1:
-                        manager.showSoftInput(mSurface, 0);
-                        break;
-                    case 2:
-                        manager.toggleSoftInputFromWindow(mSurface.getWindowToken(), 0, 0);
-                        break;
-                    }
+            case COMMAND_TEXTEDIT_HIDE:
+                if (mTextEdit != null) {
+                    mTextEdit.setVisibility(View.GONE);
+
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(mTextEdit.getWindowToken(), 0);
                 }
-               break;
+                break;
             }
         }
     };
-
-    CommandHandler commandHandler = new CommandHandler(this);
 
     // Send a message from the SDLMain thread
     void sendCommand(int command, Object data) {
@@ -177,7 +169,7 @@ public class SDLActivity extends Activity {
     public static native void onNativeKeyDown(int keycode);
     public static native void onNativeKeyUp(int keycode);
     public static native void onNativeTouch(int touchDevId, int pointerFingerId,
-                                            int action, float x,
+                                            int action, float x, 
                                             float y, float p);
     public static native void onNativeAccel(float x, float y, float z);
     public static native void nativeRunAudioThread();
@@ -223,13 +215,57 @@ public class SDLActivity extends Activity {
             }
         }
     }
+    
+    static class ShowTextInputHandler implements Runnable {
+        /*
+         * This is used to regulate the pan&scan method to have some offset from
+         * the bottom edge of the input region and the top edge of an input
+         * method (soft keyboard)
+         */
+        static final int HEIGHT_PADDING = 15;
+
+        public int x, y, w, h;
+
+        public ShowTextInputHandler(int x, int y, int w, int h) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+        }
+
+        public void run() {
+            AbsoluteLayout.LayoutParams params = new AbsoluteLayout.LayoutParams(
+                    w, h + HEIGHT_PADDING, x, y);
+
+            if (mTextEdit == null) {
+                mTextEdit = new DummyEdit(getContext());
+
+                mLayout.addView(mTextEdit, params);
+            } else {
+                mTextEdit.setLayoutParams(params);
+            }
+
+            mTextEdit.setVisibility(View.VISIBLE);
+            mTextEdit.requestFocus();
+
+            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(mTextEdit, 0);
+        }
+
+    }
+
+    public static void showTextInput(int x, int y, int w, int h) {
+        // Transfer the task to the main thread as a Runnable
+        mSingleton.commandHandler.post(new ShowTextInputHandler(x, y, w, h));
+    }
+
 
     // EGL functions
     public static boolean initEGL(int majorVersion, int minorVersion) {
-        if (SDLActivity.mEGLDisplay == null) {
-            //Log.v("SDL", "Starting up OpenGL ES " + majorVersion + "." + minorVersion);
+        try {
+            if (SDLActivity.mEGLDisplay == null) {
+                Log.v("SDL", "Starting up OpenGL ES " + majorVersion + "." + minorVersion);
 
-            try {
                 EGL10 egl = (EGL10)EGLContext.getEGL();
 
                 EGLDisplay dpy = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
@@ -258,31 +294,20 @@ public class SDLActivity extends Activity {
                 }
                 EGLConfig config = configs[0];
 
-                /*int EGL_CONTEXT_CLIENT_VERSION=0x3098;
-                int contextAttrs[] = new int[] { EGL_CONTEXT_CLIENT_VERSION, majorVersion, EGL10.EGL_NONE };
-                EGLContext ctx = egl.eglCreateContext(dpy, config, EGL10.EGL_NO_CONTEXT, contextAttrs);
-
-                if (ctx == EGL10.EGL_NO_CONTEXT) {
-                    Log.e("SDL", "Couldn't create context");
-                    return false;
-                }
-                SDLActivity.mEGLContext = ctx;*/
                 SDLActivity.mEGLDisplay = dpy;
                 SDLActivity.mEGLConfig = config;
                 SDLActivity.mGLMajor = majorVersion;
                 SDLActivity.mGLMinor = minorVersion;
-
-                SDLActivity.createEGLSurface();
-            } catch(Exception e) {
-                Log.v("SDL", e + "");
-                for (StackTraceElement s : e.getStackTrace()) {
-                    Log.v("SDL", s.toString());
-                }
             }
-        }
-        else SDLActivity.createEGLSurface();
+            return SDLActivity.createEGLSurface();
 
-        return true;
+        } catch(Exception e) {
+            Log.v("SDL", e + "");
+            for (StackTraceElement s : e.getStackTrace()) {
+                Log.v("SDL", s.toString());
+            }
+            return false;
+        }
     }
 
     public static boolean createEGLContext() {
@@ -322,8 +347,10 @@ public class SDLActivity extends Activity {
             }
             SDLActivity.mEGLSurface = surface;
             return true;
+        } else {
+            Log.e("SDL", "Surface creation failed, display = " + SDLActivity.mEGLDisplay + ", config = " + SDLActivity.mEGLConfig);
+            return false;
         }
-        return false;
     }
 
     // EGL buffer flip
@@ -350,34 +377,34 @@ public class SDLActivity extends Activity {
 
     // Audio
     private static Object buf;
-
+    
     public static Object audioInit(int sampleRate, boolean is16Bit, boolean isStereo, int desiredFrames) {
-        int channelConfig = isStereo ? AudioFormat.CHANNEL_OUT_STEREO : AudioFormat.CHANNEL_OUT_MONO;
+        int channelConfig = isStereo ? AudioFormat.CHANNEL_CONFIGURATION_STEREO : AudioFormat.CHANNEL_CONFIGURATION_MONO;
         int audioFormat = is16Bit ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
         int frameSize = (isStereo ? 2 : 1) * (is16Bit ? 2 : 1);
-
-        Log.v("SDL", "SDL audio: wanted " + (isStereo ? "stereo" : "mono") + " " + (is16Bit ? "16-bit" : "8-bit") + " " + (sampleRate / 1000f) + "kHz, " + desiredFrames + " frames buffer");
-
+        
+        Log.v("SDL", "SDL audio: wanted " + (isStereo ? "stereo" : "mono") + " " + (is16Bit ? "16-bit" : "8-bit") + " " + ((float)sampleRate / 1000f) + "kHz, " + desiredFrames + " frames buffer");
+        
         // Let the user pick a larger buffer if they really want -- but ye
         // gods they probably shouldn't, the minimums are horrifyingly high
         // latency already
         desiredFrames = Math.max(desiredFrames, (AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat) + frameSize - 1) / frameSize);
-
+        
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,
                 channelConfig, audioFormat, desiredFrames * frameSize, AudioTrack.MODE_STREAM);
-
+        
         audioStartThread();
-
-        Log.v("SDL", "SDL audio: got " + ((mAudioTrack.getChannelCount() >= 2) ? "stereo" : "mono") + " " + ((mAudioTrack.getAudioFormat() == AudioFormat.ENCODING_PCM_16BIT) ? "16-bit" : "8-bit") + " " + (mAudioTrack.getSampleRate() / 1000f) + "kHz, " + desiredFrames + " frames buffer");
-
+        
+        Log.v("SDL", "SDL audio: got " + ((mAudioTrack.getChannelCount() >= 2) ? "stereo" : "mono") + " " + ((mAudioTrack.getAudioFormat() == AudioFormat.ENCODING_PCM_16BIT) ? "16-bit" : "8-bit") + " " + ((float)mAudioTrack.getSampleRate() / 1000f) + "kHz, " + desiredFrames + " frames buffer");
+        
         if (is16Bit) {
             buf = new short[desiredFrames * (isStereo ? 2 : 1)];
         } else {
-            buf = new byte[desiredFrames * (isStereo ? 2 : 1)];
+            buf = new byte[desiredFrames * (isStereo ? 2 : 1)]; 
         }
         return buf;
     }
-
+    
     public static void audioStartThread() {
         mAudioThread = new Thread(new Runnable() {
             public void run() {
@@ -385,12 +412,12 @@ public class SDLActivity extends Activity {
                 nativeRunAudioThread();
             }
         });
-
+        
         // I'd take REALTIME if I could get it!
         mAudioThread.setPriority(Thread.MAX_PRIORITY);
         mAudioThread.start();
     }
-
+    
     public static void audioWriteShortBuffer(short[] buffer) {
         for (int i = 0; i < buffer.length; ) {
             int result = mAudioTrack.write(buffer, i, buffer.length - i);
@@ -408,7 +435,7 @@ public class SDLActivity extends Activity {
             }
         }
     }
-
+    
     public static void audioWriteByteBuffer(byte[] buffer) {
         for (int i = 0; i < buffer.length; ) {
             int result = mAudioTrack.write(buffer, i, buffer.length - i);
@@ -461,11 +488,11 @@ class SDLMain implements Runnable {
 
 /**
     SDLSurface. This is what we draw on, so we need to know when it's created
-    in order to do anything useful.
+    in order to do anything useful. 
 
     Because of this, that's where we set up the SDL thread
 */
-class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
+class SDLSurface extends SurfaceView implements SurfaceHolder.Callback, 
     View.OnKeyListener, View.OnTouchListener, SensorEventListener  {
 
     // Sensors
@@ -474,16 +501,16 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     // Keep track of the surface size to normalize touch events
     private static float mWidth, mHeight;
 
-    // Startup
+    // Startup    
     public SDLSurface(Context context) {
         super(context);
-        getHolder().addCallback(this);
-
+        getHolder().addCallback(this); 
+    
         setFocusable(true);
         setFocusableInTouchMode(true);
         requestFocus();
-        setOnKeyListener(this);
-        setOnTouchListener(this);
+        setOnKeyListener(this); 
+        setOnTouchListener(this);   
 
         mSensorManager = (SensorManager)context.getSystemService("sensor");
 
@@ -495,7 +522,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     // Called when we have a valid drawing surface
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v("SDL", "surfaceCreated()");
-        // holder.setType(SurfaceHolder.SURFACE_TYPE_GPU); // Deprecated. Automaticly set when needed.
+        holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
         enableSensor(Sensor.TYPE_ACCELEROMETER, true);
     }
 
@@ -519,8 +546,19 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         case PixelFormat.A_8:
             Log.v("SDL", "pixel format A_8");
             break;
+        case PixelFormat.LA_88:
+            Log.v("SDL", "pixel format LA_88");
+            break;
         case PixelFormat.L_8:
             Log.v("SDL", "pixel format L_8");
+            break;
+        case PixelFormat.RGBA_4444:
+            Log.v("SDL", "pixel format RGBA_4444");
+            sdlFormat = 0x85421002; // SDL_PIXELFORMAT_RGBA4444
+            break;
+        case PixelFormat.RGBA_5551:
+            Log.v("SDL", "pixel format RGBA_5551");
+            sdlFormat = 0x85441002; // SDL_PIXELFORMAT_RGBA5551
             break;
         case PixelFormat.RGBA_8888:
             Log.v("SDL", "pixel format RGBA_8888");
@@ -529,6 +567,10 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         case PixelFormat.RGBX_8888:
             Log.v("SDL", "pixel format RGBX_8888");
             sdlFormat = 0x86262004; // SDL_PIXELFORMAT_RGBX8888
+            break;
+        case PixelFormat.RGB_332:
+            Log.v("SDL", "pixel format RGB_332");
+            sdlFormat = 0x84110801; // SDL_PIXELFORMAT_RGB332
             break;
         case PixelFormat.RGB_565:
             Log.v("SDL", "pixel format RGB_565");
@@ -544,8 +586,8 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             break;
         }
 
-        mWidth = width;
-        mHeight = height;
+        mWidth = (float) width;
+        mHeight = (float) height;
         SDLActivity.onNativeResize(width, height, sdlFormat);
         Log.v("SDL", "Window size:" + width + "x"+height);
 
@@ -553,7 +595,6 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     // unused
-    @Override
     public void onDraw(Canvas canvas) {}
 
 
@@ -572,25 +613,25 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             SDLActivity.onNativeKeyUp(keyCode);
             return true;
         }
-
+        
         return false;
     }
 
     // Touch events
     public boolean onTouch(View v, MotionEvent event) {
         {
-            final int touchDevId = event.getDeviceId();
-            final int pointerCount = event.getPointerCount();
-            // touchId, pointerId, action, x, y, pressure
-            int actionPointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent. ACTION_POINTER_INDEX_SHIFT; /* API 8: event.getActionIndex(); */
-            int pointerFingerId = event.getPointerId(actionPointerIndex);
-            int action = (event.getAction() & MotionEvent.ACTION_MASK); /* API 8: event.getActionMasked(); */
+             final int touchDevId = event.getDeviceId();
+             final int pointerCount = event.getPointerCount();
+             // touchId, pointerId, action, x, y, pressure
+             int actionPointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent. ACTION_POINTER_ID_SHIFT; /* API 8: event.getActionIndex(); */
+             int pointerFingerId = event.getPointerId(actionPointerIndex);
+             int action = (event.getAction() & MotionEvent.ACTION_MASK); /* API 8: event.getActionMasked(); */
 
-            float x = event.getX(actionPointerIndex) / mWidth;
-            float y = event.getY(actionPointerIndex) / mHeight;
-            float p = event.getPressure(actionPointerIndex);
+             float x = event.getX(actionPointerIndex) / mWidth;
+             float y = event.getY(actionPointerIndex) / mHeight;
+             float p = event.getPressure(actionPointerIndex);
 
-            if (action == MotionEvent.ACTION_MOVE && pointerCount > 1) {
+             if (action == MotionEvent.ACTION_MOVE && pointerCount > 1) {
                 // TODO send motion to every pointer if its position has
                 // changed since prev event.
                 for (int i = 0; i < pointerCount; i++) {
@@ -600,26 +641,26 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
                     p = event.getPressure(i);
                     SDLActivity.onNativeTouch(touchDevId, pointerFingerId, action, x, y, p);
                 }
-            } else {
+             } else {
                 SDLActivity.onNativeTouch(touchDevId, pointerFingerId, action, x, y, p);
-            }
+             }
         }
-        return true;
-    }
+      return true;
+   } 
 
     // Sensor events
     public void enableSensor(int sensortype, boolean enabled) {
         // TODO: This uses getDefaultSensor - what if we have >1 accels?
         if (enabled) {
-            mSensorManager.registerListener(this,
-                    mSensorManager.getDefaultSensor(sensortype),
-                    SensorManager.SENSOR_DELAY_GAME, null);
+            mSensorManager.registerListener(this, 
+                            mSensorManager.getDefaultSensor(sensortype), 
+                            SensorManager.SENSOR_DELAY_GAME, null);
         } else {
-            mSensorManager.unregisterListener(this,
-                    mSensorManager.getDefaultSensor(sensortype));
+            mSensorManager.unregisterListener(this, 
+                            mSensorManager.getDefaultSensor(sensortype));
         }
     }
-
+    
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // TODO
     }
@@ -627,9 +668,108 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             SDLActivity.onNativeAccel(event.values[0] / SensorManager.GRAVITY_EARTH,
-                    event.values[1] / SensorManager.GRAVITY_EARTH,
-                    event.values[2] / SensorManager.GRAVITY_EARTH);
+                                      event.values[1] / SensorManager.GRAVITY_EARTH,
+                                      event.values[2] / SensorManager.GRAVITY_EARTH);
         }
     }
+    
+}
+
+/* This is a fake invisible editor view that receives the input and defines the
+ * pan&scan region
+ */
+class DummyEdit extends View implements View.OnKeyListener {
+    InputConnection ic;
+
+    public DummyEdit(Context context) {
+        super(context);
+        setFocusableInTouchMode(true);
+        setFocusable(true);
+        setOnKeyListener(this);
+    }
+
+    @Override
+    public boolean onCheckIsTextEditor() {
+        return true;
+    }
+
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+        // This handles the hardware keyboard input
+        if (event.isPrintingKey()) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                ic.commitText(String.valueOf((char) event.getUnicodeChar()), 1);
+            }
+            return true;
+        }
+
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            SDLActivity.onNativeKeyDown(keyCode);
+            return true;
+        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+            SDLActivity.onNativeKeyUp(keyCode);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        ic = new SDLInputConnection(this, true);
+
+        outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
+                | 33554432 /* API 11: EditorInfo.IME_FLAG_NO_FULLSCREEN */;
+
+        return ic;
+    }
+}
+
+class SDLInputConnection extends BaseInputConnection {
+
+    public SDLInputConnection(View targetView, boolean fullEditor) {
+        super(targetView, fullEditor);
+
+    }
+
+    @Override
+    public boolean sendKeyEvent(KeyEvent event) {
+
+        /*
+         * This handles the keycodes from soft keyboard (and IME-translated
+         * input from hardkeyboard)
+         */
+        int keyCode = event.getKeyCode();
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+
+            SDLActivity.onNativeKeyDown(keyCode);
+            return true;
+        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+
+            SDLActivity.onNativeKeyUp(keyCode);
+            return true;
+        }
+        return super.sendKeyEvent(event);
+    }
+
+    @Override
+    public boolean commitText(CharSequence text, int newCursorPosition) {
+
+        nativeCommitText(text.toString(), newCursorPosition);
+
+        return super.commitText(text, newCursorPosition);
+    }
+
+    @Override
+    public boolean setComposingText(CharSequence text, int newCursorPosition) {
+
+        nativeSetComposingText(text.toString(), newCursorPosition);
+
+        return super.setComposingText(text, newCursorPosition);
+    }
+
+    public native void nativeCommitText(String text, int newCursorPosition);
+
+    public native void nativeSetComposingText(String text, int newCursorPosition);
 
 }

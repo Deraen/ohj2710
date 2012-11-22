@@ -7,6 +7,7 @@
 #### Prequisites
 
 CMake takes care of building Box2D.
+Freetype2 is required, distribution package should be recent enough.
 SDL, SDL2_gfx and SDL_ttf need to be installed manually (from included sources if
 distribution doesn't recent enough packages).
 
@@ -29,7 +30,7 @@ distribution doesn't recent enough packages).
 
 #### Install SDL_ttf
 
-	cd jni/SDL_ttf-2.0.11
+	cd jni/SDL_ttf
 	./configure --prefix=/usr/local
 	make -j5
 	sudo make install

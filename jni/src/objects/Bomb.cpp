@@ -162,6 +162,10 @@ void Bomb::Detonate(b2Body* other)
 
 		return;
 	}
+	else if (type__ == NORMAL && status_ == DETONATED)
+	{
+		return;
+	}
 
 	status_ = DETONATED;
 	if (type__ == NORMAL)

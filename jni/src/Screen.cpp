@@ -156,8 +156,7 @@ void Screen::processInput()
 	static SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
-		if (event.type == SDL_QUIT
-		 || (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_AC_BACK))
+		if (event.type == SDL_QUIT)
 		{
 			Game::instance().stop();
 		}
