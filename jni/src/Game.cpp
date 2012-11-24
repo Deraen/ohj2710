@@ -173,13 +173,13 @@ void Game::HandleEvent(SDL_Event &event)
 {
 	if (event.user.code == COLLISION_ASTEROID_PLANET)
 	{
-		// - points
+		removePoint();
 
 		world_.DestroyBody((b2Body*)event.user.data1);
 	}
 	else if (event.user.code == COLLISION_BOMB_PLANET)
 	{
-		// - points
+		removePoint();
 
 		world_.DestroyBody((b2Body*)event.user.data1);
 	}
@@ -201,22 +201,15 @@ void Game::HandleEvent(SDL_Event &event)
 		Bomb::BombType type = (Bomb::BombType)(long)event.user.data1;
 		bombs_[type] += 1;
 
-		if (type == Bomb::BombType::NORMAL && bombs_[type] > 20)
+		if (bombs_[type] > Bomb::INFO[type].quota)
 		{
-			bombs_[type] = 20;
+			bombs_[type] = Bomb::INFO[type].quota;
 		}
-		else if (type == Bomb::BombType::SPLASH && bombs_[type] > 5)
-		{
-			bombs_[type] = 20;
-		}
-		else if (type == Bomb::BombType::CHAIN && bombs_[type] > 5)
-		{
-			bombs_[type] = 20;
-		}
-		else if (type == Bomb::BombType::LASER && bombs_[type] > 10)
-		{
-			bombs_[type] = 20;
-		}
+	}
+	else if (event.user.code == SLOW_ASTEROID)
+	{
+		Asteroid* asteroid = (Asteroid*)event.user.data1;
+		asteroid->Slow();
 	}
 }
 

@@ -23,6 +23,8 @@ public:
 	inline Sprite* GetSprite() const { return type_.sprite; }
 	inline b2Vec2 GetDimensions() const { return type_.meters; }
 
+	void Slow();
+
 private:
 	Assets::Type type_;
 

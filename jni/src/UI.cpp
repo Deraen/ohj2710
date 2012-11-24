@@ -46,6 +46,10 @@ UI::UI():
 	y -= 1;
 	Button* laser = new Weapon(Bomb::BombType::LASER, x, y, 255, 0, 0);
 	buttons_.push_back(laser);
+
+	y = 0;
+	Button* points = new Points(x, y, 0, 0, 0);
+	buttons_.push_back(points);
 }
 
 UI::~UI()
@@ -63,7 +67,7 @@ UI::Button::Button(const std::string& text_, unsigned int x_, unsigned int y_, U
 }
 
 UI::Weapon::Weapon(Bomb::BombType type_, unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b_):
-	Button(Bomb::TYPENAMES[type_], x_, y_, r_, g_, b_),
+	Button(Bomb::INFO[type_].name, x_, y_, r_, g_, b_),
 	type(type_), count(Game::instance().BombCount(type))
 {
 	f = [&]() {
@@ -72,6 +76,13 @@ UI::Weapon::Weapon(Bomb::BombType type_, unsigned int x_, unsigned int y_, Uint8
 	activef = [&]() -> bool {
 		return Game::instance().SelectedWeapon() == type;
 	};
+}
+
+
+UI::Points::Points(unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b_):
+	Button("0", x_, y_, r_, g_, b_),
+	points(0)
+{
 }
 
 void UI::Button::Draw()
@@ -98,12 +109,11 @@ void UI::Button::Draw()
 	SDL_SetRenderDrawColor(Screen::instance().renderer(), r, g, b, a);
 	SDL_RenderFillRect(Screen::instance().renderer(), &dst);
 
-	SDL_Rect dst_ = dst;
-	dst_.x += dst_.w * 0.1;
-	dst_.y += dst_.h * 0.1;
-	dst_.w *= 0.8;
-	dst_.h *= 0.8;
-	SDL_RenderCopy(Screen::instance().renderer(), texture_, NULL, &dst_);
+	dst.x += dst.w * 0.1;
+	dst.y += dst.h * 0.1;
+	dst.w *= 0.8;
+	dst.h *= 0.8;
+	SDL_RenderCopy(Screen::instance().renderer(), texture_, NULL, &dst);
 }
 
 void UI::Weapon::Draw()
@@ -116,7 +126,29 @@ void UI::Weapon::Draw()
 		count = Game::instance().BombCount(type);
 
 		std::ostringstream ss;
-		ss << Bomb::TYPENAMES[type] << " " << count;
+		ss << Bomb::INFO[type].name << " " << count;
+		text = ss.str();
+
+		SDL_Color color = {255, 255, 255};
+		surface_ = TTF_RenderText_Blended(Screen::instance().font(), text.c_str(), color);
+
+		texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface_);
+	}
+	UI::Button::Draw();
+}
+
+
+void UI::Points::Draw()
+{
+	if (Game::instance().Points() != points)
+	{
+		SDL_FreeSurface(surface_);
+		SDL_DestroyTexture(texture_);
+
+		points = Game::instance().Points();
+
+		std::ostringstream ss;
+		ss << points;
 		text = ss.str();
 
 		SDL_Color color = {255, 255, 255};

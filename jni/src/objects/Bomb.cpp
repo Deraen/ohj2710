@@ -14,7 +14,13 @@
 #include "objects/Planet.hpp"
 #include "Screen.hpp"
 
-const std::string Bomb::TYPENAMES[] = {"NORMAL", "SPLASH", "CHAIN", "LASER"};
+const Bomb::Info Bomb::INFO[] = {
+	{"NORMAL", 15},
+	{"SPLASH", 5},
+	{"CHAIN", 5},
+	{"LASER", 10}
+};
+
 unsigned int Bomb::count_ = 0;
 
 Bomb::Bomb(b2Body* parent, BombType type, float radians, float force):
@@ -24,7 +30,7 @@ Bomb::Bomb(b2Body* parent, BombType type, float radians, float force):
 	type__(type),
 	status_(DEFAULT)
 {
-	type_ = Assets::instance().info("Bomb", TYPENAMES[type]);
+	type_ = Assets::instance().info("Bomb", INFO[type].name);
 
 	Planet* planet = (Planet*)parent->GetUserData();
 	float r = planet->GetRadius() + 1.0;
@@ -50,7 +56,7 @@ Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
 	type__(type),
 	status_(status)
 {
-	type_ = Assets::instance().info("Bomb", TYPENAMES[type]);
+	type_ = Assets::instance().info("Bomb", INFO[type].name);
 
 	b2BodyDef temp;
 	temp.position = pos;
@@ -147,11 +153,13 @@ void Bomb::Detonate(b2Body* other)
 {
 	if (type__ == SPLASH && status_ == DETONATED)
 	{
+		Game::instance().addPoint();
 		Game::instance().world()->DestroyBody(other);
 		return;
 	}
 	else if (type__ == CHAIN && status_ == DETONATED)
 	{
+		Game::instance().addPoint();
 		// Create new chain bomb that is already detonated
 		Bomb* tmp = new Bomb(CHAIN, other->GetPosition(), DETONATED);
 
@@ -168,12 +176,12 @@ void Bomb::Detonate(b2Body* other)
 	}
 
 	status_ = DETONATED;
+	Game::instance().addPoint();
+	Game::instance().world()->DestroyBody(other);
 	if (type__ == NORMAL)
 	{
 		// Normal bomb destroys hit asteroid immediatly
 		// display small explosion for short time
-		Game::instance().world()->DestroyBody(other);
-
 		GetBody()->SetType(b2BodyType::b2_staticBody);
 		GetBody()->DestroyFixture(GetBody()->GetFixtureList());
 
@@ -204,10 +212,7 @@ void Bomb::Detonate(b2Body* other)
 	{
 		// Display small explosion for short time
 		// If other asteroids go through explosion Detonate them
-
 		SetupChain(GetBody());
-
-		Game::instance().world()->DestroyBody(other);
 	}
 	else if (type__ == LASER)
 	{

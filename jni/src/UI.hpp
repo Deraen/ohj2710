@@ -53,6 +53,15 @@ private:
 		unsigned int count;
 	};
 
+	struct Points: public Button
+	{
+		Points(unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b_);
+
+		void Draw();
+
+		int points;
+	};
+
 	std::vector<Button*> buttons_;
 };
 

@@ -26,7 +26,11 @@ public:
 		LASER,
 		COUNT_
 	};
-	static const std::string TYPENAMES[];
+	struct Info {
+		std::string name;
+		unsigned int quota;
+	};
+	static const Info INFO[];
 
 	enum Status {
 		DETONATED,

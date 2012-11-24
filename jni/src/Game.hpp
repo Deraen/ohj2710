@@ -1,4 +1,5 @@
 
+
 /*
  * Game.hh
  *
@@ -25,7 +26,8 @@ public:
 		COLLISION_ASTEROID_BOMB,
 		COLLISION_BOMB_BOMB,
 		DELETE_BODY,
-		REPLENISH_BOMB
+		REPLENISH_BOMB,
+		SLOW_ASTEROID
 	};
 
 	Game();
@@ -56,6 +58,9 @@ public:
 
 	void HandleEvent(SDL_Event& event);
 
+	inline int Points() const { return points_; }
+	void addPoint() { points_ += 1; }
+	void removePoint() { points_ -= 1; }
 	inline Bomb::BombType SelectedWeapon() const { return selectedWeapon_; }
 	unsigned int BombCount(Bomb::BombType type) const;
 
@@ -64,6 +69,7 @@ private:
 
 	bool running_;
 
+	int points_;
 	Bomb::BombType selectedWeapon_;
 	unsigned int bombs_[Bomb::BombType::COUNT_];
 };

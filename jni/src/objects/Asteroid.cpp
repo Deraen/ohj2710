@@ -15,6 +15,20 @@
 
 unsigned int Asteroid::count_ = 0;
 
+namespace {
+	Uint32 SlowEvent(Uint32 interval, void* param)
+	{
+		SDL_Event event;
+		event.type = SDL_USEREVENT;
+		event.user.code = Game::SLOW_ASTEROID;
+		event.user.data1 = param;
+
+		SDL_PushEvent(&event);
+
+		return interval;
+	}
+}
+
 Asteroid::Asteroid(b2Body* planet):
 	Object(),
 	Drawable()
@@ -36,6 +50,8 @@ Asteroid::Asteroid(b2Body* planet):
 	GetBody()->ApplyForce(b2Vec2(11.0 * std::cos(pos), 11.0 * std::sin(pos)), GetBody()->GetWorldCenter());
 	SDL_Log("Asteroid m=%f @(%f, %f)", GetBody()->GetMass(), GetBody()->GetPosition().x, GetBody()->GetPosition().y);
 
+	SDL_AddTimer(1000, SlowEvent, this);
+
 	++count_;
 }
 
@@ -43,4 +59,12 @@ Asteroid::~Asteroid()
 {
 	--count_;
 	SDL_Log("~Asteroid");
+}
+
+void Asteroid::Slow()
+{
+	b2Vec2 f = GetBody()->GetLinearVelocity();
+	// Asteroids lose 2.5% of their velocity / second
+	f *= -0.025;
+	GetBody()->ApplyForce(f, GetBody()->GetWorldCenter());
 }
