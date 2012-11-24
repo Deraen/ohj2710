@@ -1,5 +1,6 @@
 #include <functional>
 #include <string>
+#include <sstream>
 
 #include "SDL2_gfxPrimitives.h"
 #include "SDL_ttf.h"
@@ -9,54 +10,50 @@
 #include "Game.hpp"
 
 UI::UI():
-	activeMenu_(NULL),
-	activeButton_(NULL)
+	buttons_()
 {
-	Button* tmp = new Button("Debug", 170, 0, 0);
-	tmp->f = []() {
-		Screen::instance().toggleDebug();
+	unsigned int x = 0;
+	unsigned int y = 0;
+
+	x = 9;
+	Button* cfg = new Button("Cfg", x, y, 90, 90, 90);
+	buttons_.push_back(cfg);
+
+	y += 1;
+	Button* debug = new Button("Debug", x, y, 170, 0, 0);
+	debug->parent = cfg;
+	debug->f = []() {
+		Screen::instance().ToggleDebug();
 	};
-
-	menus_[0] = new Menu("Cfg", 90, 90, 90);
-	menus_[0]->first = tmp;
-
-	menus_[1] = new Menu("Lvl", 0, 170, 0);
-
-	menus_[2] = new Menu("Wpn", 255, 0, 0);
-
-	tmp = new Button("Normal", 255, 0, 0);
-	tmp->f = []() {
-		Game::instance().SelectWeapon(Bomb::BombType::NORMAL);
+	debug->activef = []() -> bool {
+		return Screen::instance().Debug();
 	};
-	menus_[2]->first = tmp;
+	buttons_.push_back(debug);
 
-	tmp = new Button("Splash", 255, 0, 0);
-	tmp->f = []() {
-		Game::instance().SelectWeapon(Bomb::BombType::SPLASH);
-	};
-	menus_[2]->first->next = tmp;
+	x = 0;
+	y = 9;
+	Button* normal = new Weapon(Bomb::BombType::NORMAL, x, y, 255, 0, 0);
+	buttons_.push_back(normal);
 
-	tmp = new Button("Chain", 255, 0, 0);
-	tmp->f = []() {
-		Game::instance().SelectWeapon(Bomb::BombType::CHAIN);
-	};
-	menus_[2]->first->next->next = tmp;
+	y -= 1;
+	Button* splash = new Weapon(Bomb::BombType::SPLASH, x, y, 255, 0, 0);
+	buttons_.push_back(splash);
 
-	tmp = new Button("Laser", 255, 0, 0);
-	tmp->f = []() {
-		Game::instance().SelectWeapon(Bomb::BombType::LASER);
-	};
-	menus_[2]->first->next->next->next = tmp;
+	y -= 1;
+	Button* chain = new Weapon(Bomb::BombType::CHAIN, x, y, 255, 0, 0);
+	buttons_.push_back(chain);
 
-	menus_[3] = new Menu("Gld", 170, 170, 0);
+	y -= 1;
+	Button* laser = new Weapon(Bomb::BombType::LASER, x, y, 255, 0, 0);
+	buttons_.push_back(laser);
 }
 
 UI::~UI()
 {
 }
 
-UI::Button::Button(const std::string& text_, Uint8 r_, Uint8 g_, Uint8 b_):
-			text(text_), next(NULL), r(r_), g(g_), b(b_), active(false),
+UI::Button::Button(const std::string& text_, unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b_):
+			text(text_), f(), activef(), parent(NULL), x(x_), y(y_), r(r_), g(g_), b(b_), hover(false), active(false),
 			surface_(NULL), texture_(NULL)
 {
 	SDL_Color color = {255, 255, 255};
@@ -65,11 +62,38 @@ UI::Button::Button(const std::string& text_, Uint8 r_, Uint8 g_, Uint8 b_):
 	texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface_);
 }
 
-void UI::Button::Draw(const SDL_Rect& dst) const
+UI::Weapon::Weapon(Bomb::BombType type_, unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b_):
+	Button(Bomb::TYPENAMES[type_], x_, y_, r_, g_, b_),
+	type(type_), count(Game::instance().BombCount(type))
 {
+	f = [&]() {
+		Game::instance().SelectWeapon(type);
+	};
+	activef = [&]() -> bool {
+		return Game::instance().SelectedWeapon() == type;
+	};
+}
+
+void UI::Button::Draw()
+{
+	if (parent != NULL && !parent->hover) return;
+
+	if (activef) active = activef();
+
+	SDL_Rect dst;
+	dst.w = Screen::instance().ResX() / 10;
+	dst.h = Screen::instance().ResY() / 10;
+	dst.x = dst.w * x;
+	dst.y = dst.h * y;
+
 	Sint8 a = 120;
-	if (active) {
+	if (hover)
+	{
 		a = 180;
+	}
+	else if (active)
+	{
+		a = 255;
 	}
 	SDL_SetRenderDrawColor(Screen::instance().renderer(), r, g, b, a);
 	SDL_RenderFillRect(Screen::instance().renderer(), &dst);
@@ -82,10 +106,25 @@ void UI::Button::Draw(const SDL_Rect& dst) const
 	SDL_RenderCopy(Screen::instance().renderer(), texture_, NULL, &dst_);
 }
 
-UI::Menu::Menu(const std::string& text_, Uint8 r_, Uint8 g_, Uint8 b_):
-			Button(text_, r_, g_, b_),
-			first(NULL)
+void UI::Weapon::Draw()
 {
+	if (Game::instance().BombCount(type) != count)
+	{
+		SDL_FreeSurface(surface_);
+		SDL_DestroyTexture(texture_);
+
+		count = Game::instance().BombCount(type);
+
+		std::ostringstream ss;
+		ss << Bomb::TYPENAMES[type] << " " << count;
+		text = ss.str();
+
+		SDL_Color color = {255, 255, 255};
+		surface_ = TTF_RenderText_Blended(Screen::instance().font(), text.c_str(), color);
+
+		texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface_);
+	}
+	UI::Button::Draw();
 }
 
 void UI::Draw() const
@@ -93,87 +132,23 @@ void UI::Draw() const
 	SDL_Renderer* renderer = Screen::instance().renderer();
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-	SDL_Rect dst;
-	dst.w = Screen::instance().ResX() / 10;
-	dst.h = Screen::instance().ResY() / 10;
-	for (unsigned int i = 0; i < 4; ++i)
+	for (unsigned int i = 0; i < buttons_.size(); ++i)
 	{
-		Menu* menu = menus_[i];
-
-		// 0  1
-		// 2  3
-		dst.x = 0;
-		dst.y = 0;
-		if (i == 1 || i == 3)
-		{
-			dst.x = Screen::instance().ResX() - dst.w;
-		}
-
-		if (i == 2 || i == 3)
-		{
-			dst.y = Screen::instance().ResY() - dst.h;
-		}
-
-		menu->Draw(dst);
-
-		if (menu->active)
-		{
-			Button* button = menu->first;
-			SDL_Rect dst2 = dst;
-
-			while (button != NULL)
-			{
-				if (i == 0 || i == 1)
-				{
-					dst2.y += dst.h + 1;
-				}
-				else
-				{
-					dst2.y -= dst.h - 1;
-				}
-				button->Draw(dst2);
-
-				button = button->next;
-			}
-		}
+		buttons_.at(i)->Draw();
 	}
 }
 
 void UI::TouchStart(std::pair<unsigned int, unsigned int> p)
 {
-	SDL_Rect dst;
-	dst.w = Screen::instance().ResX() / 10;
-	dst.h = Screen::instance().ResY() / 10;
-	for (unsigned int i = 0; i < 4; ++i)
+	unsigned int x = p.first * 10 / Screen::instance().ResX();
+	unsigned int y = p.second * 10 / Screen::instance().ResY();
+
+	for (unsigned int i = 0; i < buttons_.size(); ++i)
 	{
-		Menu* menu = menus_[i];
-
-		// 0  1
-		// 2  3
-		dst.x = 0;
-		dst.y = 0;
-		if (i == 1 || i == 3)
+		buttons_.at(i)->hover = buttons_.at(i)->x == x && buttons_.at(i)->y == y;
+		if (buttons_.at(i)->hover && buttons_.at(i)->parent != NULL)
 		{
-			dst.x = Screen::instance().ResX() - dst.w;
-		}
-
-		if (i == 2 || i == 3)
-		{
-			dst.y = Screen::instance().ResY() - dst.h;
-		}
-
-		if (dst.x <= p.first && p.first <= dst.x + dst.w
-		 && dst.y <= p.second && p.second <= dst.y + dst.h)
-		{
-			if (activeMenu_ != NULL)
-			{
-				activeMenu_->active = false;
-				activeMenu_ = NULL;
-			}
-
-			menu->active = true;
-			activeMenu_ = menu;
-			return;
+			buttons_.at(i)->parent->hover = true;
 		}
 	}
 }
@@ -181,68 +156,18 @@ void UI::TouchStart(std::pair<unsigned int, unsigned int> p)
 
 void UI::Touch(std::pair<unsigned int, unsigned int> p)
 {
-	SDL_Rect dst;
-	dst.w = Screen::instance().ResX() / 10;
-	dst.h = Screen::instance().ResY() / 10;
-	for (unsigned int i = 0; i < 4; ++i)
-	{
-		Menu* menu = menus_[i];
-
-		// 0  1
-		// 2  3
-		dst.x = 0;
-		dst.y = 0;
-		if (i == 1 || i == 3)
-		{
-			dst.x = Screen::instance().ResX() - dst.w;
-		}
-
-		if (i == 2 || i == 3)
-		{
-			dst.y = Screen::instance().ResY() - dst.h;
-		}
-
-		if (menu->active)
-		{
-			Button* button = menu->first;
-			SDL_Rect dst2 = dst;
-
-			while (button != NULL)
-			{
-				if (i == 0 || i == 1)
-				{
-					dst2.y += dst.h + 1;
-				}
-				else
-				{
-					dst2.y -= dst.h - 1;
-				}
-
-				if (dst2.x <= p.first && p.first <= dst2.x + dst2.w
-				 && dst2.y <= p.second && p.second <= dst2.y + dst2.h)
-				{
-					activeButton_ = button;
-					activeButton_->active = true;
-				}
-
-				button = button->next;
-			}
-		}
-	}
+	TouchStart(p);
 }
 
 void UI::TouchEnd()
 {
-	if (activeButton_ != NULL)
+	for (unsigned int i = 0; i < buttons_.size(); ++i)
 	{
-		activeButton_->f();
-		activeButton_->active = false;
-		activeButton_ = NULL;
-	}
-
-	if (activeMenu_ != NULL)
-	{
-		activeMenu_->active = false;
-		activeMenu_ = NULL;
+		if (buttons_.at(i)->hover)
+		{
+			if (buttons_.at(i)->f) buttons_.at(i)->f();
+			buttons_.at(i)->hover = false;
+			// return;
+		}
 	}
 }

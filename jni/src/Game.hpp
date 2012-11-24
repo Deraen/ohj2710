@@ -19,7 +19,14 @@ class Asteroid;
 
 class Game: public b2ContactListener {
 public:
-	enum Events { COLLISION_ASTEROID_PLANET, COLLISION_BOMB_PLANET, COLLISION_ASTEROID_BOMB, COLLISION_BOMB_BOMB, DELETE_BODY };
+	enum Events {
+		COLLISION_ASTEROID_PLANET,
+		COLLISION_BOMB_PLANET,
+		COLLISION_ASTEROID_BOMB,
+		COLLISION_BOMB_BOMB,
+		DELETE_BODY,
+		REPLENISH_BOMB
+	};
 
 	Game();
 
@@ -49,12 +56,16 @@ public:
 
 	void HandleEvent(SDL_Event& event);
 
+	inline Bomb::BombType SelectedWeapon() const { return selectedWeapon_; }
+	unsigned int BombCount(Bomb::BombType type) const;
+
 private:
 	b2World world_;
 
 	bool running_;
 
 	Bomb::BombType selectedWeapon_;
+	unsigned int bombs_[Bomb::BombType::COUNT_];
 };
 
 #endif /* GAME_HH_ */

@@ -23,7 +23,8 @@ public:
 		NORMAL,
 		SPLASH,
 		CHAIN,
-		LASER
+		LASER,
+		COUNT_
 	};
 	static const std::string TYPENAMES[];
 

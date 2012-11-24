@@ -243,7 +243,7 @@ void Screen::resized()
 
 	unsigned int size = h_ / 10;
 
-	font_ = TTF_OpenFont("DroidSans.ttf", size);
+	font_ = TTF_OpenFont("visitor1.ttf", size);
 	if (!font_)
 	{
 		printf("TTF_OpenFont: %s\n", TTF_GetError());

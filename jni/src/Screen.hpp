@@ -50,7 +50,8 @@ public:
 	b2Vec2 toPixels(const b2Vec2& coord, bool center = false) const;
 	b2Vec2 toMeters(const b2Vec2& coord) const;
 
-	void toggleDebug() { debug_ = !debug_; }
+	inline bool Debug() { return debug_; }
+	inline void ToggleDebug() { debug_ = !debug_; }
 
 	static const int DEF_SCREEN_WIDTH = 800;
 	static const int DEF_SCREEN_HEIGHT = 480;

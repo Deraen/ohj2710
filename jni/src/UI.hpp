@@ -3,8 +3,11 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 #include "SDL2_gfxPrimitives.h"
+
+#include "objects/Bomb.hpp"
 
 class UI
 {
@@ -20,32 +23,37 @@ public:
 private:
 	struct Button
 	{
-		Button(const std::string& text_, Uint8 r_, Uint8 g_, Uint8 b_);
+		Button(const std::string& text_, unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b_);
 
-		const std::string text;
+		std::string text;
 		std::function<void()> f;
-		Button* next;
+		std::function<bool()> activef;
+		Button* parent;
+		unsigned int x;
+		unsigned int y;
 		Uint8 r;
 		Uint8 g;
 		Uint8 b;
 		bool active;
+		bool hover;
 
-		void Draw(const SDL_Rect& dst) const;
+		virtual void Draw();
 
 		SDL_Surface* surface_;
 		SDL_Texture* texture_;
 	};
 
-	struct Menu: public Button
+	struct Weapon: public Button
 	{
-		Menu(const std::string& text_, Uint8 r_, Uint8 g_, Uint8 b_);
+		Weapon(Bomb::BombType type_, unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b_);
 
-		Button* first;
+		void Draw();
+
+		Bomb::BombType type;
+		unsigned int count;
 	};
 
-	Menu* menus_[4];
-	Menu* activeMenu_;
-	Button* activeButton_;
+	std::vector<Button*> buttons_;
 };
 
 #endif

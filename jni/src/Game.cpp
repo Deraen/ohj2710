@@ -1,4 +1,5 @@
 /*
+
  * Game.cc
  *
  *  Created on: 18.10.2012
@@ -12,10 +13,32 @@
  #include "objects/Bomb.hpp"
 #include "Screen.hpp"
 
+namespace {
+	Uint32 Replenish(Uint32 interval, void* param)
+	{
+		SDL_Event event;
+		event.type = SDL_USEREVENT;
+		event.user.code = Game::REPLENISH_BOMB;
+		event.user.data1 = param;
+
+		SDL_PushEvent(&event);
+
+		return interval;
+	}
+}
 Game::Game():
 	world_(b2Vec2(0.0, 0.0)),
 	running_(true)
 {
+	for (unsigned int i = 0; i < Bomb::BombType::COUNT_; ++i)
+	{
+		bombs_[i] = 0;
+	}
+
+	SDL_AddTimer(5000, Replenish, (void*)Bomb::BombType::NORMAL);
+	SDL_AddTimer(10000, Replenish, (void*)Bomb::BombType::SPLASH);
+	SDL_AddTimer(10000, Replenish, (void*)Bomb::BombType::CHAIN);
+	SDL_AddTimer(1000, Replenish, (void*)Bomb::BombType::LASER);
 }
 
 Game::~Game()
@@ -82,7 +105,11 @@ void Game::Step()
 
 void Game::Shoot(b2Body *planet, float radians, float force)
 {
-	new Bomb(planet, selectedWeapon_, radians, force);
+	if (bombs_[selectedWeapon_] > 0)
+	{
+		new Bomb(planet, selectedWeapon_, radians, force);
+		bombs_[selectedWeapon_] -= 1;
+	}
 }
 
 void Game::BeginContact(b2Contact *contact)
@@ -169,4 +196,31 @@ void Game::HandleEvent(SDL_Event &event)
 	{
 		world_.DestroyBody((b2Body*)event.user.data1);
 	}
+	else if (event.user.code == REPLENISH_BOMB)
+	{
+		Bomb::BombType type = (Bomb::BombType)(long)event.user.data1;
+		bombs_[type] += 1;
+
+		if (type == Bomb::BombType::NORMAL && bombs_[type] > 20)
+		{
+			bombs_[type] = 20;
+		}
+		else if (type == Bomb::BombType::SPLASH && bombs_[type] > 5)
+		{
+			bombs_[type] = 20;
+		}
+		else if (type == Bomb::BombType::CHAIN && bombs_[type] > 5)
+		{
+			bombs_[type] = 20;
+		}
+		else if (type == Bomb::BombType::LASER && bombs_[type] > 10)
+		{
+			bombs_[type] = 20;
+		}
+	}
+}
+
+unsigned int Game::BombCount(Bomb::BombType type) const
+{
+	return bombs_[type];
 }

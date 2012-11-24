@@ -7,8 +7,7 @@
 #### Prequisites
 
 CMake takes care of building Box2D.
-Freetype2 is required, distribution package should be recent enough.
-SDL, SDL2_gfx and SDL_ttf need to be installed manually (from included sources if
+SDL, SDL2_gfx and SDL2_ttf need to be installed manually (from included sources if
 distribution doesn't recent enough packages).
 
 ##### Install SDL
