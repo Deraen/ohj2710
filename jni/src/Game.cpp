@@ -10,7 +10,8 @@
 
 #include "objects/Planet.hpp"
 #include "objects/Asteroid.hpp"
- #include "objects/Bomb.hpp"
+#include "objects/Bomb.hpp"
+#include "objects/Laser.hpp"
 #include "Screen.hpp"
 
 namespace {
@@ -18,7 +19,7 @@ namespace {
 	{
 		SDL_Event event;
 		event.type = SDL_USEREVENT;
-		event.user.code = Game::REPLENISH_BOMB;
+		event.user.code = Game::REPLENISH_WEAPON;
 		event.user.data1 = param;
 
 		SDL_PushEvent(&event);
@@ -103,11 +104,15 @@ void Game::Step()
 
 }
 
-void Game::Shoot(b2Body *planet, float radians, float force)
+bool Game::WeaponHasUses() const
+{
+	return bombs_[selectedWeapon_] > 0;
+}
+
+void Game::UseWeapon()
 {
 	if (bombs_[selectedWeapon_] > 0)
 	{
-		new Bomb(planet, selectedWeapon_, radians, force);
 		bombs_[selectedWeapon_] -= 1;
 	}
 }
@@ -196,7 +201,7 @@ void Game::HandleEvent(SDL_Event &event)
 	{
 		world_.DestroyBody((b2Body*)event.user.data1);
 	}
-	else if (event.user.code == REPLENISH_BOMB)
+	else if (event.user.code == REPLENISH_WEAPON)
 	{
 		Bomb::BombType type = (Bomb::BombType)(long)event.user.data1;
 		bombs_[type] += 1;
@@ -206,10 +211,18 @@ void Game::HandleEvent(SDL_Event &event)
 			bombs_[type] = Bomb::INFO[type].quota;
 		}
 	}
+	else if (event.user.code == SPAWN_ASTEROID)
+	{
+		new Asteroid((b2Body*)event.user.data1);
+	}
 	else if (event.user.code == SLOW_ASTEROID)
 	{
 		Asteroid* asteroid = (Asteroid*)event.user.data1;
 		asteroid->Slow();
+	}
+	else if (event.user.code == USE_WEAPON)
+	{
+		UseWeapon();
 	}
 }
 

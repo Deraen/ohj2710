@@ -16,6 +16,8 @@
 #include "interfaces/Touchable.hpp"
 #include "Assets.hpp"
 
+class Laser;
+
 /*
  * A planet is a player.
  */
@@ -29,6 +31,7 @@ public:
 	inline float GetMass() const { return 2 * M_PI * GetRadius() * type_.def->density; }
 
 	void Draw(b2Body* body) const;
+
 	inline Sprite* GetSprite() const { return type_.sprite; }
 	inline b2Vec2 GetDimensions() const { return type_.meters; }
 
@@ -37,9 +40,8 @@ public:
 	void TouchEnd();
 private:
 	Assets::Type type_;
-
-	bool touched_;
-	b2Vec2 touchPosition_;
+	Laser* laser_;
+	b2Vec2 weaponAim_;
 };
 
 #endif /* PLANET_H_ */

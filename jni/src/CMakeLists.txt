@@ -24,6 +24,7 @@ set(SOURCES
 	interfaces/Drawable.cpp
 	objects/Asteroid.cpp
 	objects/Bomb.cpp
+	objects/Laser.cpp
 	objects/Planet.cpp
 	objects/Sprite.cpp
 	)
@@ -45,4 +46,3 @@ target_link_libraries (
 
 add_dependencies(peli build-assets)
 
-file(COPY ${CMAKE_CURRENT_BINARY_DIR}/peli DESTINATION .)

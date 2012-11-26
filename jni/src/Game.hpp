@@ -1,5 +1,3 @@
-
-
 /*
  * Game.hh
  *
@@ -10,12 +8,11 @@
 #ifndef GAME_HH_
 #define GAME_HH_
 
-#include <queue>
-
 #include "Box2D/Box2D.h"
 
 #include "objects/Bomb.hpp"
 
+class Laser;
 class Asteroid;
 
 class Game: public b2ContactListener {
@@ -26,8 +23,10 @@ public:
 		COLLISION_ASTEROID_BOMB,
 		COLLISION_BOMB_BOMB,
 		DELETE_BODY,
-		REPLENISH_BOMB,
-		SLOW_ASTEROID
+		REPLENISH_WEAPON,
+		USE_WEAPON,
+		SPAWN_ASTEROID,
+		SLOW_ASTEROID,
 	};
 
 	Game();
@@ -50,7 +49,8 @@ public:
 
 	inline b2World* world() { return &world_; }
 
-	void Shoot(b2Body* planet, float radians, float force);
+	bool WeaponHasUses() const;
+	void UseWeapon();
 	inline void SelectWeapon(const Bomb::BombType weapon) { selectedWeapon_ = weapon; }
 
 	void BeginContact(b2Contact* contact);
@@ -68,8 +68,8 @@ private:
 	b2World world_;
 
 	bool running_;
-
 	int points_;
+
 	Bomb::BombType selectedWeapon_;
 	unsigned int bombs_[Bomb::BombType::COUNT_];
 };

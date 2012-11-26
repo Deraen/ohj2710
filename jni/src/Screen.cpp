@@ -33,7 +33,7 @@ Screen::~Screen()
 void Screen::init()
 {
 	// Initialize SDL.
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) // | SDL_INIT_AUDIO
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) // | SDL_INIT_AUDIO
 	{
 		return;
 	}
