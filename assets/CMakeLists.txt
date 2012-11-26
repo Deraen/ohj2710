@@ -7,4 +7,4 @@ function    (cm_export_file FILE DEST)
   install(FILES "${FILE}" DESTINATION "${DEST}")
 endfunction (cm_export_file)
 
-cm_export_file("visitor1.ttf" ".")
+cm_export_file("visitor1.ttf" "..")

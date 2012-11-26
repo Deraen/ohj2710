@@ -46,3 +46,4 @@ target_link_libraries (
 
 add_dependencies(peli build-assets)
 
+FILE(COPY ${CMAKE_CURRENT_BINARY_DIR}/peli DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../..)
