@@ -2,7 +2,7 @@
 	"class": "Asteroid",
 	"type": "NORMAL",
 	"sprite": "asteroid.png",
-	"meters": [0.2, 0.2],
+	"meters": [0.3, 0.3],
 	"shape": {
 		"type": "b2PolygonShape",
 		"pixels": [[-8, -8], [8, 0], [-8, 8]]

@@ -5,8 +5,7 @@
  *      Author: juho
  */
 
-#include "SDL_log.h"
-#include "SDL2_gfxPrimitives.h"
+#include "SDL.h"
 
 #include "objects/Planet.hpp"
 #include "Game.hpp"
@@ -26,8 +25,8 @@ namespace {
 
 		SDL_PushEvent(&event);
 
-		// asteroid every 1ms - 10sec
-		return rand() % 9999 + 1;
+		// asteroid every 1ms - 5sec
+		return rand() % 4999 + 1;
 	}
 }
 
@@ -37,6 +36,7 @@ Planet::Planet():
 	Touchable(),
 	weaponAim_(0, 0)
 {
+
 	type_ = Assets::instance().info("Planet", "EARTH");
 
 	b2BodyDef temp;
@@ -49,6 +49,31 @@ Planet::Planet():
 	SDL_Log("Planet m=%f", GetMass());
 
 	SDL_AddTimer(10, SpawnAsteroid, GetBody());
+
+	Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	rmask = 0xff000000;
+	gmask = 0x00ff0000;
+	bmask = 0x0000ff00;
+	amask = 0x000000ff;
+#else
+	rmask = 0x000000ff;
+	gmask = 0x0000ff00;
+	bmask = 0x00ff0000;
+	amask = 0xff000000;
+#endif
+
+	SDL_Surface* surface = SDL_CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask);
+
+	Uint32 color = SDL_MapRGBA(surface->format, 255, 0, 150, 255);
+	SDL_Rect rect;
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = 1;
+	rect.h = 1;
+	SDL_FillRect(surface, &rect, color);
+
+	texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface);
 }
 
 Planet::~Planet()
@@ -58,6 +83,9 @@ Planet::~Planet()
 
 void Planet::Draw(b2Body *body) const
 {
+	static SDL_Point rot;
+	rot.x = 0;
+	rot.y = 2;
 	if (Game::instance().SelectedWeapon() == Bomb::BombType::LASER)
 	{
 		laser_->Draw();
@@ -65,13 +93,19 @@ void Planet::Draw(b2Body *body) const
 	else if (weaponAim_.x != 0 || weaponAim_.y != 0)
 	{
 		b2Vec2 p1 = Screen::instance().toPixels(GetBody()->GetPosition(), true);
-		Sint16 x1 = static_cast<Sint16>(p1.x);
-		Sint16 y1 = static_cast<Sint16>(p1.y);
 
-		b2Vec2 p2 = Screen::instance().toPixels(GetBody()->GetPosition() + weaponAim_, true);
-		Sint16 x2 = static_cast<Sint16>(p2.x);
-		Sint16 y2 = static_cast<Sint16>(p2.y);
-		thickLineRGBA(Screen::instance().renderer(), x1, y1, x2, y2, 4, 200, 0, 150, 255);
+		SDL_Rect dst;
+		dst.x = p1.x;
+		dst.y = p1.y;
+		dst.w = weaponAim_.Length() * Screen::instance().pixelsPerMeter();
+		dst.h = 5;
+
+		float32 angle = (180 * atan2(weaponAim_.y, weaponAim_.x) / M_PI);
+#ifdef __ANDROID__
+		// There might be a bug in SDL...
+		angle = -angle;
+#endif
+		SDL_RenderCopyEx(Screen::instance().renderer(), texture_, NULL, &dst, angle, &rot, SDL_FLIP_NONE);
 	}
 
 	Drawable::Draw(body);

@@ -28,6 +28,7 @@ public:
 	inline Sprite* GetSprite() const { return NULL; }
 	inline b2Vec2 GetDimensions() const { return b2Vec2(0, 0); }
 
+	inline bool Active() const { return active_; }
 	void Activate();
 	void Deactivate();
 	void SetAim(const b2Vec2& aim);
@@ -39,6 +40,9 @@ private:
 	bool active_;
 	b2Vec2 aim_;
 	SDL_TimerID timer_;
+
+	// For drawing laser
+	SDL_Texture* texture_;
 };
 
 #endif /* LASER_H_ */

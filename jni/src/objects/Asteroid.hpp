@@ -29,6 +29,8 @@ private:
 	Assets::Type type_;
 
 	static unsigned int count_;
+
+	SDL_TimerID timer_;
 };
 
 #endif /* ASTEROID_H_ */

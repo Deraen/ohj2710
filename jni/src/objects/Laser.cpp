@@ -5,7 +5,7 @@
  *      Author: juho
  */
 
-#include "SDL2_gfxPrimitives.h"
+#include "SDL.h"
 
 #include "Assets.hpp"
 #include "Laser.hpp"
@@ -24,6 +24,31 @@ Laser::Laser(b2Body* parent):
 
 	Planet* planet = (Planet*)parent->GetUserData();
 	float r = planet->GetRadius() + 1.0;
+
+	Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	rmask = 0xff000000;
+	gmask = 0x00ff0000;
+	bmask = 0x0000ff00;
+	amask = 0x000000ff;
+#else
+	rmask = 0x000000ff;
+	gmask = 0x0000ff00;
+	bmask = 0x00ff0000;
+	amask = 0xff000000;
+#endif
+
+	SDL_Surface* surface = SDL_CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask);
+
+	Uint32 color = SDL_MapRGBA(surface->format, 200, 0, 0, 255);
+	SDL_Rect rect;
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = 1;
+	rect.h = 1;
+	SDL_FillRect(surface, &rect, color);
+
+	texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface);
 }
 
 Laser::~Laser()
@@ -33,23 +58,26 @@ Laser::~Laser()
 
 void Laser::Draw()
 {
-	if (!Game::instance().WeaponHasUses()) {
-		active_ = false;
-		SDL_RemoveTimer(timer_);
-		timer_ = 0;
-	}
+	static SDL_Point rot;
+	rot.x = 0;
+	rot.y = 2;
 
 	if (!active_) return;
 
 	unsigned int px = Screen::instance().pixelsPerMeter();
-	b2Vec2 p = Screen::instance().toPixels(parent_->GetPosition(), true);
-	Sint16 x1 = p.x;
-	Sint16 y1 = p.y;
-	Sint16 x2 = p.x + aim_.x * px;
-	Sint16 y2 = p.y + aim_.y * px;
-	auto render = Screen::instance().renderer();
+	b2Vec2 p1 = Screen::instance().toPixels(parent_->GetPosition(), true);
 
-	thickLineRGBA(render, x1, y1, x2, y2, 10, 200, 0, 0, 255);
+	SDL_Rect dst;
+	dst.x = p1.x;
+	dst.y = p1.y;
+	dst.w = aim_.Length() * Screen::instance().pixelsPerMeter();
+	dst.h = 8;
+
+	float32 angle = 180 * atan2(aim_.y, aim_.x) / M_PI;
+#ifdef __ANDROID__
+		angle = -angle;
+#endif
+	SDL_RenderCopyEx(Screen::instance().renderer(), texture_, NULL, &dst, angle, &rot, SDL_FLIP_NONE);
 
 	Game::instance().world()->RayCast(this, parent_->GetPosition(), parent_->GetPosition() + aim_);
 }
@@ -58,26 +86,36 @@ namespace {
 	Uint32 UseLaser(Uint32 interval, void* param)
 	{
 		SDL_Event event;
-		event.type = SDL_USEREVENT;
-		event.user.code = Game::USE_WEAPON;
+		// This might be called from a different thread but probably it doesn't matter
+		if (!((Laser*)param)->Active() || !Game::instance().WeaponHasUses())
+		{
+			event.type = SDL_USEREVENT;
+			event.user.code = Game::STOP_LASER_FUU;
+			event.user.data1 = param;
+			interval = 0;
+		}
+		else
+		{
+			event.type = SDL_USEREVENT;
+			event.user.code = Game::USE_WEAPON;
+			interval = 500;
+		}
 
 		SDL_PushEvent(&event);
 
-		return 500;
+		return interval;
 	}
 }
 
 void Laser::Activate()
 {
 	active_ = true;
-	timer_ = SDL_AddTimer(10, UseLaser, NULL);
+	SDL_AddTimer(10, UseLaser, this);
 }
 
 void Laser::Deactivate()
 {
 	active_ = false;
-	SDL_RemoveTimer(timer_);
-	timer_ = 0;
 }
 
 void Laser::SetAim(const b2Vec2& aim)

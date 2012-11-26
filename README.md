@@ -65,9 +65,12 @@ It will also try to send .apk to connected Android phone using adb.
 
 ### Weapons
 
+On desktop weapons can be selected with keys 1 to 4.
+
 #### Normal
 
 Detonates one asteroid. Other asteroids will go through the explosion unharmed.
+Slightly heavier than others.
 
 #### Splash
 
@@ -77,7 +80,7 @@ explosion get destroyed.
 #### Chain
 
 Detonates one asteroid. If another asteroid passes through the explosion
-it'll explode continuen the chain.
+it'll explode continuing the chain.
 
 #### Laser
 

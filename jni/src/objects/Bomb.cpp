@@ -23,6 +23,11 @@ const Bomb::Info Bomb::INFO[] = {
 
 unsigned int Bomb::count_ = 0;
 
+
+// All bombs on same collision group. Negative numbers means that objects
+// with same group never collide with each other.
+b2Filter bombFilter_;
+
 Bomb::Bomb(b2Body* parent, BombType type, float radians, float force):
 	Object(),
 	Drawable(),
@@ -30,6 +35,8 @@ Bomb::Bomb(b2Body* parent, BombType type, float radians, float force):
 	type__(type),
 	status_(DEFAULT)
 {
+	bombFilter_.groupIndex = -1;
+
 	type_ = Assets::instance().info("Bomb", INFO[type].name);
 
 	Planet* planet = (Planet*)parent->GetUserData();
@@ -41,7 +48,9 @@ Bomb::Bomb(b2Body* parent, BombType type, float radians, float force):
 	temp.angle = radians;
 	CreateBody(temp, type_.def);
 
-	force *= 5;
+	GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
+
+	force *= 10;
 	GetBody()->ApplyForce(b2Vec2(force  * std::cos(radians), force * std::sin(radians)), GetBody()->GetWorldCenter());
 	GetBody()->SetBullet(true);
 	SDL_Log("Bomb created (%f, %f)", GetBody()->GetPosition().x, GetBody()->GetPosition().y);
@@ -63,6 +72,8 @@ Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
 	temp.type = b2_dynamicBody;
 	temp.angle = 0;
 	CreateBody(temp, type_.def);
+
+	GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
 
 	GetBody()->SetBullet(true);
 	SDL_Log("Bomb created (%f, %f)", GetBody()->GetPosition().x, GetBody()->GetPosition().y);
@@ -100,7 +111,7 @@ void Bomb::Draw(b2Body *body) const
 		}
 		else if (type__ == CHAIN)
 		{
-			filledCircleRGBA(render, x, y, 0.4 * px, 255, 0, 150, 255);
+			filledCircleRGBA(render, x, y, 0.3 * px, 255, 0, 150, 255);
 		}
 	}
 }
@@ -137,47 +148,48 @@ namespace {
 		// It wont move
 		// It has circle collision shape (explosion)
 		b2CircleShape circle;
-		circle.m_radius = 0.4;
+		circle.m_radius = 0.3;
 
 		b2FixtureDef def;
 		def.shape = &circle;
 		body->CreateFixture(&def);
 		body->SetLinearVelocity(b2Vec2(0, 0));
 		body->SetAngularVelocity(0);
+		body->GetFixtureList()->SetFilterData(bombFilter_);
 
-		SDL_AddTimer(1000, Destroy, body);
+		SDL_AddTimer(2000, Destroy, body);
 	}
 }
 
 void Bomb::Detonate(b2Body* other)
 {
-	if (type__ == SPLASH && status_ == DETONATED)
+	if (type__ == CHAIN && status_ == DETONATED)
 	{
-		Game::instance().addPoint();
-		Game::instance().world()->DestroyBody(other);
-		return;
-	}
-	else if (type__ == CHAIN && status_ == DETONATED)
-	{
-		Game::instance().addPoint();
 		// Create new chain bomb that is already detonated
 		Bomb* tmp = new Bomb(CHAIN, other->GetPosition(), DETONATED);
 
 		SetupChain(tmp->GetBody());
-
-		// Destroy asteroids body
-		Game::instance().world()->DestroyBody(other);
-
-		return;
 	}
 	else if (type__ == NORMAL && status_ == DETONATED)
 	{
 		return;
 	}
 
-	status_ = DETONATED;
 	Game::instance().addPoint();
-	Game::instance().world()->DestroyBody(other);
+
+	SDL_Event event;
+	event.type = SDL_USEREVENT;
+	event.user.code = Game::DELETE_BODY;
+	event.user.data1 = other;
+
+	SDL_PushEvent(&event);
+
+	if (status_ == DETONATED)
+	{
+		return;
+	}
+
+	status_ = DETONATED;
 	if (type__ == NORMAL)
 	{
 		// Normal bomb destroys hit asteroid immediatly
@@ -204,18 +216,15 @@ void Bomb::Detonate(b2Body* other)
 		GetBody()->CreateFixture(&def);
 		GetBody()->SetLinearVelocity(b2Vec2(0, 0));
 		GetBody()->SetAngularVelocity(0);
+		GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
 
 		// Explosion stays for 1sec
-		SDL_AddTimer(1000, Destroy, GetBody());
+		SDL_AddTimer(2000, Destroy, GetBody());
 	}
 	else if (type__ == CHAIN)
 	{
 		// Display small explosion for short time
 		// If other asteroids go through explosion Detonate them
 		SetupChain(GetBody());
-	}
-	else if (type__ == LASER)
-	{
-		// ?!?!?
 	}
 }

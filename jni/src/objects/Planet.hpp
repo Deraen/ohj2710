@@ -1,4 +1,5 @@
 
+
 /*
  * Planet.h
  *
@@ -42,6 +43,9 @@ private:
 	Assets::Type type_;
 	Laser* laser_;
 	b2Vec2 weaponAim_;
+
+	// For drawing weapon aim
+	SDL_Texture* texture_;
 };
 
 #endif /* PLANET_H_ */

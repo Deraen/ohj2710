@@ -56,6 +56,8 @@ void Game::loop()
 {
 	while(running_)
 	{
+		deleted_.clear();
+
 		Screen::instance().draw();
 
 		Step();
@@ -69,7 +71,7 @@ void Game::loop()
 
 void Game::Step()
 {
-	static const float G = 2.66726;
+	static const float G = 0.45;
 
 	world_.Step(1.0 / 60.0, 10, 10);
 	world_.ClearForces();
@@ -90,11 +92,15 @@ void Game::Step()
 			if (m2 != 0 && body2->GetType() != b2_staticBody && body != body2)
 			{
 				b2Vec2 d = body->GetPosition() - body2->GetPosition();
-				float f = (G * m1 * m2) / d.LengthSquared();
-				d.Normalize();
-				d *= f;
+				float len = d.LengthSquared();
+				// Strange things could happend if two bombs are over each other
+				if (len > 0.01) {
+					float f = (G * m1 * m2) / len;
+					d.Normalize();
+					d *= f;
 
-				body2->ApplyForceToCenter(d);
+					body2->ApplyForceToCenter(d);
+				}
 			}
 			body2 = body2->GetNext();
 		}
@@ -152,11 +158,6 @@ void Game::BeginContact(b2Contact *contact)
 		b1 = b2;
 		b2 = tmp;
 	}
-	else if (dynamic_cast<Bomb*>(obj1) != NULL && dynamic_cast<Bomb*>(obj2))
-	{
-		SDL_Log("Contact: Bomb <-> Bomb");
-		event.user.code = COLLISION_BOMB_BOMB;
-	}
 	else
 	{
 		return;
@@ -169,37 +170,28 @@ void Game::BeginContact(b2Contact *contact)
 	SDL_PushEvent(&event);
 }
 
-// void Game::EndContact(b2Contact *contact)
-// {
-// 	SDL_Log("Kosketus loppu");
-// }
-
 void Game::HandleEvent(SDL_Event &event)
 {
 	if (event.user.code == COLLISION_ASTEROID_PLANET)
 	{
 		removePoint();
 
-		world_.DestroyBody((b2Body*)event.user.data1);
+		DestroyBody((b2Body*)event.user.data1);
 	}
 	else if (event.user.code == COLLISION_BOMB_PLANET)
 	{
 		removePoint();
 
-		world_.DestroyBody((b2Body*)event.user.data1);
+		DestroyBody((b2Body*)event.user.data1);
 	}
 	else if (event.user.code == COLLISION_ASTEROID_BOMB)
 	{
 		// blow up bomb
 		((Bomb*)((b2Body*)event.user.data2)->GetUserData())->Detonate((b2Body*)event.user.data1);
 	}
-	else if (event.user.code == COLLISION_BOMB_BOMB)
-	{
-		// Bombs are so smart that they'll only detonate if they hit asteroid
-	}
 	else if (event.user.code == DELETE_BODY)
 	{
-		world_.DestroyBody((b2Body*)event.user.data1);
+		DestroyBody((b2Body*)event.user.data1);
 	}
 	else if (event.user.code == REPLENISH_WEAPON)
 	{
@@ -224,9 +216,27 @@ void Game::HandleEvent(SDL_Event &event)
 	{
 		UseWeapon();
 	}
+	else if (event.user.code == STOP_LASER_FUU)
+	{
+		((Laser*)event.user.data1)->Deactivate();
+	}
 }
 
 unsigned int Game::BombCount(Bomb::BombType type) const
 {
 	return bombs_[type];
+}
+
+void Game::DestroyBody(b2Body* body)
+{
+	// Prevent double deletion
+	auto f = deleted_.find(body);
+	if (f != deleted_.end()) return;
+
+	deleted_.insert(body);
+
+	Object* obj = (Object*)body->GetUserData();
+	delete obj;
+
+	world_.DestroyBody(body);
 }

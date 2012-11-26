@@ -8,6 +8,8 @@
 #ifndef GAME_HH_
 #define GAME_HH_
 
+#include <set>
+
 #include "Box2D/Box2D.h"
 
 #include "objects/Bomb.hpp"
@@ -21,12 +23,12 @@ public:
 		COLLISION_ASTEROID_PLANET,
 		COLLISION_BOMB_PLANET,
 		COLLISION_ASTEROID_BOMB,
-		COLLISION_BOMB_BOMB,
 		DELETE_BODY,
 		REPLENISH_WEAPON,
 		USE_WEAPON,
 		SPAWN_ASTEROID,
 		SLOW_ASTEROID,
+		STOP_LASER_FUU
 	};
 
 	Game();
@@ -64,6 +66,8 @@ public:
 	inline Bomb::BombType SelectedWeapon() const { return selectedWeapon_; }
 	unsigned int BombCount(Bomb::BombType type) const;
 
+	void DestroyBody(b2Body* body);
+
 private:
 	b2World world_;
 
@@ -72,6 +76,10 @@ private:
 
 	Bomb::BombType selectedWeapon_;
 	unsigned int bombs_[Bomb::BombType::COUNT_];
+
+	std::set<b2Body*> deleted_;
+
+	static b2Filter bombFilter_;
 };
 
 #endif /* GAME_HH_ */

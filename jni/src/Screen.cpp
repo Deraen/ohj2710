@@ -214,6 +214,25 @@ void Screen::processInput()
 				ui_->TouchEnd();
 			}
 		}
+		else if (event.type == SDL_KEYUP)
+		{
+			if (event.key.keysym.sym == SDLK_1)
+			{
+				Game::instance().SelectWeapon(Bomb::BombType::NORMAL);
+			}
+			else if (event.key.keysym.sym == SDLK_2)
+			{
+				Game::instance().SelectWeapon(Bomb::BombType::SPLASH);
+			}
+			else if (event.key.keysym.sym == SDLK_3)
+			{
+				Game::instance().SelectWeapon(Bomb::BombType::CHAIN);
+			}
+			else if (event.key.keysym.sym == SDLK_4)
+			{
+				Game::instance().SelectWeapon(Bomb::BombType::LASER);
+			}
+		}
 		else if (event.type == SDL_USEREVENT)
 		{
 			Game::instance().HandleEvent(event);

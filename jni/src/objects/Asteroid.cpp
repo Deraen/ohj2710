@@ -40,23 +40,25 @@ Asteroid::Asteroid(b2Body* planet):
 
 	// Init Box2D
 	b2BodyDef temp;
-	temp.position = planet->GetPosition() + b2Vec2(5.0 * std::cos(pos), 5.0 * std::sin(pos));
+	temp.position = planet->GetPosition() + b2Vec2(7.0 * std::cos(pos), 7.0 * std::sin(pos));
 	temp.type = b2_dynamicBody;
 	CreateBody(temp, type_.def);
 
 	// + or - 90°
 	pos += (((rand() % 1) * 2) - 1) * M_PI / 2;
 
-	GetBody()->ApplyForce(b2Vec2(11.0 * std::cos(pos), 11.0 * std::sin(pos)), GetBody()->GetWorldCenter());
+	GetBody()->ApplyForce(b2Vec2(8.0 * std::cos(pos), 8.0 * std::sin(pos)), GetBody()->GetWorldCenter());
 	SDL_Log("Asteroid m=%f @(%f, %f)", GetBody()->GetMass(), GetBody()->GetPosition().x, GetBody()->GetPosition().y);
 
-	SDL_AddTimer(1000, SlowEvent, this);
+	timer_ = SDL_AddTimer(1000, SlowEvent, this);
 
 	++count_;
 }
 
 Asteroid::~Asteroid()
 {
+	SDL_RemoveTimer(timer_);
+
 	--count_;
 	SDL_Log("~Asteroid");
 }
@@ -64,7 +66,7 @@ Asteroid::~Asteroid()
 void Asteroid::Slow()
 {
 	b2Vec2 f = GetBody()->GetLinearVelocity();
-	// Asteroids lose 2.5% of their velocity / second
-	f *= -0.025;
+	// Asteroids lose 0.4% of their velocity / second
+	f *= -0.004;
 	GetBody()->ApplyForce(f, GetBody()->GetWorldCenter());
 }
