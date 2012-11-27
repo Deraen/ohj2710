@@ -84,7 +84,7 @@ FIND_PATH(SDL2TTF_INCLUDE_DIR SDL_ttf.h
 )
 
 FIND_LIBRARY(SDL2TTF_LIBRARY_TEMP
-	NAMES SDL_ttf
+	NAMES SDL2_ttf
 	HINTS
 	$ENV{SDL2TTFDIR}
 	PATH_SUFFIXES lib64 lib
@@ -98,7 +98,7 @@ IF(NOT SDL2TTF_BUILDING_LIBRARY)
 		# seem to provide SDL2TTFmain for compatibility even though they don't
 		# necessarily need it.
 		FIND_LIBRARY(SDL2TTFMAIN_LIBRARY
-			NAMES SDL2_gfx
+			NAMES SDL2_ttf
 			HINTS
 			$ENV{SDL2TTFDIR}
 			PATH_SUFFIXES lib64 lib

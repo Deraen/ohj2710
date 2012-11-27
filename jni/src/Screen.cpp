@@ -59,6 +59,27 @@ void Screen::init()
 	// Get the first available Hardware-accelerated renderer for this window.
 	renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
 
+
+
+
+	SDL_RWops *rw = SDL_RWFromFile("visitor1.ttf", "rb");
+	if ( rw == NULL ) {
+		TTF_SetError(SDL_GetError());
+		return;
+	}
+
+
+
+
+	unsigned int size = 24;
+
+	font_ = TTF_OpenFont("visitor1.ttf", size);
+	if (!font_)
+	{
+		printf("TTF_OpenFont: %s\n", TTF_GetError());
+		return;
+	}
+
 	resized();
 
 	debugger_ = new DebugDraw();
@@ -252,22 +273,16 @@ void Screen::resized()
 
 	// Compute new pixels per meter
 	// Planet is 4 meters and should be 128px on 800px wide screen.
-	pixelsPerMeter_ = 128.0 * w_ / (DEF_SCREEN_WIDTH * 4.0);
+
+	pixelsPerMeter_ = 480.0 * std::min(static_cast<float>(w_) / DEF_SCREEN_WIDTH,
+                                       static_cast<float>(h_) / DEF_SCREEN_HEIGHT)
+                      / 16.0;
 
 	SDL_Log("Screen resolution %ix%i, pixels per meter %i", w_, h_, pixelsPerMeter_);
 
 	// Render viewport needs to be fixed after resize or it will be
 	// messed up after window shrinking.
 	SDL_RenderSetViewport(renderer_, &rect);
-
-	unsigned int size = h_ / 10;
-
-	font_ = TTF_OpenFont("visitor1.ttf", size);
-	if (!font_)
-	{
-		printf("TTF_OpenFont: %s\n", TTF_GetError());
-		return;
-	}
 }
 
 b2Vec2 Screen::toPixels(const b2Vec2 &coord, bool center) const

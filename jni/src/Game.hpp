@@ -16,6 +16,7 @@
 
 class Laser;
 class Asteroid;
+class Planet;
 
 class Game: public b2ContactListener {
 public:
@@ -70,6 +71,8 @@ public:
 
 private:
 	b2World world_;
+
+	Planet* planet_;
 
 	bool running_;
 	int points_;

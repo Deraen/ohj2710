@@ -49,7 +49,7 @@ Game::~Game()
 void Game::init()
 {
 	world_.SetContactListener(this);
-	new Planet();
+	planet_ = new Planet();
 }
 
 void Game::loop()
@@ -72,9 +72,12 @@ void Game::loop()
 void Game::Step()
 {
 	static const float G = 0.45;
+	static const float DESTROYRADIUS = 150 * 150;
 
 	world_.Step(1.0 / 60.0, 10, 10);
 	world_.ClearForces();
+
+	b2Vec2 planetPoint = planet_->GetBody()->GetPosition();
 
 	// All bodies affect all others bodies
 	b2Body* body = world_.GetBodyList();
@@ -103,6 +106,15 @@ void Game::Step()
 				}
 			}
 			body2 = body2->GetNext();
+		}
+
+		// Remove bodies that go too far away
+		if ((planetPoint - body->GetPosition()).LengthSquared() > DESTROYRADIUS) {
+			SDL_Event event;
+			event.type = SDL_USEREVENT;
+			event.user.code = Game::DELETE_BODY;
+			event.user.data1 = body;
+			SDL_PushEvent(&event);
 		}
 
 		body = body->GetNext();
