@@ -14,6 +14,45 @@
 #include "objects/Laser.hpp"
 #include "Screen.hpp"
 
+const Game::Level Game::LEVELS[] = {
+	Game::Level(
+		"Lvl1", // Level name
+		"MOON", // Planet name
+		0.45, // Gravity
+		Game::WeaponQuotas(20, 4, 4, 10),
+		1, // Rand
+		100, // Asteroids
+		8 // Asteroid initial force
+	),
+	Game::Level(
+		"Lvl2", // Level name
+		"EARTH", // Planet name
+		0.45, // Gravity
+		Game::WeaponQuotas(20, 4, 4, 10),
+		1, // Rand
+		100, // Asteroids
+		8 // Asteroid initial force
+	),
+	Game::Level(
+		"Lvl3", // Level name
+		"JUPITER", // Planet name
+		0.45, // Gravity
+		Game::WeaponQuotas(20, 4, 4, 10),
+		1, // Rand
+		100, // Asteroids
+		8 // Asteroid initial force
+	),
+	Game::Level(
+		"N+1", // Level name
+		"DEATHSTAR", // Planet name
+		0.45, // Gravity
+		Game::WeaponQuotas(20, 4, 4, 10),
+		1, // Rand
+		100, // Asteroids
+		8 // Asteroid initial force
+	)
+};
+
 namespace {
 	Uint32 Replenish(Uint32 interval, void* param)
 	{
@@ -29,7 +68,9 @@ namespace {
 }
 Game::Game():
 	world_(b2Vec2(0.0, 0.0)),
-	running_(true)
+	running_(true),
+	planet_(NULL),
+	level_(Levels::COUNT_)
 {
 	for (unsigned int i = 0; i < Bomb::BombType::COUNT_; ++i)
 	{
@@ -49,7 +90,6 @@ Game::~Game()
 void Game::init()
 {
 	world_.SetContactListener(this);
-	planet_ = new Planet();
 }
 
 void Game::loop()
@@ -71,11 +111,12 @@ void Game::loop()
 
 void Game::Step()
 {
-	static const float G = 0.45;
 	static const float DESTROYRADIUS = 150 * 150;
 
 	world_.Step(1.0 / 60.0, 10, 10);
 	world_.ClearForces();
+
+	if (planet_ == NULL) return;
 
 	b2Vec2 planetPoint = planet_->GetBody()->GetPosition();
 
@@ -98,7 +139,7 @@ void Game::Step()
 				float len = d.LengthSquared();
 				// Strange things could happend if two bombs are over each other
 				if (len > 0.01) {
-					float f = (G * m1 * m2) / len;
+					float f = (LevelInfo()->g * m1 * m2) / len;
 					d.Normalize();
 					d *= f;
 
@@ -251,4 +292,22 @@ void Game::DestroyBody(b2Body* body)
 	delete obj;
 
 	world_.DestroyBody(body);
+}
+
+void Game::SelectLevel(Game::Levels level)
+{
+	level_ = level;
+
+	// Destroying all bodies should also delete current planet_
+	b2Body* body = world_.GetBodyList();
+	while (body != NULL)
+	{
+		DestroyBody(body);
+		body = body->GetNext();
+	}
+
+	planet_ = NULL;
+	if (level_ != Levels::COUNT_) {
+		planet_ = new Planet(LevelInfo()->planet);
+	}
 }

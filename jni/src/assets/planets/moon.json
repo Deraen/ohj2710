@@ -1,0 +1,15 @@
+{
+	"class": "Planet",
+	"type": "MOON",
+	"sprite": "moon.png",
+	"meters": [3.0, 3.0],
+	"shape": {
+		"type": "b2CircleShape",
+		"pixels": 24
+	},
+	"physics": {
+		"density": 10.0,
+		"friction": 1.0,
+		"restitution": 0.1
+	}
+}

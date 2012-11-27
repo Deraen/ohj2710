@@ -30,14 +30,14 @@ namespace {
 	}
 }
 
-Planet::Planet():
+Planet::Planet(std::string name):
 	Object(),
 	Drawable(),
 	Touchable(),
 	weaponAim_(0, 0)
 {
 
-	type_ = Assets::instance().info("Planet", "EARTH");
+	type_ = Assets::instance().info("Planet", name);
 
 	b2BodyDef temp;
 	temp.position = b2Vec2(0.0, 0.0);
@@ -48,7 +48,7 @@ Planet::Planet():
 
 	SDL_Log("Planet m=%f", GetMass());
 
-	SDL_AddTimer(10, SpawnAsteroid, GetBody());
+	timer_ = SDL_AddTimer(10, SpawnAsteroid, GetBody());
 
 	Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -78,6 +78,7 @@ Planet::Planet():
 
 Planet::~Planet()
 {
+	SDL_RemoveTimer(timer_);
 	SDL_Log("~Planet");
 }
 

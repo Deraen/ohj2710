@@ -142,7 +142,11 @@ namespace {
 	}
 
 	void SetupChain(b2Body* body) {
-		body->DestroyFixture(body->GetFixtureList());
+		b2Fixture* fixture = body->GetFixtureList();
+		if (fixture != NULL)
+		{
+			body->DestroyFixture(fixture);
+		}
 
 		// Modify body so that:
 		// It wont move
@@ -195,7 +199,11 @@ void Bomb::Detonate(b2Body* other)
 		// Normal bomb destroys hit asteroid immediatly
 		// display small explosion for short time
 		GetBody()->SetType(b2BodyType::b2_staticBody);
-		GetBody()->DestroyFixture(GetBody()->GetFixtureList());
+		b2Fixture* fixture = GetBody()->GetFixtureList();
+		if (fixture != NULL)
+		{
+			GetBody()->DestroyFixture(fixture);
+		}
 
 		// Destroy bomb after a delay
 		SDL_AddTimer(500, Destroy, GetBody());
@@ -203,7 +211,11 @@ void Bomb::Detonate(b2Body* other)
 	else if (type__ == SPLASH)
 	{
 		// Display large explosion for some time and destroy asteroids that go through explosion
-		GetBody()->DestroyFixture(GetBody()->GetFixtureList());
+		b2Fixture* fixture = GetBody()->GetFixtureList();
+		if (fixture != NULL)
+		{
+			GetBody()->DestroyFixture(fixture);
+		}
 
 		// Modify body so that:
 		// It wont move

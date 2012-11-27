@@ -69,9 +69,52 @@ public:
 
 	void DestroyBody(b2Body* body);
 
+	enum Levels {
+		LVL1,
+		LVL2,
+		LVL3,
+		INF,
+		COUNT_
+	};
+
+	static unsigned int* WeaponQuotas(unsigned int normal, unsigned int splash, unsigned int chain, unsigned int laser) {
+		unsigned int* fuu = new unsigned int[Bomb::BombType::COUNT_];
+		fuu[0] = normal;
+		fuu[1] = splash;
+		fuu[2] = chain;
+		fuu[3] = laser;
+		return fuu;
+	};
+
+	struct Level {
+		std::string name;
+		std::string planet;
+		float g;
+		unsigned int quota[Bomb::BombType::COUNT_];
+		unsigned int rand;
+		unsigned int asteroids;
+		float asteroidForce;
+
+		Level(std::string name_, std::string planet_, float g_, unsigned int quota_[Bomb::BombType::COUNT_], unsigned int rand_, unsigned int asteroids_, float asteroidForce_):
+			name(name_),
+			planet(planet_),
+			g(g_),
+			rand(rand_),
+			asteroids(asteroids_),
+			asteroidForce(asteroidForce_)
+		{};
+	};
+
+	static const Level LEVELS[];
+
+	void SelectLevel(Levels level);
+	const Level* LevelInfo() const { return &LEVELS[level_]; }
+	inline Levels SelectedLevel() const { return level_; }
+
 private:
 	b2World world_;
 
+	Levels level_;
 	Planet* planet_;
 
 	bool running_;

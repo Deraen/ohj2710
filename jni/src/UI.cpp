@@ -50,6 +50,34 @@ UI::UI():
 	y = 0;
 	Button* points = new Points(x, y, 0, 0, 0);
 	buttons_.push_back(points);
+
+	x = 9;
+	y = 9;
+	Button* levels = new Button("Lvl", x, y, 10, 150, 10);
+	levels->f = []() {
+		Game::instance().SelectLevel(Game::Levels::COUNT_);
+	};
+	buttons_.push_back(levels);
+
+	y -= 1;
+	Button* lvl1 = new Level(Game::Levels::LVL1, x, y, 10, 150, 10);
+	lvl1->parent = levels;
+	buttons_.push_back(lvl1);
+
+	y -= 1;
+	Button* lvl2 = new Level(Game::Levels::LVL2, x, y, 10, 150, 10);
+	lvl2->parent = levels;
+	buttons_.push_back(lvl2);
+
+	y -= 1;
+	Button* lvl3 = new Level(Game::Levels::LVL3, x, y, 10, 150, 10);
+	lvl3->parent = levels;
+	buttons_.push_back(lvl3);
+
+	y -= 1;
+	Button* inf = new Level(Game::Levels::INF, x, y, 10, 10, 150);
+	inf->parent = levels;
+	buttons_.push_back(inf);
 }
 
 UI::~UI()
@@ -75,6 +103,18 @@ UI::Weapon::Weapon(Bomb::BombType type_, unsigned int x_, unsigned int y_, Uint8
 	};
 	activef = [&]() -> bool {
 		return Game::instance().SelectedWeapon() == type;
+	};
+}
+
+UI::Level::Level(Game::Levels level_, unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b_):
+	Button(Game::LEVELS[level_].name, x_, y_, r_, g_, b_),
+	level(level_)
+{
+	f = [&]() {
+		Game::instance().SelectLevel(level);
+	};
+	activef = [&]() -> bool {
+		return Game::instance().SelectedLevel() == level;
 	};
 }
 

@@ -8,6 +8,7 @@
 #include "SDL2_gfxPrimitives.h"
 
 #include "objects/Bomb.hpp"
+#include "Game.hpp"
 
 class UI
 {
@@ -51,6 +52,13 @@ private:
 
 		Bomb::BombType type;
 		unsigned int count;
+	};
+
+	struct Level: public Button
+	{
+		Level(Game::Levels type_, unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b_);
+
+		Game::Levels level;
 	};
 
 	struct Points: public Button

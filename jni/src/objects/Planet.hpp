@@ -25,7 +25,7 @@ class Laser;
 class Planet: public Object, public Drawable, public Touchable
 {
 public:
-	Planet();
+	Planet(std::string name);
 	virtual ~Planet();
 
 	inline float GetRadius() const { return type_.def->shape->m_radius; }
@@ -46,6 +46,8 @@ private:
 
 	// For drawing weapon aim
 	SDL_Texture* texture_;
+
+	SDL_TimerID timer_;
 };
 
 #endif /* PLANET_H_ */
