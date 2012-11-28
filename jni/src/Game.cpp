@@ -158,6 +158,33 @@ void Game::Step()
 
 		body = body->GetNext();
 	}
+
+	// Create asteroids
+	if (SDL_GetTicks() - previousAsteroid_ > LevelInfo()->asteroidSpawnSec
+	 && (asteroids_ == -1 || asteroids_ > 0))
+	{
+		new Asteroid(planet_->GetBody());
+		if (asteroids_ != -1) {
+			asteroids_ -= 1;
+		}
+		previousAsteroid_ = SDL_GetTicks();
+	}
+
+	// Replenish weapons
+	if (level_ == Levels::INF)
+	{
+		for (unsigned int i = 0; i < Bomb::BombType::COUNT_; ++i)
+		{
+			if (SDL_GetTicks() - previousReplenish_[i] > Bomb::INFO[i].replenishTime)
+			{
+				bombs_[i] += 1;
+				if (bombs_[i] > Bomb::INFO[i].quota)
+				{
+					bombs_[i] = Bomb::INFO[i].quota;
+				}
+			}
+		}
+	}
 }
 
 bool Game::WeaponHasUses() const
@@ -242,25 +269,6 @@ void Game::HandleEvent(SDL_Event &event)
 	{
 		DestroyBody((b2Body*)event.user.data1);
 	}
-	else if (event.user.code == REPLENISH_WEAPON)
-	{
-		Bomb::BombType type = (Bomb::BombType)(long)event.user.data1;
-		bombs_[type] += 1;
-
-		if (bombs_[type] > Bomb::INFO[type].quota)
-		{
-			bombs_[type] = Bomb::INFO[type].quota;
-		}
-	}
-	else if (event.user.code == SPAWN_ASTEROID)
-	{
-		if (asteroids_ == -1 || asteroids_ > 0) {
-			new Asteroid((b2Body*)event.user.data1);
-			if (asteroids_ != -1) {
-				asteroids_ -= 1;
-			}
-		}
-	}
 }
 
 unsigned int Game::BombCount(Bomb::BombType type) const
@@ -299,37 +307,6 @@ void Game::RemovePoint()
 	}
 }
 
-namespace {
-	Uint32 SpawnAsteroid(Uint32 interval, void* param)
-	{
-		if (Game::instance().Asteroids() == -1 || Game::instance().Asteroids() > 0) {
-			SDL_Event event;
-			event.type = SDL_USEREVENT;
-			event.user.code = Game::SPAWN_ASTEROID;
-			event.user.data1 = param;
-
-			SDL_PushEvent(&event);
-			return interval;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
-	Uint32 Replenish(Uint32 interval, void* param)
-	{
-		SDL_Event event;
-		event.type = SDL_USEREVENT;
-		event.user.code = Game::REPLENISH_WEAPON;
-		event.user.data1 = param;
-
-		SDL_PushEvent(&event);
-
-		return interval;
-	}
-}
-
 void Game::SelectLevel(Game::Levels level)
 {
 	level_ = level;
@@ -349,30 +326,25 @@ void Game::SelectLevel(Game::Levels level)
 
 	points_ = 0;
 
-	SDL_RemoveTimer(asteroidTimer_);
-	SDL_RemoveTimer(normalTimer_);
-	SDL_RemoveTimer(splashTimer_);
-	SDL_RemoveTimer(chainTimer_);
-	SDL_RemoveTimer(laserTimer_);
+	for (unsigned int i = 0; i < Bomb::BombType::COUNT_; ++i)
+	{
+		previousReplenish_[i] = SDL_GetTicks();
+	}
+	previousAsteroid_ = SDL_GetTicks();
 
 	planet_ = NULL;
 	if (level_ != Levels::COUNT_) {
 		points_ = LevelInfo()->lives;
 		asteroids_ = LevelInfo()->asteroids;
 
-		bombs_[Bomb::BombType::NORMAL] = LevelInfo()->normal;
-		bombs_[Bomb::BombType::SPLASH] = LevelInfo()->splash;
-		bombs_[Bomb::BombType::CHAIN] = LevelInfo()->chain;
-		bombs_[Bomb::BombType::LASER] = LevelInfo()->laser;
+		for (unsigned int i = 0; i < Bomb::BombType::COUNT_; ++i)
+		{
+			bombs_[i] = LevelInfo()->bombs[i];
+		}
 
 		if (level_ == Levels::INF)
 		{
 			srand(time(NULL));
-
-			normalTimer_ = SDL_AddTimer(5000, Replenish, (void*)Bomb::BombType::NORMAL);
-			splashTimer_ = SDL_AddTimer(10000, Replenish, (void*)Bomb::BombType::SPLASH);
-			chainTimer_ = SDL_AddTimer(10000, Replenish, (void*)Bomb::BombType::CHAIN);
-			laserTimer_ = SDL_AddTimer(1000, Replenish, (void*)Bomb::BombType::LASER);
 		}
 		else
 		{
@@ -380,7 +352,5 @@ void Game::SelectLevel(Game::Levels level)
 		}
 
 		planet_ = new Planet(LevelInfo()->planet);
-
-		asteroidTimer_ = SDL_AddTimer(LevelInfo()->asteroidSpawnSec, SpawnAsteroid, planet_->GetBody());
 	}
 }

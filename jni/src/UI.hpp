@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "SDL2_gfxPrimitives.h"
-
 #include "objects/Bomb.hpp"
 #include "Game.hpp"
 

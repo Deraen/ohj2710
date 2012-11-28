@@ -10,6 +10,18 @@
 #include "DebugDraw.hpp"
 #include "UI.hpp"
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+Uint32 Screen::RMASK = 0xff000000;
+Uint32 Screen::GMASK = 0x00ff0000;
+Uint32 Screen::BMASK = 0x0000ff00;
+Uint32 Screen::AMASK = 0x000000ff;
+#else
+Uint32 Screen::RMASK = 0x000000ff;
+Uint32 Screen::GMASK = 0x0000ff00;
+Uint32 Screen::BMASK = 0x00ff0000;
+Uint32 Screen::AMASK = 0xff000000;
+#endif
+
 Screen::Screen():
 	window_(NULL),
 	renderer_(NULL),
@@ -33,7 +45,7 @@ Screen::~Screen()
 void Screen::init()
 {
 	// Initialize SDL.
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) // | SDL_INIT_AUDIO
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) // | SDL_INIT_AUDIO
 	{
 		return;
 	}
@@ -87,7 +99,7 @@ void Screen::init()
 	                    | b2Draw::e_aabbBit
 	                    | b2Draw::e_jointBit
 	                    | b2Draw::e_centerOfMassBit);
-	Game::instance().world()->SetDebugDraw(debugger_);
+	Game::instance().World()->SetDebugDraw(debugger_);
 
 	ui_ = new UI();
 }
@@ -106,7 +118,7 @@ void Screen::draw()
 	// Clear the entire screen to the Renderer's base colour.
 	SDL_RenderClear(renderer_);
 
-	b2Body* body = Game::instance().world()->GetBodyList();
+	b2Body* body = Game::instance().World()->GetBodyList();
 	while (body != NULL) {
 		Drawable* obj = dynamic_cast<Drawable*>((Object*)body->GetUserData());
 		if (obj != NULL) {
@@ -120,7 +132,7 @@ void Screen::draw()
 
 	if (debug_)
 	{
-		Game::instance().world()->DrawDebugData();
+		Game::instance().World()->DrawDebugData();
 	}
 
 	// Flip the shown and hidden buffers to refresh the screen.
@@ -179,7 +191,7 @@ void Screen::processInput()
 	{
 		if (event.type == SDL_QUIT)
 		{
-			Game::instance().stop();
+			Game::instance().Stop();
 		}
 		else if (event.type == SDL_WINDOWEVENT)
 		{
@@ -198,7 +210,7 @@ void Screen::processInput()
 			aabb.upperBound = touchPoint_;
 
 			// This will call ReportFixture.
-			Game::instance().world()->QueryAABB(this, aabb);
+			Game::instance().World()->QueryAABB(this, aabb);
 
 			if (touchObject_ != NULL) {
 				touchObject_->TouchStart();
@@ -301,4 +313,14 @@ b2Vec2 Screen::toMeters(const b2Vec2 &coord) const
 {
 	b2Vec2 copy(coord.x / pixelsPerMeter_, coord.y / pixelsPerMeter_);
 	return copy;
+}
+
+SDL_Surface* Screen::CreateSurface(int width, int height, int depth)
+{
+	return SDL_CreateRGBSurface(0, 1, 1, 32, RMASK, GMASK, BMASK, AMASK);
+}
+
+SDL_Surface* Screen::CreateSurfaceFrom(void *data, int width, int height, int depth, int pitch)
+{
+	return SDL_CreateRGBSurfaceFrom(data, width, height, depth, pitch, RMASK, GMASK, BMASK, AMASK);
 }

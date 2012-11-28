@@ -2,7 +2,6 @@
 #include <string>
 #include <sstream>
 
-#include "SDL2_gfxPrimitives.h"
 #include "SDL_ttf.h"
 
 #include "UI.hpp"

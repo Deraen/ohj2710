@@ -26,8 +26,6 @@ public:
 		COLLISION_BOMB_PLANET,
 		COLLISION_ASTEROID_BOMB,
 		DELETE_BODY,
-		REPLENISH_WEAPON,
-		SPAWN_ASTEROID,
 	};
 
 	Game();
@@ -55,7 +53,6 @@ public:
 	inline void SelectWeapon(const Bomb::BombType weapon) { selectedWeapon_ = weapon; }
 
 	void BeginContact(b2Contact* contact);
-	// void EndContact(b2Contact* contact);
 
 	void HandleEvent(SDL_Event& event);
 
@@ -79,10 +76,7 @@ public:
 		std::string name;
 		std::string planet;
 		float g;
-		unsigned int normal;
-		unsigned int splash;
-		unsigned int chain;
-		unsigned int laser;
+		unsigned int bombs[Bomb::BombType::COUNT_];
 		unsigned int rand;
 		int asteroids;
 		float asteroidForce;
@@ -104,10 +98,7 @@ public:
 			name(name_),
 			planet(planet_),
 			g(g_),
-			normal(normal_),
-			splash(splash_),
-			chain(chain_),
-			laser(laser_),
+			bombs{normal_, splash_, chain_, laser_},
 			rand(rand_),
 			asteroids(asteroids_),
 			asteroidForce(asteroidForce_),
@@ -121,8 +112,6 @@ public:
 	void SelectLevel(Levels level);
 	const Level* LevelInfo() const { return &LEVELS[level_]; }
 	inline Levels SelectedLevel() const { return level_; }
-
-	inline int Asteroids() const { return asteroids_; }
 
 private:
 	b2World world_;
@@ -141,11 +130,8 @@ private:
 
 	static b2Filter bombFilter_;
 
-	SDL_TimerID asteroidTimer_;
-	SDL_TimerID normalTimer_;
-	SDL_TimerID splashTimer_;
-	SDL_TimerID chainTimer_;
-	SDL_TimerID laserTimer_;
+	unsigned int previousReplenish_[Bomb::BombType::COUNT_];
+	unsigned int previousAsteroid_;
 };
 
 #endif /* GAME_HH_ */

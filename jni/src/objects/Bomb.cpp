@@ -14,11 +14,12 @@
 #include "objects/Planet.hpp"
 #include "Screen.hpp"
 
+// Quota and replenish time affect inf game mode
 const Bomb::Info Bomb::INFO[] = {
-	{"NORMAL", 15},
-	{"SPLASH", 5},
-	{"CHAIN", 5},
-	{"LASER", 10}
+	{"NORMAL", 15, 5000},
+	{"SPLASH", 5, 10000},
+	{"CHAIN", 5, 10000},
+	{"LASER", 10, 1000}
 };
 
 unsigned int Bomb::count_ = 0;
@@ -140,10 +141,19 @@ void Bomb::Detonate(b2Body* other)
 	};
 
 	// What to do if asteroid hits explosion - "Special cases"
-	if (status_ == DETONATED && type__ == CHAIN)
+	if (status_ == DETONATED)
 	{
-		// Create new chain bomb that is already detonated
-		Bomb* tmp = new Bomb(CHAIN, other->GetPosition(), DETONATED);
+		if (type__ == CHAIN)
+		{
+			// Create new chain bomb that is already detonated
+			new Bomb(CHAIN, other->GetPosition(), DETONATED);
+		}
+		else if (type__ == NORMAL)
+		{
+			// Bomb might hit multiple asteroids but normal bomb will only
+			// destroy one of them.
+			return;
+		}
 	}
 
 	// What to do if asteroid hit bomb

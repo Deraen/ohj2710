@@ -18,35 +18,13 @@
 Laser::Laser(b2Body* parent):
 	parent_(parent),
 	active_(false),
-	aim_(0, 0)
+	aim_(0, 0),
+	previous_(SDL_GetTicks())
 {
-	// type_ = Assets::instance().info("Laser", INFO[type].name);
-
-	Planet* planet = (Planet*)parent->GetUserData();
-	float r = planet->GetRadius() + 1.0;
-
-	Uint32 rmask, gmask, bmask, amask;
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	rmask = 0xff000000;
-	gmask = 0x00ff0000;
-	bmask = 0x0000ff00;
-	amask = 0x000000ff;
-#else
-	rmask = 0x000000ff;
-	gmask = 0x0000ff00;
-	bmask = 0x00ff0000;
-	amask = 0xff000000;
-#endif
-
-	SDL_Surface* surface = SDL_CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask);
+	SDL_Surface* surface = Screen::CreateSurface(1, 1, 32);
 
 	Uint32 color = SDL_MapRGBA(surface->format, 0, 250, 0, 255);
-	SDL_Rect rect;
-	rect.x = 0;
-	rect.y = 0;
-	rect.w = 1;
-	rect.h = 1;
-	SDL_FillRect(surface, &rect, color);
+	SDL_FillRect(surface, NULL, color);
 
 	texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface);
 }
@@ -64,14 +42,7 @@ void Laser::Draw()
 
 	if (!active_) return;
 
-	unsigned int px = Screen::instance().pixelsPerMeter();
 	b2Vec2 p1 = Screen::instance().toPixels(parent_->GetPosition(), true);
-
-	if (Game::instance().SelectedLevel() == Game::Levels::INF)
-	{
-		p1.x -= 0.5 * px;
-		p1.y -= 0.7 * px;
-	}
 
 	SDL_Rect dst;
 	dst.x = p1.x;
@@ -81,18 +52,19 @@ void Laser::Draw()
 
 	float32 angle = 180 * atan2(aim_.y, aim_.x) / M_PI;
 #ifdef __ANDROID__
-		angle = -angle;
+	// Wat...
+	angle = -angle;
 #endif
 	SDL_RenderCopyEx(Screen::instance().renderer(), texture_, NULL, &dst, angle, &rot, SDL_FLIP_NONE);
 
-	Game::instance().world()->RayCast(this, parent_->GetPosition(), parent_->GetPosition() + aim_);
+	Game::instance().World()->RayCast(this, parent_->GetPosition(), parent_->GetPosition() + aim_);
 }
 
 void Laser::Tick()
 {
 	if (active_ && SDL_GetTicks() - previous_ > 500)
 	{
-		if (Game::instance().WeaponHasUses())
+		if (!Game::instance().WeaponHasUses())
 		{
 			active_ = false;
 		}
@@ -100,12 +72,16 @@ void Laser::Tick()
 		{
 			Game::instance().UseWeapon();
 		}
+		previous_ = SDL_GetTicks();
 	}
 }
 
 void Laser::Activate()
 {
 	active_ = true;
+
+	// We want first tick immediately
+	previous_ = 0;
 }
 
 void Laser::Deactivate()
@@ -131,7 +107,7 @@ float32 Laser::ReportFixture(b2Fixture *fixture, const b2Vec2 &point, const b2Ve
 
 		SDL_PushEvent(&event);
 
-		Game::instance().addPoint();
+		Game::instance().AddPoint();
 	}
 	return 1;
 }

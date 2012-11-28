@@ -56,6 +56,9 @@ public:
 	static const int DEF_SCREEN_WIDTH = 800;
 	static const int DEF_SCREEN_HEIGHT = 480;
 
+	static SDL_Surface* CreateSurface(int width, int height, int depth);
+	static SDL_Surface* CreateSurfaceFrom(void* data, int width, int height, int depth, int pitch);
+
 private:
 	// Window and Renderer.
 	SDL_Window* window_;
@@ -80,6 +83,11 @@ private:
 	Touchable* touchObject_;
 
 	UI* ui_;
+
+	static Uint32 RMASK;
+	static Uint32 GMASK;
+	static Uint32 BMASK;
+	static Uint32 AMASK;
 };
 
 #endif /* SCREEN_HPP_ */

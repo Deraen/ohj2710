@@ -21,27 +21,13 @@ Sprite::Sprite(int x, int y, unsigned char* data):
 	surface_(NULL),
 	texture_(NULL)
 {
-	Uint32 rmask, gmask, bmask, amask;
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	rmask = 0xff000000;
-	gmask = 0x00ff0000;
-	bmask = 0x0000ff00;
-	amask = 0x000000ff;
-#else
-	rmask = 0x000000ff;
-	gmask = 0x0000ff00;
-	bmask = 0x00ff0000;
-	amask = 0xff000000;
-#endif
-
 	src_.x = 0;
 	src_.y = 0;
 	src_.w = x;
 	src_.h = y;
 
 	// Surface
-	surface_ = SDL_CreateRGBSurfaceFrom(data, src_.w, src_.h, 32, src_.w * 4, rmask, gmask, bmask, amask);
-
+	surface_ = Screen::CreateSurfaceFrom(data, src_.w, src_.h, 32, src_.w * 4);
 	texture_ = SDL_CreateTextureFromSurface(Screen::instance().renderer(), surface_);
 }
 

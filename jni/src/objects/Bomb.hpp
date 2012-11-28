@@ -30,6 +30,7 @@ public:
 	struct Info {
 		std::string name;
 		int quota;
+		unsigned int replenishTime;
 	};
 	static const Info INFO[];
 

@@ -42,7 +42,6 @@ private:
 	b2Body* parent_;
 	bool active_;
 	b2Vec2 aim_;
-	// SDL_TimerID timer_;
 
 	unsigned int previous_;
 
