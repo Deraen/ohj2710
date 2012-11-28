@@ -46,8 +46,6 @@ private:
 
 	// For drawing weapon aim
 	SDL_Texture* texture_;
-
-	SDL_TimerID timer_;
 };
 
 #endif /* PLANET_H_ */

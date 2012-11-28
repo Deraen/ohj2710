@@ -63,6 +63,22 @@ It will also try to send .apk to connected Android phone using adb.
 
 ## About the game
 
+### Modes
+
+#### Normal [LVL1,2,3]
+
+Player has lives (shown on topleft corner). They will be reduced if asteroid
+or bomb hits planet. Game will end if lives reach zero.
+
+Player has limited number of weapons.
+
+#### INF [N+1]
+
+Player has points. Player will get points for destroying Asteroids.
+Game goes on forever.
+
+Weapons recharge over time. There is cap for weapons.
+
 ### Weapons
 
 On desktop weapons can be selected with keys 1 to 4.
@@ -85,3 +101,10 @@ it'll explode continuing the chain.
 #### Laser
 
 Short laser beam. Easy to control and destroys everything that passes through it.
+
+## Issues
+
+### SDL_Timers
+
+Sometimes explosion don't disapper when they should. Eg. if shooting chainbomb
+into group of maybe 50+ asteroids.

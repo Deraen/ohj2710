@@ -15,10 +15,10 @@
 #include "Screen.hpp"
 
 const Bomb::Info Bomb::INFO[] = {
-	{"NORMAL", 15},
-	{"SPLASH", 5},
-	{"CHAIN", 5},
-	{"LASER", 10}
+	{"NORMAL"},
+	{"SPLASH"},
+	{"CHAIN"},
+	{"LASER"}
 };
 
 unsigned int Bomb::count_ = 0;
@@ -83,6 +83,8 @@ Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
 
 Bomb::~Bomb()
 {
+	SDL_RemoveTimer(timer_);
+
 	--count_;
 	SDL_Log("~Bomb");
 }
@@ -141,7 +143,7 @@ namespace {
 		return 0; // Stop timer
 	}
 
-	void SetupChain(b2Body* body) {
+	SDL_TimerID SetupChain(b2Body* body) {
 		b2Fixture* fixture = body->GetFixtureList();
 		if (fixture != NULL)
 		{
@@ -161,7 +163,14 @@ namespace {
 		body->SetAngularVelocity(0);
 		body->GetFixtureList()->SetFilterData(bombFilter_);
 
-		SDL_AddTimer(2000, Destroy, body);
+		SDL_TimerID ret = SDL_AddTimer(2000, Destroy, body);
+		// If shooting chainbomb into huge group of bombs timers go crazy
+		if (ret == 0) {
+			SDL_Log("SDL_AddTimer Error? Not enough timers? Lets destroy explosion immediately.");
+
+			Destroy(0, body);
+		}
+		return ret;
 	}
 }
 
@@ -172,7 +181,7 @@ void Bomb::Detonate(b2Body* other)
 		// Create new chain bomb that is already detonated
 		Bomb* tmp = new Bomb(CHAIN, other->GetPosition(), DETONATED);
 
-		SetupChain(tmp->GetBody());
+		tmp->SetTimer(SetupChain(tmp->GetBody()));
 	}
 	else if (type__ == NORMAL && status_ == DETONATED)
 	{
@@ -206,7 +215,7 @@ void Bomb::Detonate(b2Body* other)
 		}
 
 		// Destroy bomb after a delay
-		SDL_AddTimer(500, Destroy, GetBody());
+		timer_ = SDL_AddTimer(500, Destroy, GetBody());
 	}
 	else if (type__ == SPLASH)
 	{
@@ -231,12 +240,12 @@ void Bomb::Detonate(b2Body* other)
 		GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
 
 		// Explosion stays for 1sec
-		SDL_AddTimer(2000, Destroy, GetBody());
+		timer_ = SDL_AddTimer(2000, Destroy, GetBody());
 	}
 	else if (type__ == CHAIN)
 	{
 		// Display small explosion for short time
 		// If other asteroids go through explosion Detonate them
-		SetupChain(GetBody());
+		timer_ = SetupChain(GetBody());
 	}
 }

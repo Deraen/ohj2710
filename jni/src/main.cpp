@@ -8,8 +8,6 @@
 
 int main(int argc, char* argv[])
 {
-	srand(time(NULL));
-
 	// Load screen first so Sprites can create textures.
 	Screen::instance().init();
 	// Load assets before creating world so objects can find their

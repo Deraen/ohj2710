@@ -62,8 +62,8 @@ public:
 	void HandleEvent(SDL_Event& event);
 
 	inline int Points() const { return points_; }
-	void addPoint() { points_ += 1; }
-	void removePoint() { points_ -= 1; }
+	void addPoint();
+	void removePoint();
 	inline Bomb::BombType SelectedWeapon() const { return selectedWeapon_; }
 	unsigned int BombCount(Bomb::BombType type) const;
 
@@ -77,31 +77,44 @@ public:
 		COUNT_
 	};
 
-	static unsigned int* WeaponQuotas(unsigned int normal, unsigned int splash, unsigned int chain, unsigned int laser) {
-		unsigned int* fuu = new unsigned int[Bomb::BombType::COUNT_];
-		fuu[0] = normal;
-		fuu[1] = splash;
-		fuu[2] = chain;
-		fuu[3] = laser;
-		return fuu;
-	};
-
 	struct Level {
 		std::string name;
 		std::string planet;
 		float g;
-		unsigned int quota[Bomb::BombType::COUNT_];
+		unsigned int normal;
+		unsigned int splash;
+		unsigned int chain;
+		unsigned int laser;
 		unsigned int rand;
-		unsigned int asteroids;
+		int asteroids;
 		float asteroidForce;
+		unsigned int asteroidSpawnSec;
+		unsigned int lives;
 
-		Level(std::string name_, std::string planet_, float g_, unsigned int quota_[Bomb::BombType::COUNT_], unsigned int rand_, unsigned int asteroids_, float asteroidForce_):
+		Level(std::string name_,
+		      std::string planet_,
+		      float g_,
+		      unsigned int normal_,
+		      unsigned int splash_,
+		      unsigned int chain_,
+		      unsigned int laser_,
+		      unsigned int rand_,
+		      int asteroids_,
+		      float asteroidForce_,
+		      unsigned int asteroidsSpawnSec_,
+		      unsigned int lives_):
 			name(name_),
 			planet(planet_),
 			g(g_),
+			normal(normal_),
+			splash(splash_),
+			chain(chain_),
+			laser(laser_),
 			rand(rand_),
 			asteroids(asteroids_),
-			asteroidForce(asteroidForce_)
+			asteroidForce(asteroidForce_),
+			asteroidSpawnSec(asteroidsSpawnSec_),
+			lives(lives_)
 		{};
 	};
 
@@ -111,11 +124,14 @@ public:
 	const Level* LevelInfo() const { return &LEVELS[level_]; }
 	inline Levels SelectedLevel() const { return level_; }
 
+	inline int Asteroids() const { return asteroids_; }
+
 private:
 	b2World world_;
 
 	Levels level_;
 	Planet* planet_;
+	int asteroids_;
 
 	bool running_;
 	int points_;
@@ -126,6 +142,12 @@ private:
 	std::set<b2Body*> deleted_;
 
 	static b2Filter bombFilter_;
+
+	SDL_TimerID asteroidTimer_;
+	SDL_TimerID normalTimer_;
+	SDL_TimerID splashTimer_;
+	SDL_TimerID chainTimer_;
+	SDL_TimerID laserTimer_;
 };
 
 #endif /* GAME_HH_ */

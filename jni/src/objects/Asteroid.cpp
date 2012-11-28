@@ -44,10 +44,10 @@ Asteroid::Asteroid(b2Body* planet):
 	temp.type = b2_dynamicBody;
 	CreateBody(temp, type_.def);
 
-	// + or - 90°
-	pos += (((rand() % 1) * 2) - 1) * M_PI / 2;
+	pos -= M_PI / 2;
 
-	GetBody()->ApplyForce(b2Vec2(8.0 * std::cos(pos), 8.0 * std::sin(pos)), GetBody()->GetWorldCenter());
+	float f = Game::instance().LevelInfo()->asteroidForce;
+	GetBody()->ApplyForce(b2Vec2(f * std::cos(pos), f * std::sin(pos)), GetBody()->GetWorldCenter());
 	SDL_Log("Asteroid m=%f @(%f, %f)", GetBody()->GetMass(), GetBody()->GetPosition().x, GetBody()->GetPosition().y);
 
 	timer_ = SDL_AddTimer(1000, SlowEvent, this);

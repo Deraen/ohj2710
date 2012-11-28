@@ -15,21 +15,6 @@
 #include "objects/Laser.hpp"
 #include "Screen.hpp"
 
-namespace {
-	Uint32 SpawnAsteroid(Uint32 interval, void* param)
-	{
-		SDL_Event event;
-		event.type = SDL_USEREVENT;
-		event.user.code = Game::SPAWN_ASTEROID;
-		event.user.data1 = param;
-
-		SDL_PushEvent(&event);
-
-		// asteroid every 1ms - 5sec
-		return rand() % 4999 + 1;
-	}
-}
-
 Planet::Planet(std::string name):
 	Object(),
 	Drawable(),
@@ -48,8 +33,6 @@ Planet::Planet(std::string name):
 
 	SDL_Log("Planet m=%f", GetMass());
 
-	timer_ = SDL_AddTimer(10, SpawnAsteroid, GetBody());
-
 	Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	rmask = 0xff000000;
@@ -65,7 +48,7 @@ Planet::Planet(std::string name):
 
 	SDL_Surface* surface = SDL_CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask);
 
-	Uint32 color = SDL_MapRGBA(surface->format, 255, 0, 150, 255);
+	Uint32 color = SDL_MapRGBA(surface->format, 255, 90, 255, 250);
 	SDL_Rect rect;
 	rect.x = 0;
 	rect.y = 0;
@@ -78,12 +61,16 @@ Planet::Planet(std::string name):
 
 Planet::~Planet()
 {
-	SDL_RemoveTimer(timer_);
 	SDL_Log("~Planet");
 }
 
 void Planet::Draw(b2Body *body) const
 {
+	if (Game::instance().SelectedLevel() == Game::Levels::INF)
+	{
+		Drawable::Draw(body);
+	}
+
 	static SDL_Point rot;
 	rot.x = 0;
 	rot.y = 2;
@@ -94,11 +81,12 @@ void Planet::Draw(b2Body *body) const
 	else if (weaponAim_.x != 0 || weaponAim_.y != 0)
 	{
 		b2Vec2 p1 = Screen::instance().toPixels(GetBody()->GetPosition(), true);
+		unsigned int px = Screen::instance().pixelsPerMeter();
 
 		SDL_Rect dst;
 		dst.x = p1.x;
 		dst.y = p1.y;
-		dst.w = weaponAim_.Length() * Screen::instance().pixelsPerMeter();
+		dst.w = weaponAim_.Length() * px;
 		dst.h = 5;
 
 		float32 angle = (180 * atan2(weaponAim_.y, weaponAim_.x) / M_PI);
@@ -109,7 +97,10 @@ void Planet::Draw(b2Body *body) const
 		SDL_RenderCopyEx(Screen::instance().renderer(), texture_, NULL, &dst, angle, &rot, SDL_FLIP_NONE);
 	}
 
-	Drawable::Draw(body);
+	if (Game::instance().SelectedLevel() != Game::Levels::INF)
+	{
+		Drawable::Draw(body);
+	}
 }
 
 void Planet::TouchStart()

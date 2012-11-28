@@ -40,7 +40,7 @@ Laser::Laser(b2Body* parent):
 
 	SDL_Surface* surface = SDL_CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask);
 
-	Uint32 color = SDL_MapRGBA(surface->format, 200, 0, 0, 255);
+	Uint32 color = SDL_MapRGBA(surface->format, 0, 250, 0, 255);
 	SDL_Rect rect;
 	rect.x = 0;
 	rect.y = 0;
@@ -66,6 +66,12 @@ void Laser::Draw()
 
 	unsigned int px = Screen::instance().pixelsPerMeter();
 	b2Vec2 p1 = Screen::instance().toPixels(parent_->GetPosition(), true);
+
+	if (Game::instance().SelectedLevel() == Game::Levels::INF)
+	{
+		p1.x -= 0.5 * px;
+		p1.y -= 0.7 * px;
+	}
 
 	SDL_Rect dst;
 	dst.x = p1.x;

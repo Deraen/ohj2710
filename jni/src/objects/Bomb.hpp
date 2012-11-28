@@ -28,7 +28,6 @@ public:
 	};
 	struct Info {
 		std::string name;
-		unsigned int quota;
 	};
 	static const Info INFO[];
 
@@ -51,12 +50,17 @@ public:
 
 	float GetMass() const;
 
+	// argh
+	inline void SetTimer(SDL_TimerID timer) { timer_ = timer; }
+
 private:
 	Assets::Type type_;
 	BombType type__;
 	Status status_;
 
 	static unsigned int count_;
+
+	SDL_TimerID timer_;
 };
 
 #endif /* BOMB_H_ */

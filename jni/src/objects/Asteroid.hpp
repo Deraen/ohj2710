@@ -25,6 +25,8 @@ public:
 
 	void Slow();
 
+	inline static unsigned int Count() { return count_; }
+
 private:
 	Assets::Type type_;
 
