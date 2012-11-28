@@ -19,7 +19,7 @@ const Game::Level Game::LEVELS[] = {
 		"Lvl1", // Level name
 		"MOON", // Planet name
 		0.08, // Gravity
-		20, 10, 10, 30,
+		100, 5, 0, 0,
 		1, // Rand
 		70, // Asteroids
 		3, // Asteroid initial force
@@ -30,7 +30,7 @@ const Game::Level Game::LEVELS[] = {
 		"Lvl2", // Level name
 		"EARTH", // Planet name
 		0.45, // Gravity
-		20, 7, 7, 20,
+		20, 30, 5, 20,
 		1, // Rand
 		100, // Asteroids
 		8, // Asteroid initial force
@@ -41,7 +41,7 @@ const Game::Level Game::LEVELS[] = {
 		"Lvl3", // Level name
 		"JUPITER", // Planet name
 		1.2, // Gravity
-		25, 10, 10, 20,
+		10, 10, 20, 20,
 		1, // Rand
 		150, // Asteroids
 		15, // Asteroid initial force

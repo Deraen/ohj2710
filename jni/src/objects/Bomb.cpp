@@ -15,10 +15,10 @@
 #include "Screen.hpp"
 
 const Bomb::Info Bomb::INFO[] = {
-	{"NORMAL"},
-	{"SPLASH"},
-	{"CHAIN"},
-	{"LASER"}
+	{"NORMAL", 15},
+	{"SPLASH", 5},
+	{"CHAIN", 5},
+	{"LASER", 10}
 };
 
 unsigned int Bomb::count_ = 0;

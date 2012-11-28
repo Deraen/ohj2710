@@ -28,6 +28,7 @@ public:
 	};
 	struct Info {
 		std::string name;
+		int quota;
 	};
 	static const Info INFO[];
 

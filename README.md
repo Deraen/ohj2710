@@ -18,6 +18,8 @@ distribution doesn't recent enough packages).
 	sudo make install
 	cd ../..
 
+SDL directory might need to be in initial state for Android build to work.
+
 ##### Install SDL2_gfx
 
 	cd jni/sdl2gfx-code

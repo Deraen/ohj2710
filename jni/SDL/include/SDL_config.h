@@ -48,4 +48,6 @@
 #error Wrong SDL_config.h, check your include path?
 #endif
 
+#define SDL_ATOMIC_DISABLED 1
+
 #endif /* _SDL_config_h */
