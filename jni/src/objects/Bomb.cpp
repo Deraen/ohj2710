@@ -106,15 +106,15 @@ void Bomb::Draw(b2Body *body) const
 
 		if (type__ == NORMAL)
 		{
-			filledCircleRGBA(render, x, y, 0.4 * px, 255, 0, 0, 255);
+			filledCircleRGBA(render, x, y, 0.4 * px, 190, 0, 0, 255);
 		}
 		else if (type__ == SPLASH)
 		{
-			filledCircleRGBA(render, x, y, 0.6 * px, 255, 100, 0, 255);
+			filledCircleRGBA(render, x, y, 0.6 * px, 20, 180, 20, 255);
 		}
 		else if (type__ == CHAIN)
 		{
-			filledCircleRGBA(render, x, y, 0.3 * px, 255, 0, 150, 255);
+			filledCircleRGBA(render, x, y, 0.3 * px, 20, 40, 170, 255);
 		}
 	}
 }
@@ -131,15 +131,6 @@ float Bomb::GetMass() const
 
 void Bomb::Detonate(b2Body* other)
 {
-	// Shortcuts
-	static auto DestroyFixture = [&]() {
-		b2Fixture* fixture = GetBody()->GetFixtureList();
-		if (fixture != NULL)
-		{
-			GetBody()->DestroyFixture(fixture);
-		}
-	};
-
 	// What to do if asteroid hits explosion - "Special cases"
 	if (status_ == DETONATED)
 	{
@@ -177,7 +168,12 @@ void Bomb::Detonate(b2Body* other)
 	status_ = DETONATED;
 
 	// All bombs want to change fixture from bomb into explosion
-	DestroyFixture();
+	b2Fixture* fixture = GetBody()->GetFixtureList();
+	if (fixture != NULL)
+	{
+		GetBody()->DestroyFixture(fixture);
+	}
+
 	if (type__ == NORMAL)
 	{
 		// Normal bomb destroys hit asteroid immediatly
@@ -198,8 +194,6 @@ void Bomb::Detonate(b2Body* other)
 		b2FixtureDef def;
 		def.shape = &circle;
 		GetBody()->CreateFixture(&def);
-		GetBody()->SetLinearVelocity(b2Vec2(0, 0));
-		GetBody()->SetAngularVelocity(0);
 		GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
 	}
 	else if (type__ == CHAIN)
@@ -213,10 +207,10 @@ void Bomb::Detonate(b2Body* other)
 		b2FixtureDef def;
 		def.shape = &circle;
 		GetBody()->CreateFixture(&def);
-		GetBody()->SetLinearVelocity(b2Vec2(0, 0));
-		GetBody()->SetAngularVelocity(0);
 		GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
 	}
+	GetBody()->SetLinearVelocity(b2Vec2(0, 0));
+	GetBody()->SetAngularVelocity(0);
 	previous_ = SDL_GetTicks();
 }
 

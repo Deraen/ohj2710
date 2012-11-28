@@ -182,6 +182,7 @@ void Game::Step()
 				{
 					bombs_[i] = Bomb::INFO[i].quota;
 				}
+				previousReplenish_[i] = SDL_GetTicks();
 			}
 		}
 	}
