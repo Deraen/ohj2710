@@ -12,11 +12,12 @@
 #include "Box2D/Box2D.h"
 #include "Object.hpp"
 #include "interfaces/Drawable.hpp"
+#include "interfaces/Timed.hpp"
 #include "Assets.hpp"
 
 class Sprite;
 
-class Bomb: public Object, public Drawable
+class Bomb: public Object, public Drawable, public Timed
 {
 public:
 	enum BombType {
@@ -51,8 +52,7 @@ public:
 
 	float GetMass() const;
 
-	// argh
-	inline void SetTimer(SDL_TimerID timer) { timer_ = timer; }
+	void Tick();
 
 private:
 	Assets::Type type_;
@@ -61,7 +61,7 @@ private:
 
 	static unsigned int count_;
 
-	SDL_TimerID timer_;
+	Uint32 previous_;
 };
 
 #endif /* BOMB_H_ */

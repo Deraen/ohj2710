@@ -88,35 +88,24 @@ void Laser::Draw()
 	Game::instance().world()->RayCast(this, parent_->GetPosition(), parent_->GetPosition() + aim_);
 }
 
-namespace {
-	Uint32 UseLaser(Uint32 interval, void* param)
+void Laser::Tick()
+{
+	if (active_ && SDL_GetTicks() - previous_ > 500)
 	{
-		SDL_Event event;
-		// This might be called from a different thread but probably it doesn't matter
-		if (!((Laser*)param)->Active() || !Game::instance().WeaponHasUses())
+		if (Game::instance().WeaponHasUses())
 		{
-			event.type = SDL_USEREVENT;
-			event.user.code = Game::STOP_LASER_FUU;
-			event.user.data1 = param;
-			interval = 0;
+			active_ = false;
 		}
 		else
 		{
-			event.type = SDL_USEREVENT;
-			event.user.code = Game::USE_WEAPON;
-			interval = 500;
+			Game::instance().UseWeapon();
 		}
-
-		SDL_PushEvent(&event);
-
-		return interval;
 	}
 }
 
 void Laser::Activate()
 {
 	active_ = true;
-	SDL_AddTimer(10, UseLaser, this);
 }
 
 void Laser::Deactivate()

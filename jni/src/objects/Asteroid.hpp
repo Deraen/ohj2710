@@ -11,9 +11,10 @@
 #include "Box2D/Box2D.h"
 #include "Object.hpp"
 #include "interfaces/Drawable.hpp"
+#include "interfaces/Timed.hpp"
 #include "Assets.hpp"
 
-class Asteroid: public Object, public Drawable
+class Asteroid: public Object, public Drawable, public Timed
 {
 public:
 	Asteroid(b2Body* planet);
@@ -23,7 +24,7 @@ public:
 	inline Sprite* GetSprite() const { return type_.sprite; }
 	inline b2Vec2 GetDimensions() const { return type_.meters; }
 
-	void Slow();
+	void Tick();
 
 	inline static unsigned int Count() { return count_; }
 
@@ -32,7 +33,7 @@ private:
 
 	static unsigned int count_;
 
-	SDL_TimerID timer_;
+	Uint32 previousSlow_;
 };
 
 #endif /* ASTEROID_H_ */

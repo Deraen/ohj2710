@@ -9,6 +9,7 @@
 #define GAME_HH_
 
 #include <set>
+#include <chrono>
 
 #include "Box2D/Box2D.h"
 
@@ -26,10 +27,7 @@ public:
 		COLLISION_ASTEROID_BOMB,
 		DELETE_BODY,
 		REPLENISH_WEAPON,
-		USE_WEAPON,
 		SPAWN_ASTEROID,
-		SLOW_ASTEROID,
-		STOP_LASER_FUU
 	};
 
 	Game();
@@ -40,7 +38,7 @@ public:
 
 	void loop();
 
-	inline void stop() { running_ = false; }
+	inline void Stop() { running_ = false; }
 
 	static Game& instance()
 	{
@@ -50,7 +48,7 @@ public:
 
 	void Step();
 
-	inline b2World* world() { return &world_; }
+	inline b2World* World() { return &world_; }
 
 	bool WeaponHasUses() const;
 	void UseWeapon();
@@ -62,8 +60,8 @@ public:
 	void HandleEvent(SDL_Event& event);
 
 	inline int Points() const { return points_; }
-	void addPoint();
-	void removePoint();
+	void AddPoint();
+	void RemovePoint();
 	inline Bomb::BombType SelectedWeapon() const { return selectedWeapon_; }
 	unsigned int BombCount(Bomb::BombType type) const;
 

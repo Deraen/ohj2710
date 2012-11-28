@@ -13,6 +13,7 @@
 #include "objects/Bomb.hpp"
 #include "objects/Laser.hpp"
 #include "Screen.hpp"
+#include "interfaces/Timed.hpp"
 
 const Game::Level Game::LEVELS[] = {
 	Game::Level(
@@ -116,6 +117,7 @@ void Game::Step()
 	{
 		Object* obj = (Object*)body->GetUserData();
 		float m1 = obj->GetMass();
+		b2Vec2 p1 = body->GetPosition();
 
 		b2Body* body2 = world_.GetBodyList();
 		while (m1 != 0 && body2 != NULL)
@@ -125,18 +127,24 @@ void Game::Step()
 
 			if (m2 != 0 && body2->GetType() != b2_staticBody && body != body2)
 			{
-				b2Vec2 d = body->GetPosition() - body2->GetPosition();
+				b2Vec2 d = p1 - body2->GetPosition();
 				float len = d.LengthSquared();
 				// Strange things could happend if two bombs are over each other
 				if (len > 0.01) {
-					float f = (LevelInfo()->g * m1 * m2) / len;
 					d.Normalize();
-					d *= f;
+					d *= (LevelInfo()->g * m1 * m2) / len;
 
 					body2->ApplyForceToCenter(d);
 				}
 			}
 			body2 = body2->GetNext();
+		}
+
+		// Slow asteroids
+		Timed* timed = dynamic_cast<Timed*>(obj);
+		if (timed != NULL)
+		{
+			timed->Tick();
 		}
 
 		// Remove bodies that go too far away
@@ -150,7 +158,6 @@ void Game::Step()
 
 		body = body->GetNext();
 	}
-
 }
 
 bool Game::WeaponHasUses() const
@@ -205,7 +212,6 @@ void Game::BeginContact(b2Contact *contact)
 	{
 		return;
 	}
-	//if (dynamic_cast<Asteroid*>(obj1) != NULL && dynamic_cast<Asteroid*>(obj2)) {
 
 	event.user.data1 = b1;
 	event.user.data2 = b2;
@@ -217,13 +223,13 @@ void Game::HandleEvent(SDL_Event &event)
 {
 	if (event.user.code == COLLISION_ASTEROID_PLANET)
 	{
-		removePoint();
+		RemovePoint();
 
 		DestroyBody((b2Body*)event.user.data1);
 	}
 	else if (event.user.code == COLLISION_BOMB_PLANET)
 	{
-		removePoint();
+		RemovePoint();
 
 		DestroyBody((b2Body*)event.user.data1);
 	}
@@ -255,19 +261,6 @@ void Game::HandleEvent(SDL_Event &event)
 			}
 		}
 	}
-	else if (event.user.code == SLOW_ASTEROID)
-	{
-		Asteroid* asteroid = (Asteroid*)event.user.data1;
-		asteroid->Slow();
-	}
-	else if (event.user.code == USE_WEAPON)
-	{
-		UseWeapon();
-	}
-	else if (event.user.code == STOP_LASER_FUU)
-	{
-		((Laser*)event.user.data1)->Deactivate();
-	}
 }
 
 unsigned int Game::BombCount(Bomb::BombType type) const
@@ -289,14 +282,14 @@ void Game::DestroyBody(b2Body* body)
 	world_.DestroyBody(body);
 }
 
-void Game::addPoint()
+void Game::AddPoint()
 {
 	if (level_ == Levels::INF) {
 		points_ += 1;
 	}
 }
 
-void Game::removePoint()
+void Game::RemovePoint()
 {
 	points_ -= 1;
 

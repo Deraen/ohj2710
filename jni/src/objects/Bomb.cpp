@@ -33,7 +33,8 @@ Bomb::Bomb(b2Body* parent, BombType type, float radians, float force):
 	Drawable(),
 	type_(),
 	type__(type),
-	status_(DEFAULT)
+	status_(DEFAULT),
+	previous_(SDL_GetTicks())
 {
 	bombFilter_.groupIndex = -1;
 
@@ -63,7 +64,8 @@ Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
 	Drawable(),
 	type_(),
 	type__(type),
-	status_(status)
+	status_(status),
+	previous_(SDL_GetTicks())
 {
 	type_ = Assets::instance().info("Bomb", INFO[type].name);
 
@@ -83,8 +85,6 @@ Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
 
 Bomb::~Bomb()
 {
-	SDL_RemoveTimer(timer_);
-
 	--count_;
 	SDL_Log("~Bomb");
 }
@@ -120,75 +120,35 @@ void Bomb::Draw(b2Body *body) const
 
 float Bomb::GetMass() const
 {
-	// Detonated splash bomb has mass of 0 so it wont move
-	if ((type__ == SPLASH || type__ == CHAIN) && status_ == DETONATED)
+	// Detonated bombs have mass of 0 so they wont move
+	if (status_ == DETONATED)
 	{
 		return 0.0;
 	}
 	return Object::GetMass();
 }
 
-namespace {
-	Uint32 Destroy(Uint32 interval, void* param)
-	{
-		SDL_Log("Destroying bomb (Timer)");
-		// Destroy bomb after a delay
-		SDL_Event event;
-		event.type = SDL_USEREVENT;
-		event.user.code = Game::DELETE_BODY;
-		event.user.data1 = param;
-
-		SDL_PushEvent(&event);
-
-		return 0; // Stop timer
-	}
-
-	SDL_TimerID SetupChain(b2Body* body) {
-		b2Fixture* fixture = body->GetFixtureList();
-		if (fixture != NULL)
-		{
-			body->DestroyFixture(fixture);
-		}
-
-		// Modify body so that:
-		// It wont move
-		// It has circle collision shape (explosion)
-		b2CircleShape circle;
-		circle.m_radius = 0.3;
-
-		b2FixtureDef def;
-		def.shape = &circle;
-		body->CreateFixture(&def);
-		body->SetLinearVelocity(b2Vec2(0, 0));
-		body->SetAngularVelocity(0);
-		body->GetFixtureList()->SetFilterData(bombFilter_);
-
-		SDL_TimerID ret = SDL_AddTimer(2000, Destroy, body);
-		// If shooting chainbomb into huge group of bombs timers go crazy
-		if (ret == 0) {
-			SDL_Log("SDL_AddTimer Error? Not enough timers? Lets destroy explosion immediately.");
-
-			Destroy(0, body);
-		}
-		return ret;
-	}
-}
-
 void Bomb::Detonate(b2Body* other)
 {
-	if (type__ == CHAIN && status_ == DETONATED)
+	// Shortcuts
+	static auto DestroyFixture = [&]() {
+		b2Fixture* fixture = GetBody()->GetFixtureList();
+		if (fixture != NULL)
+		{
+			GetBody()->DestroyFixture(fixture);
+		}
+	};
+
+	// What to do if asteroid hits explosion - "Special cases"
+	if (status_ == DETONATED && type__ == CHAIN)
 	{
 		// Create new chain bomb that is already detonated
 		Bomb* tmp = new Bomb(CHAIN, other->GetPosition(), DETONATED);
-
-		tmp->SetTimer(SetupChain(tmp->GetBody()));
-	}
-	else if (type__ == NORMAL && status_ == DETONATED)
-	{
-		return;
 	}
 
-	Game::instance().addPoint();
+	// What to do if asteroid hit bomb
+	// or explosion of splash or chain bomb
+	Game::instance().AddPoint();
 
 	SDL_Event event;
 	event.type = SDL_USEREVENT;
@@ -202,29 +162,22 @@ void Bomb::Detonate(b2Body* other)
 		return;
 	}
 
+	// Detonate bomb
+
 	status_ = DETONATED;
+
+	// All bombs want to change fixture from bomb into explosion
+	DestroyFixture();
 	if (type__ == NORMAL)
 	{
 		// Normal bomb destroys hit asteroid immediatly
 		// display small explosion for short time
-		GetBody()->SetType(b2BodyType::b2_staticBody);
-		b2Fixture* fixture = GetBody()->GetFixtureList();
-		if (fixture != NULL)
-		{
-			GetBody()->DestroyFixture(fixture);
-		}
 
-		// Destroy bomb after a delay
-		timer_ = SDL_AddTimer(500, Destroy, GetBody());
+		// Normal explosion doesn't have fixture at all.
 	}
 	else if (type__ == SPLASH)
 	{
 		// Display large explosion for some time and destroy asteroids that go through explosion
-		b2Fixture* fixture = GetBody()->GetFixtureList();
-		if (fixture != NULL)
-		{
-			GetBody()->DestroyFixture(fixture);
-		}
 
 		// Modify body so that:
 		// It wont move
@@ -238,14 +191,39 @@ void Bomb::Detonate(b2Body* other)
 		GetBody()->SetLinearVelocity(b2Vec2(0, 0));
 		GetBody()->SetAngularVelocity(0);
 		GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
-
-		// Explosion stays for 1sec
-		timer_ = SDL_AddTimer(2000, Destroy, GetBody());
 	}
 	else if (type__ == CHAIN)
 	{
-		// Display small explosion for short time
-		// If other asteroids go through explosion Detonate them
-		timer_ = SetupChain(GetBody());
+		// Modify body so that:
+		// It wont move
+		// It has circle collision shape (explosion)
+		b2CircleShape circle;
+		circle.m_radius = 0.3;
+
+		b2FixtureDef def;
+		def.shape = &circle;
+		GetBody()->CreateFixture(&def);
+		GetBody()->SetLinearVelocity(b2Vec2(0, 0));
+		GetBody()->SetAngularVelocity(0);
+		GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
+	}
+	previous_ = SDL_GetTicks();
+}
+
+void Bomb::Tick()
+{
+	if (status_ == DETONATED
+	 && ((type__ == NORMAL && SDL_GetTicks() - previous_ > 500)
+	  || (type__ == SPLASH && SDL_GetTicks() - previous_ > 1000)
+	  || (type__ == CHAIN && SDL_GetTicks() - previous_ > 2000)))
+	{
+		SDL_Log("Destroying bomb (Timer)");
+		// Destroy bomb after a delay
+		SDL_Event event;
+		event.type = SDL_USEREVENT;
+		event.user.code = Game::DELETE_BODY;
+		event.user.data1 = GetBody();
+
+		SDL_PushEvent(&event);
 	}
 }

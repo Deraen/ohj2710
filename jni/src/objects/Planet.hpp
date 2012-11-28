@@ -15,14 +15,16 @@
 #include "Object.hpp"
 #include "interfaces/Drawable.hpp"
 #include "interfaces/Touchable.hpp"
+#include "interfaces/Timed.hpp"
 #include "Assets.hpp"
+#include "objects/Laser.hpp"
 
 class Laser;
 
 /*
  * A planet is a player.
  */
-class Planet: public Object, public Drawable, public Touchable
+class Planet: public Object, public Drawable, public Touchable, public Timed
 {
 public:
 	Planet(std::string name);
@@ -39,6 +41,8 @@ public:
 	void TouchStart();
 	void TouchMovement(const b2Vec2& p);
 	void TouchEnd();
+
+	inline void Tick() { laser_->Tick(); }
 private:
 	Assets::Type type_;
 	Laser* laser_;
