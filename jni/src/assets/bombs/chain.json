@@ -1,0 +1,15 @@
+{
+	"class": "Bomb",
+	"type": "CHAIN",
+	"sprite": "chain.png",
+	"meters": [0.3, 0.3],
+	"shape": {
+		"type": "b2PolygonShape",
+		"pixels": [[-8, -8], [0, -8], [8, 0], [0, 8], [-8, 8]]
+	},
+	"physics": {
+		"density": 1.0,
+		"friction": 1.0,
+		"restitution": 0.1
+	}
+}

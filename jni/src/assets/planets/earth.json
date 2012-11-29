@@ -1,0 +1,15 @@
+{
+	"class": "Planet",
+	"type": "EARTH",
+	"sprite": "earth.png",
+	"meters": [4.0, 4.0],
+	"shape": {
+		"type": "b2CircleShape",
+		"pixels": 32
+	},
+	"physics": {
+		"density": 10.0,
+		"friction": 1.0,
+		"restitution": 0.1
+	}
+}
