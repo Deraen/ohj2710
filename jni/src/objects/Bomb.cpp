@@ -16,10 +16,10 @@
 
 // Quota and replenish time affect inf game mode
 const Bomb::Info Bomb::INFO[] = {
-	{"NORMAL %i", 15, 5000},
-	{"SPLASH %i", 5, 10000},
-	{"CHAIN %i", 5, 10000},
-	{"LASER %i", 10, 1000}
+	{"NORMAL", 15, 5000},
+	{"SPLASH", 5, 10000},
+	{"CHAIN", 5, 10000},
+	{"LASER", 10, 1000}
 };
 
 unsigned int Bomb::count_ = 0;
