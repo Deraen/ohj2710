@@ -103,6 +103,7 @@ void Game::loop()
 void Game::Step()
 {
 	static const float DESTROYRADIUS = 150 * 150;
+	static unsigned int D_TIMER;
 
 	world_.Step(1.0 / 60.0, 10, 10);
 	world_.ClearForces();
@@ -111,7 +112,11 @@ void Game::Step()
 
 	b2Vec2 planetPoint = planet_->GetBody()->GetPosition();
 
+	unsigned int d_cycles = 0;
+	unsigned int d_time = SDL_GetTicks();
+
 	// All bodies affect all others bodies
+	float G = LevelInfo()->g;
 	b2Body* body = world_.GetBodyList();
 	while (body != NULL)
 	{
@@ -127,12 +132,14 @@ void Game::Step()
 
 			if (m2 != 0 && body2->GetType() != b2_staticBody && body != body2)
 			{
+				++d_cycles;
+
 				b2Vec2 d = p1 - body2->GetPosition();
 				float len = d.LengthSquared();
 				// Strange things could happend if two bombs are over each other
 				if (len > 0.01) {
 					d.Normalize();
-					d *= (LevelInfo()->g * m1 * m2) / len;
+					d *= (G * m1 * m2) / len;
 
 					body2->ApplyForceToCenter(d);
 				}
@@ -158,6 +165,8 @@ void Game::Step()
 
 		body = body->GetNext();
 	}
+
+	SDL_Log("Gravitation calculation took %i ms (%i loop cycles). %i asteroids.", SDL_GetTicks() - d_time, d_cycles, Asteroid::Count());
 
 	// Create asteroids
 	if (SDL_GetTicks() - previousAsteroid_ > LevelInfo()->asteroidSpawnSec
@@ -214,22 +223,22 @@ void Game::BeginContact(b2Contact *contact)
 	// Planet is static, it won't collide with others
 	if (dynamic_cast<Asteroid*>(obj1) != NULL && dynamic_cast<Planet*>(obj2))
 	{
-		SDL_Log("Contact: Asteroid <-> Planet");
+		// SDL_Log("Contact: Asteroid <-> Planet");
 		event.user.code = COLLISION_ASTEROID_PLANET;
 	}
 	else if (dynamic_cast<Bomb*>(obj1) != NULL && dynamic_cast<Planet*>(obj2))
 	{
-		SDL_Log("Contact: Bomb <-> Planet");
+		// SDL_Log("Contact: Bomb <-> Planet");
 		event.user.code = COLLISION_BOMB_PLANET;
 	}
 	else if (dynamic_cast<Asteroid*>(obj1) != NULL && dynamic_cast<Bomb*>(obj2))
 	{
-		SDL_Log("Contact: Asteroid <-> Bomb");
+		// SDL_Log("Contact: Asteroid <-> Bomb");
 		event.user.code = COLLISION_ASTEROID_BOMB;
 	}
 	else if (dynamic_cast<Bomb*>(obj1) != NULL && dynamic_cast<Asteroid*>(obj2))
 	{
-		SDL_Log("Contact: Asteroid <-> Bomb");
+		// SDL_Log("Contact: Asteroid <-> Bomb");
 		event.user.code = COLLISION_ASTEROID_BOMB;
 		// invert bodies
 		b2Body* tmp = b1;

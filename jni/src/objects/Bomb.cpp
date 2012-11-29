@@ -16,10 +16,10 @@
 
 // Quota and replenish time affect inf game mode
 const Bomb::Info Bomb::INFO[] = {
-	{"NORMAL", 15, 5000},
-	{"SPLASH", 5, 10000},
-	{"CHAIN", 5, 10000},
-	{"LASER", 10, 1000}
+	{"NORMAL %i", 15, 5000},
+	{"SPLASH %i", 5, 10000},
+	{"CHAIN %i", 5, 10000},
+	{"LASER %i", 10, 1000}
 };
 
 unsigned int Bomb::count_ = 0;
@@ -55,7 +55,7 @@ Bomb::Bomb(b2Body* parent, BombType type, float radians, float force):
 	force *= 10;
 	GetBody()->ApplyForce(b2Vec2(force  * std::cos(radians), force * std::sin(radians)), GetBody()->GetWorldCenter());
 	GetBody()->SetBullet(true);
-	SDL_Log("Bomb created (%f, %f)", GetBody()->GetPosition().x, GetBody()->GetPosition().y);
+	// SDL_Log("Bomb created (%f, %f)", GetBody()->GetPosition().x, GetBody()->GetPosition().y);
 
 	++count_;
 }
@@ -79,7 +79,7 @@ Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
 	GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
 
 	GetBody()->SetBullet(true);
-	SDL_Log("Bomb created (%f, %f)", GetBody()->GetPosition().x, GetBody()->GetPosition().y);
+	// SDL_Log("Bomb created (%f, %f)", GetBody()->GetPosition().x, GetBody()->GetPosition().y);
 
 	++count_;
 }
@@ -87,7 +87,7 @@ Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
 Bomb::~Bomb()
 {
 	--count_;
-	SDL_Log("~Bomb");
+	// SDL_Log("~Bomb");
 }
 
 void Bomb::Draw(b2Body *body) const

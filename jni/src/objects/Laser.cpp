@@ -78,7 +78,7 @@ void Laser::Tick()
 
 void Laser::Activate()
 {
-	active_ = true;
+	active_ = Game::instance().WeaponHasUses();
 
 	// We want first tick immediately
 	previous_ = 0;

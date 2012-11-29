@@ -35,7 +35,7 @@ Asteroid::Asteroid(b2Body* planet):
 
 	float f = Game::instance().LevelInfo()->asteroidForce;
 	GetBody()->ApplyForce(b2Vec2(f * std::cos(pos), f * std::sin(pos)), GetBody()->GetWorldCenter());
-	SDL_Log("Asteroid m=%f @(%f, %f)", GetBody()->GetMass(), GetBody()->GetPosition().x, GetBody()->GetPosition().y);
+	// SDL_Log("Asteroid m=%f @(%f, %f)", GetBody()->GetMass(), GetBody()->GetPosition().x, GetBody()->GetPosition().y);
 
 	++count_;
 }
@@ -43,7 +43,7 @@ Asteroid::Asteroid(b2Body* planet):
 Asteroid::~Asteroid()
 {
 	--count_;
-	SDL_Log("~Asteroid");
+	// SDL_Log("~Asteroid");
 }
 
 void Asteroid::Tick()
