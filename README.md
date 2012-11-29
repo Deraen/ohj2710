@@ -8,7 +8,7 @@
 
 CMake takes care of building Box2D.
 SDL, SDL2_gfx and SDL2_ttf need to be installed manually (from included sources if
-distribution doesn't recent enough packages).
+distribution doesn't offer recent enough packages).
 
 ##### Install SDL
 
@@ -17,8 +17,6 @@ distribution doesn't recent enough packages).
 	make -j5
 	sudo make install
 	cd ../..
-
-SDL directory might need to be in initial state for Android build to work.
 
 ##### Install SDL2_gfx
 
@@ -83,7 +81,7 @@ Weapons recharge over time. There is cap for weapons.
 
 ### Weapons
 
-On desktop weapons can be selected with keys 1 to 4.
+On desktop the weapons can be selected with keys 1 to 4.
 
 #### Normal
 
@@ -103,10 +101,3 @@ it'll explode continuing the chain.
 #### Laser
 
 Short laser beam. Easy to control and destroys everything that passes through it.
-
-## Issues
-
-### SDL_Timers
-
-Sometimes explosion don't disapper when they should. Eg. if shooting chainbomb
-into group of maybe 50+ asteroids.
