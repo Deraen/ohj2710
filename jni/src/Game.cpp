@@ -57,7 +57,7 @@ const Game::Level Game::LEVELS[] = {
 		1, // Rand
 		-1, // Asteroids
 		8, // Asteroid initial force
-		400, // Gets faster - implemented elsewhere
+		50, // Gets faster - implemented elsewhere
 		0
 	)
 };
@@ -85,25 +85,35 @@ void Game::init()
 
 void Game::loop()
 {
+	static const unsigned int FRAME_TIME = 1000 / 60;
+	unsigned int accumulator = 0;
+	// unsigned int now = SDL_GetTicks();
 	while(running_)
 	{
-		deleted_.clear();
+		unsigned int start = SDL_GetTicks();
 
-		Screen::instance().draw();
+		deleted_.clear();
 
 		Step();
 
 		Screen::instance().processInput();
 
-		// Give other applications some time to execute.
-		SDL_Delay(20);
+		Screen::instance().draw();
+
+		unsigned int frame = SDL_GetTicks() - start;
+		int sleep = FRAME_TIME - frame;
+		SDL_Log("Previous frame took %i ms. Sleep %i ms.", frame, sleep);
+		if (sleep > 0)
+		{
+			SDL_Delay(sleep);
+		}
 	}
 }
 
 void Game::Step()
 {
 	static const float DESTROYRADIUS = 150 * 150;
-	static unsigned int D_TIMER;
+	// static unsigned int D_TIMER;
 
 	world_.Step(1.0 / 60.0, 10, 10);
 	world_.ClearForces();
@@ -112,8 +122,8 @@ void Game::Step()
 
 	b2Vec2 planetPoint = planet_->GetBody()->GetPosition();
 
-	unsigned int d_cycles = 0;
-	unsigned int d_time = SDL_GetTicks();
+	// unsigned int d_cycles = 0;
+	// unsigned int d_time = SDL_GetTicks();
 
 	// All bodies affect all others bodies
 	float G = LevelInfo()->g;
@@ -132,7 +142,7 @@ void Game::Step()
 
 			if (m2 != 0 && body2->GetType() != b2_staticBody && body != body2)
 			{
-				++d_cycles;
+				// ++d_cycles;
 
 				b2Vec2 d = p1 - body2->GetPosition();
 				float len = d.LengthSquared();
@@ -166,7 +176,7 @@ void Game::Step()
 		body = body->GetNext();
 	}
 
-	SDL_Log("Gravitation calculation took %i ms (%i loop cycles). %i asteroids.", SDL_GetTicks() - d_time, d_cycles, Asteroid::Count());
+	// SDL_Log("Gravitation calculation took %i ms (%i loop cycles). %i asteroids.", SDL_GetTicks() - d_time, d_cycles, Asteroid::Count());
 
 	// Create asteroids
 	if (SDL_GetTicks() - previousAsteroid_ > LevelInfo()->asteroidSpawnSec

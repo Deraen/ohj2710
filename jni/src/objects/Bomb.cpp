@@ -221,7 +221,7 @@ void Bomb::Tick()
 	  || (type__ == SPLASH && SDL_GetTicks() - previous_ > 1000)
 	  || (type__ == CHAIN && SDL_GetTicks() - previous_ > 2000)))
 	{
-		SDL_Log("Destroying bomb (Timer)");
+		// SDL_Log("Destroying bomb (Timer)");
 		// Destroy bomb after a delay
 		SDL_Event event;
 		event.type = SDL_USEREVENT;
