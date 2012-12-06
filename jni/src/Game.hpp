@@ -9,7 +9,6 @@
 #define GAME_HH_
 
 #include <set>
-#include <chrono>
 
 #include "Box2D/Box2D.h"
 
