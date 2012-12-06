@@ -5,6 +5,8 @@
  *      Author: juho
  */
 
+#include <cstdint>
+#include "SDL.h"
 #include "SDL2_gfxPrimitives.h"
 
 #include "Assets.hpp"
@@ -24,7 +26,6 @@ const Bomb::Info Bomb::INFO[] = {
 
 unsigned int Bomb::count_ = 0;
 
-
 // All bombs on same collision group. Negative numbers means that objects
 // with same group never collide with each other.
 b2Filter bombFilter_;
@@ -37,27 +38,13 @@ Bomb::Bomb(b2Body* parent, BombType type, float radians, float force):
 	status_(DEFAULT),
 	previous_(SDL_GetTicks())
 {
-	bombFilter_.groupIndex = -1;
+	float r = ((Planet*)parent->GetUserData())->GetRadius() + 1.0;
 
-	type_ = Assets::instance().info("Bomb", INFO[type].name);
-
-	Planet* planet = (Planet*)parent->GetUserData();
-	float r = planet->GetRadius() + 1.0;
-
-	b2BodyDef temp;
-	temp.position = parent->GetPosition() + b2Vec2(r * std::cos(radians), r * std::sin(radians));
-	temp.type = b2_dynamicBody;
-	temp.angle = radians;
-	CreateBody(temp, type_.def);
-
-	GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
+	b2Vec2 pos = parent->GetPosition() + b2Vec2(r * std::cos(radians), r * std::sin(radians));
+	init(pos);
 
 	force *= 10;
 	GetBody()->ApplyForce(b2Vec2(force  * std::cos(radians), force * std::sin(radians)), GetBody()->GetWorldCenter());
-	GetBody()->SetBullet(true);
-	// SDL_Log("Bomb created (%f, %f)", GetBody()->GetPosition().x, GetBody()->GetPosition().y);
-
-	++count_;
 }
 
 Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
@@ -68,7 +55,14 @@ Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
 	status_(status),
 	previous_(SDL_GetTicks())
 {
-	type_ = Assets::instance().info("Bomb", INFO[type].name);
+	init(pos);
+}
+
+void Bomb::init(const b2Vec2& pos)
+{
+	bombFilter_.groupIndex = -1;
+
+	type_ = Assets::instance().info("Bomb", INFO[type__].name);
 
 	b2BodyDef temp;
 	temp.position = pos;
@@ -77,10 +71,9 @@ Bomb::Bomb(BombType type, b2Vec2 pos, Status status):
 	CreateBody(temp, type_.def);
 
 	GetBody()->GetFixtureList()->SetFilterData(bombFilter_);
-
 	GetBody()->SetBullet(true);
-	// SDL_Log("Bomb created (%f, %f)", GetBody()->GetPosition().x, GetBody()->GetPosition().y);
 
+	// SDL_Log("Bomb created (%f, %f)", GetBody()->GetPosition().x, GetBody()->GetPosition().y);
 	++count_;
 }
 

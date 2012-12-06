@@ -86,8 +86,7 @@ void Game::init()
 void Game::loop()
 {
 	static const unsigned int FRAME_TIME = 1000 / 60;
-	unsigned int accumulator = 0;
-	// unsigned int now = SDL_GetTicks();
+
 	while(running_)
 	{
 		unsigned int start = SDL_GetTicks();
@@ -113,7 +112,6 @@ void Game::loop()
 void Game::Step()
 {
 	static const float DESTROYRADIUS = 150 * 150;
-	// static unsigned int D_TIMER;
 
 	world_.Step(1.0 / 60.0, 10, 10);
 	world_.ClearForces();
@@ -165,7 +163,8 @@ void Game::Step()
 		}
 
 		// Remove bodies that go too far away
-		if ((planetPoint - body->GetPosition()).LengthSquared() > DESTROYRADIUS) {
+		if ((planetPoint - body->GetPosition()).LengthSquared() > DESTROYRADIUS)
+		{
 			SDL_Event event;
 			event.type = SDL_USEREVENT;
 			event.user.code = Game::DELETE_BODY;
@@ -179,7 +178,7 @@ void Game::Step()
 	// SDL_Log("Gravitation calculation took %i ms (%i loop cycles). %i asteroids.", SDL_GetTicks() - d_time, d_cycles, Asteroid::Count());
 
 	// Create asteroids
-	if (SDL_GetTicks() - previousAsteroid_ > LevelInfo()->asteroidSpawnSec
+	if ((SDL_GetTicks() - previousAsteroid_ > LevelInfo()->asteroidSpawnSec)
 	 && (asteroids_ == -1 || asteroids_ > 0))
 	{
 		new Asteroid(planet_->GetBody());
@@ -231,6 +230,7 @@ void Game::BeginContact(b2Contact *contact)
 	event.type = SDL_USEREVENT;
 
 	// Planet is static, it won't collide with others
+	// Asteroid and Bomb are both dynamic, they can collide either way
 	if (dynamic_cast<Asteroid*>(obj1) != NULL && dynamic_cast<Planet*>(obj2))
 	{
 		// SDL_Log("Contact: Asteroid <-> Planet");
@@ -338,6 +338,7 @@ void Game::SelectLevel(Game::Levels level)
 		DestroyBody(body);
 		body = body->GetNext();
 	}
+	planet_ = NULL;
 
 	for (unsigned int i = 0; i < Bomb::BombType::COUNT_; ++i)
 	{
@@ -352,7 +353,6 @@ void Game::SelectLevel(Game::Levels level)
 	}
 	previousAsteroid_ = SDL_GetTicks();
 
-	planet_ = NULL;
 	if (level_ != Levels::COUNT_) {
 		points_ = LevelInfo()->lives;
 		asteroids_ = LevelInfo()->asteroids;

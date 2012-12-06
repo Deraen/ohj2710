@@ -5,6 +5,7 @@
  *      Author: juho
  */
 
+#include <cstdint>
 #include "SDL.h"
 
 #include "Assets.hpp"
@@ -62,10 +63,12 @@ void Laser::Draw()
 
 void Laser::Tick()
 {
+	// Every 500ms check if laser laser has uses left
 	if (active_ && SDL_GetTicks() - previous_ > 500)
 	{
 		if (!Game::instance().WeaponHasUses())
 		{
+			// No uses -> Deactivate
 			active_ = false;
 		}
 		else

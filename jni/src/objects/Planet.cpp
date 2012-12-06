@@ -5,11 +5,11 @@
  *      Author: juho
  */
 
+#include <cstdint>
 #include "SDL.h"
 
 #include "objects/Planet.hpp"
 #include "Game.hpp"
-#include "objects/Asteroid.hpp"
 #include "Assets.hpp"
 #include "objects/Bomb.hpp"
 #include "objects/Laser.hpp"

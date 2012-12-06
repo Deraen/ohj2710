@@ -56,6 +56,8 @@ public:
 	void Tick();
 
 private:
+	void init(const b2Vec2& pos);
+
 	Assets::Type type_;
 	BombType type__;
 	Status status_;
