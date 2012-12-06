@@ -5,6 +5,7 @@
 #ifndef SPRITE_HPP_
 #define SPRITE_HPP_
 
+#include <cstdint>
 #include "SDL.h"
 #include "Box2D/Box2D.h"
 

@@ -1,0 +1,15 @@
+{
+	"class": "Bomb",
+	"type": "NORMALEXPLOSION",
+	"sprite": "normalexplosion.png",
+	"meters": [0.8, 0.8],
+	"shape": {
+		"type": "b2CircleShape",
+		"pixels": 16
+	},
+	"physics": {
+		"density": 0.0,
+		"friction": 1.0,
+		"restitution": 0.1
+	}
+}
