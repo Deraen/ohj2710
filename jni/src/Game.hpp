@@ -112,6 +112,8 @@ public:
 	const Level* LevelInfo() const { return &LEVELS[level_]; }
 	inline Levels SelectedLevel() const { return level_; }
 
+	inline Planet* GetPlanet() const { return planet_; }
+
 private:
 	b2World world_;
 

@@ -3,5 +3,5 @@
 	"type": "NORMALEXPLOSION",
 	"sprite": "normalexplosion.png",
 	"meters": [0.8, 0.8],
-	"shape": null,
+	"shape": null
 }

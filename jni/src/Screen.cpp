@@ -1,3 +1,4 @@
+#include <cstdint>
 #include "SDL.h"
 #include "SDL_log.h"
 #include "SDL_ttf.h"
@@ -7,6 +8,7 @@
 #include "interfaces/Drawable.hpp"
 #include "interfaces/Touchable.hpp"
 #include "objects/Sprite.hpp"
+#include "objects/Planet.hpp"
 #include "DebugDraw.hpp"
 #include "UI.hpp"
 
@@ -71,20 +73,7 @@ void Screen::init()
 	// Get the first available Hardware-accelerated renderer for this window.
 	renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
 
-
-
-
-	SDL_RWops *rw = SDL_RWFromFile("visitor1.ttf", "rb");
-	if ( rw == NULL ) {
-		TTF_SetError(SDL_GetError());
-		return;
-	}
-
-
-
-
 	unsigned int size = 24;
-
 	font_ = TTF_OpenFont("visitor1.ttf", size);
 	if (!font_)
 	{
@@ -139,16 +128,16 @@ void Screen::draw()
 	SDL_RenderPresent(renderer_);
 }
 
-bool Screen::ReportFixture(b2Fixture *fixture)
-{
-	// SDL_Log("Fixture touched");
-	b2Body* body = fixture->GetBody();
-	Touchable* touchable = dynamic_cast<Touchable*>((Object*)body->GetUserData());
-	if (touchable != NULL && fixture->TestPoint(touchPoint_)) {
-		touchObject_ = touchable;
-	}
-	return true;
-}
+// bool Screen::ReportFixture(b2Fixture *fixture)
+// {
+// 	// SDL_Log("Fixture touched");
+// 	b2Body* body = fixture->GetBody();
+// 	Touchable* touchable = dynamic_cast<Touchable*>((Object*)body->GetUserData());
+// 	if (touchable != NULL && fixture->TestPoint(touchPoint_)) {
+// 		touchObject_ = touchable;
+// 	}
+// 	return true;
+// }
 
 std::pair<unsigned int, unsigned int> Screen::TouchPosition(const SDL_Event &event)
 {
@@ -205,46 +194,45 @@ void Screen::processInput()
 		{
 			touchPoint_ = TouchPositionMeters(event);
 
-			b2AABB aabb;
-			aabb.lowerBound = touchPoint_;
-			aabb.upperBound = touchPoint_;
+			// b2AABB aabb;
+			// aabb.lowerBound = touchPoint_;
+			// aabb.upperBound = touchPoint_;
 
-			// This will call ReportFixture.
-			Game::instance().World()->QueryAABB(this, aabb);
+			// // This will call ReportFixture.
+			// Game::instance().World()->QueryAABB(this, aabb);
 
-			if (touchObject_ != NULL) {
-				touchObject_->TouchStart();
-				touchObject_->TouchMovement(touchPoint_);
-			}
-			else
-			{
-				ui_->TouchStart(TouchPosition(event));
+			if (!ui_->TouchStart(TouchPosition(event))) {
+				// touchObject_ = (Touchable*)Game::instance().GetPlanet();
+				if (Game::instance().GetPlanet() != NULL)
+				{
+					SDL_Log("PERKELE");
+					Game::instance().GetPlanet()->TouchStart();
+					Game::instance().GetPlanet()->TouchMovement(touchPoint_);
+				}
 			}
 		}
 		else if (event.type == SDL_MOUSEMOTION
 			  || (event.type == SDL_FINGERMOTION))
 		{
-			if (touchObject_ != NULL)
+			if (!ui_->Touch(TouchPosition(event)))
 			{
-				touchObject_->TouchMovement(TouchPositionMeters(event));
-			}
-			else
-			{
-				ui_->Touch(TouchPosition(event));
+				if (Game::instance().GetPlanet() != NULL)
+				{
+					Game::instance().GetPlanet()->TouchMovement(TouchPositionMeters(event));
+				}
 			}
 		}
 		else if ((event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
 			  || (event.type == SDL_FINGERUP))
 		{
-			if (touchObject_ != NULL)
+			if (!ui_->TouchEnd())
 			{
-				touchObject_->TouchMovement(TouchPositionMeters(event));
-				touchObject_->TouchEnd();
-				touchObject_ = NULL;
-			}
-			else
-			{
-				ui_->TouchEnd();
+				if (Game::instance().GetPlanet() != NULL)
+				{
+					Game::instance().GetPlanet()->TouchMovement(TouchPositionMeters(event));
+					Game::instance().GetPlanet()->TouchEnd();
+					// Game::instance().GetPlanet() = NULL;
+				}
 			}
 		}
 		else if (event.type == SDL_KEYUP)

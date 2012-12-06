@@ -126,7 +126,7 @@ UI::Points::Points(unsigned int x_, unsigned int y_, Uint8 r_, Uint8 g_, Uint8 b
 
 void UI::Button::Draw()
 {
-	if (parent != NULL && !parent->hover) return;
+	if (parent != NULL && !parent->active) return;
 
 	if (activef) active = activef();
 
@@ -209,29 +209,38 @@ void UI::Draw() const
 	}
 }
 
-void UI::TouchStart(std::pair<unsigned int, unsigned int> p)
+bool UI::TouchStart(std::pair<unsigned int, unsigned int> p)
 {
 	unsigned int x = p.first * 10 / Screen::instance().ResX();
 	unsigned int y = p.second * 10 / Screen::instance().ResY();
 
+	bool r = false;
 	for (unsigned int i = 0; i < buttons_.size(); ++i)
 	{
-		buttons_.at(i)->hover = buttons_.at(i)->x == x && buttons_.at(i)->y == y;
-		if (buttons_.at(i)->hover && buttons_.at(i)->parent != NULL)
+		if ((buttons_.at(i)->parent == NULL || buttons_.at(i)->parent->active) && buttons_.at(i)->x == x && buttons_.at(i)->y == y)
 		{
-			buttons_.at(i)->parent->hover = true;
+			buttons_.at(i)->hover = true;
+			buttons_.at(i)->active = true;
+			r = true;
+		}
+		else
+		{
+			buttons_.at(i)->hover = false;
 		}
 	}
+
+	return r;
 }
 
 
-void UI::Touch(std::pair<unsigned int, unsigned int> p)
+bool UI::Touch(std::pair<unsigned int, unsigned int> p)
 {
-	TouchStart(p);
+	return TouchStart(p);
 }
 
-void UI::TouchEnd()
+bool UI::TouchEnd()
 {
+	bool r = false;
 	for (unsigned int i = 0; i < buttons_.size(); ++i)
 	{
 		if (buttons_.at(i)->hover)
@@ -239,6 +248,10 @@ void UI::TouchEnd()
 			if (buttons_.at(i)->f) buttons_.at(i)->f();
 			buttons_.at(i)->hover = false;
 			// return;
+			r = true;
 		}
+
+		buttons_.at(i)->active = false;
 	}
+	return r;
 }

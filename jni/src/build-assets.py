@@ -23,6 +23,7 @@ def name(file):
 objects += '    Type info;'
 for assetFile in glob('assets/*.json') + glob('assets/*/*.json'):
     with open(assetFile) as f:
+        print assetFile
         d = json.load(f)
         spriteFile = path.join(path.dirname(assetFile), d['sprite'])
         spriteFiles.add(spriteFile)
