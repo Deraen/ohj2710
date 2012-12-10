@@ -1,10 +1,9 @@
 # PELI
 
-This is the sourcecode for a game developed for Game programming course (http://www.cs.tut.fi/~peliohj/)
+This is the source code for a game I wrote for Game programming course (http://www.cs.tut.fi/~peliohj/)
 at Tampere University of Techology.
 
-Directory structure is like this because this is developed for Android and PC using
-Android-ndk. Source written by me can be found at following directories:
+Source written by me can be found at following directories:
 - jni/src/
 - src/org/oh2710/
 
@@ -14,15 +13,13 @@ Android-ndk. Source written by me can be found at following directories:
   computation (Game::Step) needs n^2 time.
 - The Game can't be closed easily on Android. Killing C++ main loop doesn't close
   Android window.
-- On lvl1/2/3 asteroids should spawn on same spots every time (sets the same random seed),
-  this is to allow planning.
 - JSON asset system for objects was developed at the beginning of development.
-  - It was no used at the latter parts of project (properties of levels, bombs etc.)
-    because of time constraints.
+  - It's not used on all parts of code (properties of levels, bombs etc.)
+    because I had not enough time.
   - Build-assets.py will generate a .cpp-file from .json files (embedding images etc).
     I chose this solution so that there would be no need for file access
     (eg. where the hell do asset files go?) on Android. However,
-    I latter noticed that SDL has IO api that works on Android.
+    I later noticed that SDL has IO api that works fine on Android.
 
 ## Installation
 
@@ -77,11 +74,17 @@ distribution doesn't offer recent enough packages).
 
 ### Android
 
-Ndk-build will take care of building prequisites for Android.
+Prequisites: Android SDK and NDK.
+
+First
+
+	android update project
+
+Ndk-build will take care of building Box2D / SDL for Android.
 
 Makefile at root of the project will run ndk-build and ant.
 Ndk-build compiles c++ code. Ant compiles jave code and packages program into .apk.
-It will also try to send .apk to connected Android phone using adb.
+Make will also try to send .apk to connected Android phone using adb.
 
 	make
 

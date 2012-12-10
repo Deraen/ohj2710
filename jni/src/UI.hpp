@@ -16,9 +16,9 @@ public:
 
 	void Draw() const;
 
-	void TouchStart(std::pair<unsigned int, unsigned int> p);
-	void Touch(std::pair<unsigned int, unsigned int> p);
-	void TouchEnd();
+	bool TouchStart(std::pair<unsigned int, unsigned int> p);
+	bool Touch(std::pair<unsigned int, unsigned int> p);
+	bool TouchEnd();
 private:
 	struct Button
 	{

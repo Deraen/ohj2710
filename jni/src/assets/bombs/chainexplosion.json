@@ -1,0 +1,15 @@
+{
+	"class": "Bomb",
+	"type": "CHAINEXPLOSION",
+	"sprite": "chainexplosion.png",
+	"meters": [0.6, 0.6],
+	"shape": {
+		"type": "b2CircleShape",
+		"pixels": 16
+	},
+	"physics": {
+		"density": 0.0,
+		"friction": 1.0,
+		"restitution": 0.1
+	}
+}

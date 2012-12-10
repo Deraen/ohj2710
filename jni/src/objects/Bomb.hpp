@@ -29,8 +29,10 @@ public:
 	};
 	struct Info {
 		std::string name;
+		std::string explosionName;
 		int quota;
 		unsigned int replenishTime;
+		unsigned int explosionTime;
 	};
 	static const Info INFO[];
 
@@ -43,10 +45,8 @@ public:
 	Bomb(BombType type, b2Vec2 pos, Status status);
 	virtual ~Bomb();
 
-	void Draw(b2Body* body) const;
-
-	inline Sprite* GetSprite() const { return type_.sprite; }
-	inline b2Vec2 GetDimensions() const { return type_.meters; }
+	inline Sprite* GetSprite() const { return asset_.sprite; }
+	inline b2Vec2 GetDimensions() const { return asset_.meters; }
 
 	// starts explosion
 	void Detonate(b2Body* other);
@@ -56,8 +56,10 @@ public:
 	void Tick();
 
 private:
-	Assets::Type type_;
-	BombType type__;
+	void init(const b2Vec2& pos);
+
+	Assets::Type asset_;
+	BombType type_;
 	Status status_;
 
 	static unsigned int count_;

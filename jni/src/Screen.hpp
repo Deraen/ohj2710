@@ -3,6 +3,7 @@
 #ifndef SCREEN_HPP_
 #define SCREEN_HPP_
 
+#include <cstdint>
 #include "SDL.h"
 #include "Box2D/Box2D.h"
 #include "SDL_ttf.h"
@@ -15,7 +16,7 @@ class Touchable;
 
 class UI;
 
-class Screen: public b2QueryCallback
+class Screen//: public b2QueryCallback
 {
 public:
 	Screen();
@@ -38,7 +39,7 @@ public:
 	inline TTF_Font* font() const { return font_; }
 
 	void processInput();
-	bool ReportFixture(b2Fixture* fixture); // b2QueryCallback
+	// bool ReportFixture(b2Fixture* fixture); // b2QueryCallback
 
 	std::pair<unsigned int, unsigned int> TouchPosition(const SDL_Event& event);
 	b2Vec2 TouchPositionMeters(const SDL_Event& event);

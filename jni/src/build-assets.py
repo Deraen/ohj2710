@@ -23,6 +23,7 @@ def name(file):
 objects += '    Type info;'
 for assetFile in glob('assets/*.json') + glob('assets/*/*.json'):
     with open(assetFile) as f:
+        print assetFile
         d = json.load(f)
         spriteFile = path.join(path.dirname(assetFile), d['sprite'])
         spriteFiles.add(spriteFile)
@@ -32,32 +33,36 @@ for assetFile in glob('assets/*.json') + glob('assets/*/*.json'):
         img = Image.open(spriteFile)
         w, h = img.size
 
-        shapeVar = '{className}{id}Shape'.format(className=d['class'], id=d['type'])
-        fixtureVar = '{className}{id}Def'.format(className=d['class'], id=d['type'])
-
         objects += '\n    // {class_}::{type}\n'.format(class_=d['class'], type=d['type'])
 
-        shape = d['shape']['type']
+        if d['shape']:
+            shapeVar = '{className}{id}Shape'.format(className=d['class'], id=d['type'])
+            fixtureVar = '{className}{id}Def'.format(className=d['class'], id=d['type'])
 
-        if shape == 'b2CircleShape':
-            objects += '    {name}.m_radius = {r};\n'.format(name=shapeVar, r=px2m(d['shape']['pixels'], w, d['meters'][0]))
+            shape = d['shape']['type']
 
-        elif shape == 'b2PolygonShape':
-            data += 'b2Vec2 {name}Polygon[] = {{'.format(name=shapeVar)
-            for p in d['shape']['pixels']:
-                data += 'b2Vec2({x}, {y}), '.format(x=px2m(p[0], w, d['meters'][0]), y=px2m(p[1], h, d['meters'][1]))
-            data += '};\n'
+            if shape == 'b2CircleShape':
+                objects += '    {name}.m_radius = {r};\n'.format(name=shapeVar, r=px2m(d['shape']['pixels'], w, d['meters'][0]))
 
-            objects += '    {name}.Set({name}Polygon, {size});\n'.format(name=shapeVar, size=len(d['shape']['pixels']))
+            elif shape == 'b2PolygonShape':
+                data += 'b2Vec2 {name}Polygon[] = {{'.format(name=shapeVar)
+                for p in d['shape']['pixels']:
+                    data += 'b2Vec2({x}, {y}), '.format(x=px2m(p[0], w, d['meters'][0]), y=px2m(p[1], h, d['meters'][1]))
+                data += '};\n'
 
-        data += '{type} {name};\n'.format(type=shape, name=shapeVar)
-        data += 'b2FixtureDef {name};\n'.format(name=fixtureVar)
+                objects += '    {name}.Set({name}Polygon, {size});\n'.format(name=shapeVar, size=len(d['shape']['pixels']))
 
-        objects += '    {name}.shape = &{shapeVar};\n'.format(name=fixtureVar, shapeVar=shapeVar)
-        objects += '    {name}.density = {val};\n'.format(name=fixtureVar, val=d['physics']['density'])
-        objects += '    {name}.friction = {val};\n'.format(name=fixtureVar, val=d['physics']['friction'])
-        objects += '    {name}.restitution = {val};\n'.format(name=fixtureVar, val=d['physics']['restitution'])
-        objects += '    info.def = &{fixture};\n'.format(fixture=fixtureVar)
+            data += '{type} {name};\n'.format(type=shape, name=shapeVar)
+            data += 'b2FixtureDef {name};\n'.format(name=fixtureVar)
+
+            objects += '    {name}.shape = &{shapeVar};\n'.format(name=fixtureVar, shapeVar=shapeVar)
+            objects += '    {name}.density = {val};\n'.format(name=fixtureVar, val=d['physics']['density'])
+            objects += '    {name}.friction = {val};\n'.format(name=fixtureVar, val=d['physics']['friction'])
+            objects += '    {name}.restitution = {val};\n'.format(name=fixtureVar, val=d['physics']['restitution'])
+            objects += '    info.def = &{fixture};\n'.format(fixture=fixtureVar)
+        else:
+            objects += '    info.def = NULL;\n'
+
         objects += '    info.sprite = {sprite};\n'.format(sprite=name(spriteFile))
         objects += '    info.meters = b2Vec2({x}, {y});\n'.format(x=d['meters'][0], y=d['meters'][1])
         objects += '    types_[\"{class_}\"][\"{type}\"] = info;\n'.format(class_=d['class'], type=d['type'])
