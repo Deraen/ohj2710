@@ -1,5 +1,29 @@
 # PELI
 
+This is the sourcecode for a game developed for Game programming course (http://www.cs.tut.fi/~peliohj/)
+at Tampere University of Techology.
+
+Directory structure is like this because this is developed for Android and PC using
+Android-ndk. Source written by me can be found at following directories:
+- jni/src/
+- src/org/oh2710/
+
+## Notices
+
+- The Game gets slow when number of asteroids increases because the gravitation
+  computation (Game::Step) needs n^2 time.
+- The Game can't be closed easily on Android. Killing C++ main loop doesn't close
+  Android window.
+- On lvl1/2/3 asteroids should spawn on same spots every time (sets the same random seed),
+  this is to allow planning.
+- JSON asset system for objects was developed at the beginning of development.
+  - It was no used at the latter parts of project (properties of levels, bombs etc.)
+    because of time constraints.
+  - Build-assets.py will generate a .cpp-file from .json files (embedding images etc).
+    I chose this solution so that there would be no need for file access
+    (eg. where the hell do asset files go?) on Android. However,
+    I latter noticed that SDL has IO api that works on Android.
+
 ## Installation
 
 ### Linux
@@ -41,7 +65,7 @@ distribution doesn't offer recent enough packages).
 	cd release
 	cmake ..
 	make -j5
-	./jni/src/peli
+	./peli
 
 ##### Debug
 
@@ -49,7 +73,7 @@ distribution doesn't offer recent enough packages).
 	cd debug
 	cmake -DCMAKE_BUILD_TYPE=Debug ..
 	make -j5
-	gdb ./jni/src/peli
+	gdb ./peli
 
 ### Android
 
@@ -101,3 +125,14 @@ it'll explode continuing the chain.
 #### Laser
 
 Short laser beam. Easy to control and destroys everything that passes through it.
+
+## Graphic sources
+
+### Planets
+- http://en.wikipedia.org/wiki/File:FullMoon2010.jpg
+- http://en.wikipedia.org/wiki/File:The_Earth_seen_from_Apollo_17.jpg
+- http://en.wikipedia.org/wiki/File:Jupiter_by_Cassini-Huygens.jpg
+- http://en.wikipedia.org/wiki/File:DeathStar2.jpg
+
+### Font
+- http://www.dafont.com/visitor.font
