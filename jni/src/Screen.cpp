@@ -189,8 +189,10 @@ void Screen::processInput()
 				resized();
 			}
 		}
+		// On android duplicate events are sent because of Mouse emulation which
+		// can't be turned of... So for we'll ignore finger events.
 		else if ((event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
-			  || (event.type == SDL_FINGERDOWN))
+			  /*|| (event.type == SDL_FINGERDOWN)*/)
 		{
 			touchPoint_ = TouchPositionMeters(event);
 
@@ -205,14 +207,13 @@ void Screen::processInput()
 				// touchObject_ = (Touchable*)Game::instance().GetPlanet();
 				if (Game::instance().GetPlanet() != NULL)
 				{
-					SDL_Log("PERKELE");
 					Game::instance().GetPlanet()->TouchStart();
 					Game::instance().GetPlanet()->TouchMovement(touchPoint_);
 				}
 			}
 		}
 		else if (event.type == SDL_MOUSEMOTION
-			  || (event.type == SDL_FINGERMOTION))
+			  /*|| event.type == SDL_FINGERMOTION*/)
 		{
 			if (!ui_->Touch(TouchPosition(event)))
 			{
@@ -223,8 +224,9 @@ void Screen::processInput()
 			}
 		}
 		else if ((event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
-			  || (event.type == SDL_FINGERUP))
+			  /*|| (event.type == SDL_FINGERUP)*/)
 		{
+			SDL_Log("Joku event");
 			if (!ui_->TouchEnd())
 			{
 				if (Game::instance().GetPlanet() != NULL)

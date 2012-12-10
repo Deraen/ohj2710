@@ -57,7 +57,7 @@ const Game::Level Game::LEVELS[] = {
 		1, // Rand
 		-1, // Asteroids
 		8, // Asteroid initial force
-		50, // Gets faster - implemented elsewhere
+		500, // Gets faster - implemented elsewhere
 		0
 	)
 };
@@ -101,7 +101,7 @@ void Game::loop()
 
 		unsigned int frame = SDL_GetTicks() - start;
 		int sleep = FRAME_TIME - frame;
-		SDL_Log("Previous frame took %i ms. Sleep %i ms.", frame, sleep);
+		// SDL_Log("Previous frame took %i ms. Sleep %i ms.", frame, sleep);
 		if (sleep > 0)
 		{
 			SDL_Delay(sleep);
