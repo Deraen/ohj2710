@@ -12,8 +12,8 @@ run:
 	ndk-gdb --start
 
 jni/src/Assets.cpp:
-	cd jni/src/
-	./build-assets.py
+	jni/src/build-assets.py
+	mv Assets.cpp jni/src/Assets.cpp
 
 jni/src/gitversion.h: .git/HEAD .git/index
 	echo "#define GITVERSION \"$(shell git describe --always --dirty)\"" > $@

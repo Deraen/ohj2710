@@ -38,16 +38,16 @@ if test "$1" = "force" || test "$updated_head" != "$original_head"; then
 	cmake ..
 	make
 
-	mkdir peli-$VERSION
-	cd peli-$VERSION
+	mkdir peli-x86_64-$VERSION
+	cd peli-x86_64-$VERSION
 	cp ../peli ../visitor1.ttf .
 	cp /usr/local/lib/libSDL2-2.0.so.0 /usr/local/lib/libSDL2_gfx-1.0.so.0 /usr/local/lib/libSDL2_ttf-2.0.so.0 .
 	cd ..
-	tar -acf peli.tar.bz2 peli-$VERSION
+	tar -acf peli.tar.bz2 peli-x86_64-$VERSION
 
 	cd ..
 
-	./github_sendfile.py peli-$VERSION.tar.bz2 release/peli.tar.bz2
+	./github_sendfile.py peli-x86_64-$VERSION.tar.bz2 release/peli.tar.bz2
 
 	cd ..
 
