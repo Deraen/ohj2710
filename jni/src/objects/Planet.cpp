@@ -96,7 +96,6 @@ void Planet::TouchStart()
 void Planet::TouchMovement(const b2Vec2 &p)
 {
 	weaponAim_ = - p - GetBody()->GetPosition();
-	SDL_Log("%f, %f", weaponAim_.x, weaponAim_.y);
 	if (Game::instance().SelectedWeapon() == Bomb::BombType::LASER)
 	{
 		laser_->SetAim(weaponAim_);
