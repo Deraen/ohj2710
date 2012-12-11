@@ -3,7 +3,7 @@
 import github3
 import sys
 
-from getpass import getuser, getpass
+from getpass import getpass
 
 CREDENTIALS_FILE = '.githubtoken'
 
@@ -33,10 +33,11 @@ except IOError:
     login()
 
 with open(CREDENTIALS_FILE, 'r') as fd:
-    token = fd.readline().strip()  # Can't hurt to be paranoid
+    token = fd.readline().strip()
 
 gh = github3.login(token=token)
 
 r = gh.repository('Deraen', 'ohj2710')
 
-download = r.create_download(sys.argv[1], sys.argv[2])
+if len(sys.argv) >= 2:
+    download = r.create_download(sys.argv[1], sys.argv[2])

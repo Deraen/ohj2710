@@ -15,6 +15,9 @@ fi
 if test "$1" = "force" || test "$updated_head" != "$original_head"; then
 	VERSION=$(git describe --always --dirty)
 
+	# Check authentication
+	./github_sendfile.py
+
 	cd ..
 	cp -r ohj2710 ohj2710-android
 	cp -r ohj2710 ohj2710-x86
@@ -35,16 +38,16 @@ if test "$1" = "force" || test "$updated_head" != "$original_head"; then
 	cmake ..
 	make
 
-	mkdir pkg
-	cd pkg
-	cp ../peli .
+	mkdir peli-$VERSION
+	cd peli-$VERSION
+	cp ../peli ../visitor1.ttf .
 	cp /usr/local/lib/libSDL2-2.0.so.0 /usr/local/lib/libSDL2_gfx-1.0.so.0 /usr/local/lib/libSDL2_ttf-2.0.so.0 .
 	cd ..
-	tar -acf peli.tar.bz2 pkg
+	tar -acf peli.tar.bz2 peli-$VERSION
 
 	cd ..
 
-	./github_sendfile.py peli-$VERSION.tar.bz2 release/bin/peli.tar.bz2
+	./github_sendfile.py peli-$VERSION.tar.bz2 release/peli.tar.bz2
 
 	cd ..
 

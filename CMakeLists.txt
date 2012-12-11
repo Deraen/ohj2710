@@ -43,6 +43,7 @@ set(BOX2D_VERSION 2.1.0)
 set(BOX2D_BUILD_STATIC ON)
 add_subdirectory(${CMAKE_SOURCE_DIR}/jni/Box2D/)
 include_directories(${CMAKE_SOURCE_DIR}/jni/)
+
 add_subdirectory(jni/src/)
 
 add_subdirectory(assets/)

@@ -34,27 +34,32 @@ distribution doesn't offer recent enough packages).
 ##### Install SDL
 
 	cd jni/SDL
-	./configure --prefix=/usr/local
+	mkdir build
+	cd build
+	../configure --prefix=/usr/local
 	make -j5
 	sudo make install
-	cd ../..
+	cd ../../..
 
 ##### Install SDL2_gfx
 
 	cd jni/sdl2gfx-code
-	./autogen.sh
-	./configure --prefix=/usr/local
+	mkdir build
+	cd build
+	../configure --prefix=/usr/local
 	make -j5
 	sudo make install
-	cd ../..
+	cd ../../..
 
 #### Install SDL_ttf
 
 	cd jni/SDL_ttf
-	./configure --prefix=/usr/local
+	mkdir build
+	cd build
+	../configure --prefix=/usr/local
 	make -j5
 	sudo make install
-	cd ../..
+	cd ../../..
 
 #### The Game
 
