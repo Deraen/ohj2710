@@ -38,3 +38,4 @@ local.properties
 .cache
 debug
 jni/src/gitversion.h
+.githubtoken
