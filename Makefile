@@ -1,12 +1,13 @@
 all: jni/src/gitversion.h jni/src/Assets.cpp
 	ndk-build
 	ant debug
-	adb install -r bin/Peli-debug.apk
 
 release: jni/src/gitversion.h jni/src/Assets.cpp
 	ndk-build
 	ant release
-	adb install -r bin/Peli-release-unsigned.apk
+
+send:
+	adb install -r bin/Peli-debug.apk
 
 run:
 	ndk-gdb --start

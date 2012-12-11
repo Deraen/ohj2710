@@ -26,6 +26,9 @@ if test "$1" = "force" || test "$updated_head" != "$original_head"; then
 	cd /tmp
 	# Android
 	cd ohj2710-android
+
+	android update project --path .
+
 	make
 
 	./github_sendfile.py Peli-$VERSION.apk bin/Peli-debug.apk
